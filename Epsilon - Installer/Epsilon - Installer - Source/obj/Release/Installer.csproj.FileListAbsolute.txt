@@ -1,0 +1,9 @@
+D:\Windows Apps\Dont Melt - GIT\Dont Melt - Installer\bin\Release\Installer.exe.config
+D:\Windows Apps\Dont Melt - GIT\Dont Melt - Installer\bin\Release\Installer.exe
+D:\Windows Apps\Dont Melt - GIT\Dont Melt - Installer\bin\Release\Installer.pdb
+D:\Windows Apps\Dont Melt - GIT\Dont Melt - Installer\obj\Release\Installer.csprojAssemblyReference.cache
+D:\Windows Apps\Dont Melt - GIT\Dont Melt - Installer\obj\Release\Interop.IWshRuntimeLibrary.dll
+D:\Windows Apps\Dont Melt - GIT\Dont Melt - Installer\obj\Release\Installer.csproj.ResolveComReference.cache
+D:\Windows Apps\Dont Melt - GIT\Dont Melt - Installer\obj\Release\Installer.csproj.CoreCompileInputs.cache
+D:\Windows Apps\Dont Melt - GIT\Dont Melt - Installer\obj\Release\Installer.exe
+D:\Windows Apps\Dont Melt - GIT\Dont Melt - Installer\obj\Release\Installer.pdb

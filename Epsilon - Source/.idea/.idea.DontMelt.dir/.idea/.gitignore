@@ -1,0 +1,11 @@
+﻿# Default ignored files
+/shelf/
+/workspace.xml
+# Rider ignored files
+/.idea.DontMelt.iml
+/modules.xml
+/contentModel.xml
+/projectSettingsUpdater.xml
+# Datasource local storage ignored files
+/../../../../../../../:\Windows Apps\Dont Melt - GIT\Dont Melt\.idea\.idea.DontMelt.dir\.idea/dataSources/
+/dataSources.local.xml
