@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{4569A55B-CD89-4435-A805-20A256D7AC13}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>RandomiaGaming.Epsilon.Installer</RootNamespace>
-    <AssemblyName>RandomiaGaming.Epsilon.Installer</AssemblyName>
+    <RootNamespace>Epsilon.Installer</RootNamespace>
+    <AssemblyName>Epsilon.Installer</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -36,7 +36,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>RandomiaGaming.Epsilon.Installer.Program</StartupObject>
+    <StartupObject>Epsilon.Installer.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
