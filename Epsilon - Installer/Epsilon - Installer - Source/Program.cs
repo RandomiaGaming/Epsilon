@@ -3,7 +3,7 @@ using System.IO;
 using System.Reflection;
 using System.IO.Compression;
 using System.Windows.Forms;
-namespace RandomiaGaming.Epsilon.Installer
+namespace Epsilon.Installer
 {
     public static class Program
     {
