@@ -1,0 +1,203 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProjectGuid>{8841B1D0-0B70-458D-960D-F8D6511ACE90}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>DontMelt</RootNamespace>
+    <AssemblyName>DontMelt</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>Latest</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>Latest</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>
+    </ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup>
+    <StartupObject>Program</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="MonoGame.Framework">
+      <HintPath>..\packages\MonoGame.Framework.DesktopGL.3.8.0.1641\lib\net452\MonoGame.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Epsilon Core\Assets\Audio Clips\Music\Don%27t Melt - Rain Drops!.mp3" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Audio Clips\Music\Don%27t Melt! - Beach!.mp3" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Audio Clips\Music\Don%27t Melt! - Calm!.mp3" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Audio Clips\Music\Don%27t Melt! - Dubstep!.mp3" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Audio Clips\Music\Don%27t Melt! - Expert!.mp3" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Audio Clips\Music\Don%27t Melt! - Funky!.mp3" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Audio Clips\Music\Don%27t Melt! - Hard!.mp3" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Audio Clips\Music\Don%27t Melt! - Mythic!.mp3" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Audio Clips\Music\Don%27t Melt! - Normal!.mp3" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Audio Clips\Music\Don%27t Melt! - Peaceful!.mp3" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Stages\A GREAT FALL.json" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Stages\BOUNCING AROUND.json" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Stages\EVER HIGHER WITHOUT REST.json" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Stages\GETTING TRICKY.json" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Stages\GHOST FORTRESS.json" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Stages\GHOSTLY CANNONS.json" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Stages\INTRO TO FLYING.json" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Stages\ONE WAY LABERINTH.json" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Stages\PRETTY FUN RIGHT.json" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Stages\RYTHEM TEMPLE.json" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Stages\SHORT AND TART.json" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Stages\SPRING SEA.json" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Stages\SWITCHY FUN.json" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Stages\TETHER TEMPLE.json" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Stages\THE BEGINING.json" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Stages\THE DROP.json" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Stages\THE FINNAL CASTEL.json" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Stages\TRACKS OH MY.json" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\Item Textures\Arrow.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\Item Textures\BounceBox.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\Item Textures\CheckPoint.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\Item Textures\GhostBlock.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\Item Textures\GoalGate.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\Item Textures\Ground.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\Item Textures\Lava.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\Item Textures\LavaBubble.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\Item Textures\LavaCannon.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\Item Textures\NoJump.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\Item Textures\OneWayGate.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\Item Textures\OnOffBlock.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\Item Textures\OnOffSpike.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\Item Textures\Player.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\Item Textures\PlayerCannon.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\Item Textures\Spiny.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\Item Textures\Spring.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\Item Textures\Switch.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\Item Textures\Tether.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\Item Textures\Track.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\UI Textures\All.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\UI Textures\Arrow.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\UI Textures\Back.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\UI Textures\Brush.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\UI Textures\Bucket.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\UI Textures\Button.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\UI Textures\Dot.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\UI Textures\Eraser.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\UI Textures\menuicon.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\UI Textures\MoreItems.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\UI Textures\PauseButton.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\UI Textures\Play.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\UI Textures\Reset.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\UI Textures\Selection.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\UI Textures\SettingsGear.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\UI Textures\ToggleValue.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\UI Textures\Undo.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\UI Textures\White Square.png" />
+    <EmbeddedResource Include="Epsilon Core\Assets\Textures\UI Textures\WorldArrow.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Epsilon Core\Base Classes\InputManager.cs" />
+    <Compile Include="Epsilon Core\Base Classes\CollisionLogger.cs" />
+    <Compile Include="Epsilon Core\Data Types\Interface Packets\DontMeltGame Packets\TickReturnPacket.cs" />
+    <Compile Include="Epsilon Core\Asset Management\Asset Codecs\TextAssetDecoder.cs" />
+    <Compile Include="Epsilon Core\Asset Management\RegisterAssetCodecAttribute.cs" />
+    <Compile Include="Epsilon Core\Data Types\AudioClip.cs" />
+    <Compile Include="Epsilon Core\Data Types\Color.cs" />
+    <Compile Include="Epsilon Core\Data Types\KeyboardButton.cs" />
+    <Compile Include="Epsilon Core\Data Types\KeyboardState.cs" />
+    <Compile Include="Epsilon Core\Data Types\MouseButton.cs" />
+    <Compile Include="Epsilon Core\Data Types\MouseState.cs" />
+    <Compile Include="Epsilon Core\Data Types\Interface Packets\DontMeltGame Packets\TickInputPacket.cs" />
+    <Compile Include="Epsilon Core\Data Types\Interface Packets\DontMeltGame Packets\InputPacket.cs" />
+    <Compile Include="Epsilon Core\Data Types\Rectangle.cs" />
+    <Compile Include="Epsilon Core\Data Types\SideInfo.cs" />
+    <Compile Include="Epsilon Core\Data Types\Texture.cs" />
+    <Compile Include="Epsilon Core\Data Types\Vector2.cs" />
+    <Compile Include="Epsilon Core\Data Types\Point.cs" />
+    <Compile Include="Epsilon Core\Asset Management\Asset Types\StageAsset.cs" />
+    <Compile Include="Epsilon Core\Data Types\StageData.cs" />
+    <Compile Include="Epsilon Core\Helper Classes\SaveDataHelper.cs" />
+    <Compile Include="Epsilon Core\Helper Classes\SerializationHelper.cs" />
+    <Compile Include="Epsilon Core\Stage Items\BounceBox.cs" />
+    <Compile Include="Epsilon Core\Stage Items\CheckPoint.cs" />
+    <Compile Include="Epsilon Core\Stage Items\GhostBlock.cs" />
+    <Compile Include="Epsilon Core\Stage Items\Goalgate.cs" />
+    <Compile Include="Epsilon Core\Stage Items\Ground.cs" />
+    <Compile Include="Epsilon Core\Stage Items\Lava.cs" />
+    <Compile Include="Epsilon Core\Stage Items\LavaBubble.cs" />
+    <Compile Include="Epsilon Core\Stage Items\LavaCannon.cs" />
+    <Compile Include="Epsilon Core\Stage Items\NoJump.cs" />
+    <Compile Include="Epsilon Core\Stage Items\OneWayGate.cs" />
+    <Compile Include="Epsilon Core\Stage Items\OnOffBlock.cs" />
+    <Compile Include="Epsilon Core\Stage Items\OnOffSpike.cs" />
+    <Compile Include="Epsilon Core\Stage Items\Player.cs" />
+    <Compile Include="Epsilon Core\Stage Items\PlayerCannon.cs" />
+    <Compile Include="Epsilon Core\Stage Items\Spiny.cs" />
+    <Compile Include="Epsilon Core\Stage Items\Spring.cs" />
+    <Compile Include="Epsilon Core\Stage Items\Switch.cs" />
+    <Compile Include="Epsilon Core\Stage Items\Tether.cs" />
+    <Compile Include="Epsilon Core\Stage Items\Track.cs" />
+    <Compile Include="Epsilon Core\Asset Management\Asset Codecs\ImageAssetCodec.cs" />
+    <Compile Include="Epsilon Core\Asset Management\Asset Types\AudioAsset.cs" />
+    <Compile Include="Epsilon Core\Asset Management\Asset Types\BianaryAsset.cs" />
+    <Compile Include="Epsilon Core\Asset Management\Asset Types\TextAsset.cs" />
+    <Compile Include="Epsilon Core\Asset Management\Asset Types\TextureAsset.cs" />
+    <Compile Include="Epsilon Core\Asset Management\AssetBase.cs" />
+    <Compile Include="Epsilon Core\Asset Management\AssetCodecInfo.cs" />
+    <Compile Include="Epsilon Core\Asset Management\AssetManager.cs" />
+    <Compile Include="Epsilon Core\Base Classes\DontMeltGame.cs" />
+    <Compile Include="Epsilon Core\Base Classes\StageItem.cs" />
+    <Compile Include="Epsilon Core\Base Classes\StagePlayer.cs" />
+    <Compile Include="Epsilon Core\Helper Classes\ColorHelper.cs" />
+    <Compile Include="Epsilon Core\Asset Management\Asset Codecs\EEMetaDecoder.cs" />
+    <Compile Include="Epsilon Core\Helper Classes\GradientHelper.cs" />
+    <Compile Include="Epsilon Core\Helper Classes\MathHelper.cs" />
+    <Compile Include="Epsilon Core\Helper Classes\RandomnessHelper.cs" />
+    <Compile Include="Epsilon Core\Helper Classes\TextureHelper.cs" />
+    <Compile Include="Epsilon Core\Base Classes\Collider.cs" />
+    <Compile Include="Epsilon Core\Data Types\Collision.cs" />
+    <Compile Include="Epsilon Core\Data Types\Overlap.cs" />
+    <Compile Include="Epsilon Core\Base Classes\Rigidbody.cs" />
+    <Compile Include="Game Interfaces\MonoGame\MonoGameInterface.cs" />
+    <Compile Include="Program.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\MonoGame.Framework.DesktopGL.3.8.0.1641\build\MonoGame.Framework.DesktopGL.targets" Condition="Exists('..\packages\MonoGame.Framework.DesktopGL.3.8.0.1641\build\MonoGame.Framework.DesktopGL.targets')" />
+  <ProjectExtensions>
+    <MonoDevelop>
+      <Properties>
+        <Policies>
+          <DotNetNamingPolicy DirectoryNamespaceAssociation="None" ResourceNamePolicy="FileName" />
+        </Policies>
+      </Properties>
+    </MonoDevelop>
+  </ProjectExtensions>
+</Project>
