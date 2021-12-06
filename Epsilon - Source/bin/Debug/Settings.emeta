@@ -1,0 +1,7 @@
+"Keybinds.Up" = [ "Keys.UpArrow", "Keys.W" ];
+"Keybinds.Down" = [ "Keys.DownArrow", "Keys.S" ];
+"Keybinds.Right" = [ "Keys.RightArrow", "Keys.D" ];
+"Keybinds.Left" = [ "Keys.LeftArrow", "Keys.A" ];
+"Keybinds.Jump" = [ "Keys.Space", "Keys.C", "Keys.W", "Keys.UpArrow" ];
+"Keybinds.Special" = [ "Keys.J", "Keys.X", "Keys.LeftShift", "Keys.RightShift" ];
+"Rainbow" = "False";

@@ -1,0 +1,8 @@
+"Name" = "Epsilon";
+"Description" = "This mod contains the default items, and maps for Epsilon. This mod was made by RandomiaGaming.";
+"Version" = "1.0.0";
+"Dependencies" = [];
+"Namespace" = "RandomiaGaming.Epsilon";
+"Textures" = ["Textures\Ground.png", "Textures\Player.png", ""];
+"Maps" = "Maps"
+"Audio" = "Audio"

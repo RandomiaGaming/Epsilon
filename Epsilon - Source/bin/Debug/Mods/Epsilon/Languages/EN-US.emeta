@@ -1,0 +1,10 @@
+"AssetType" = "Language";
+"Override" = "null";
+"Com" = "RandomiaGaming.Epsilon.Languages.EN-US";
+"AssetMeta" =
+{
+"Title" = "Epsilon";
+"Play" = "Play";
+"Quit" = "Quit";
+"Mods" = "Mods";
+};
