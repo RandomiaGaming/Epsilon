@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 namespace Epsilon
 {
-    public static class SpriteLoader
+    public static class TextureLoader
     {
         public static List<Sprite> sprites = null;
         public static void LoadSprite(string assetPath)

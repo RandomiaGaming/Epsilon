@@ -1,5 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +17,8 @@ namespace EpsilonCore
         private Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch;
 
         RenderTarget2D renderTarget;
+
+        private Profiler profiler = new Profiler();
 
         GraphicsDeviceManager graphics;
         public EpsilonGame()
@@ -40,6 +40,9 @@ namespace EpsilonCore
         protected override void Initialize()
         {
             base.Initialize();
+
+            profiler = new Profiler();
+            profiler.Reset();
 
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
@@ -67,11 +70,12 @@ namespace EpsilonCore
         }
         protected override void Update(Microsoft.Xna.Framework.GameTime gameTime)
         {
+            profiler.AddSample(gameTime.ElapsedGameTime.Ticks);
+            profiler.PrintValue();
             base.Update(gameTime);
         }
         protected override void Draw(Microsoft.Xna.Framework.GameTime gameTime)
         {
-            Console.WriteLine($"Debug Profiler: {10000000 / (gameTime.ElapsedGameTime.Ticks + 1)} FPS or {gameTime.ElapsedGameTime.Ticks} TPF.");
             //Small Rendering
             GraphicsDevice.SetRenderTarget(renderTarget);
             GraphicsDevice.Clear(backgroundColor);

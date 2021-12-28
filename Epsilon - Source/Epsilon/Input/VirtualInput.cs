@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Epsilon.Epsilon_Core
+namespace EpsilonCore
 {
-    public enum EMetaTypes {  }
-    public class EMeta
+    public sealed class VirtualInput
     {
-
+        public string name = "Unnamed Virtual Input";
     }
 }

@@ -6,8 +6,76 @@ using System.Threading.Tasks;
 
 namespace Epsilon.Epsilon
 {
-    class InputManager
+    public class InputManager
     {
+        private bool _rightPressed;
+        public bool rightPressed
+        {
+            get
+            {
+                return _rightPressed;
+            }
+        }
+        private bool _leftPressed;
+        public bool leftPressed
+        {
+            get
+            {
+                return _leftPressed;
+            }
+        }
+        public int horizontalAxis
+        {
+            get
+            {
+                if (rightPressed && !leftPressed)
+                {
+                    return 1;
+                }
+                else if (leftPressed && !rightPressed)
+                {
+                    return -1;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+        }
+        private bool _upPressed;
+        public bool upPressed
+        {
+            get
+            {
+                return _upPressed;
+            }
+        }
+        private bool _downPressed;
+        public bool downPressed
+        {
+            get
+            {
+                return _downPressed;
+            }
+        }
+        public int verticalAxis
+        {
+            get
+            {
+                if (upPressed && !downPressed)
+                {
+                    return 1;
+                }
+                else if (downPressed && !upPressed)
+                {
+                    return -1;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+        }
         private InputPacket CreateInputPacket()
         {
             Microsoft.Xna.Framework.Input.KeyboardState keyboardState = Microsoft.Xna.Framework.Input.Keyboard.GetState();

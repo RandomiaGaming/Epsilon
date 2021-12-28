@@ -83,11 +83,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="Epsilon\EpsilonCore.cs" />
+    <Compile Include="Epsilon\Epsilon.cs" />
     <Compile Include="Epsilon\EpsilonGame.cs" />
+    <Compile Include="Epsilon\Profiler.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Epsilon\Base Classes\" />
+    <Folder Include="Epsilon\Data Types\" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\MonoGame.Framework.DesktopGL.3.8.0.1641\build\MonoGame.Framework.DesktopGL.targets" Condition="Exists('..\packages\MonoGame.Framework.DesktopGL.3.8.0.1641\build\MonoGame.Framework.DesktopGL.targets')" />
   <ProjectExtensions>
