@@ -7,11 +7,10 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
-namespace EpsilonCore
+namespace Epsilon
 {
-    public sealed class EpsilonGame : Microsoft.Xna.Framework.Game
+    public sealed class GameWindow : Microsoft.Xna.Framework.Game
     {
-        //Average of 9800 tpf
         public Microsoft.Xna.Framework.Color backgroundColor = new Microsoft.Xna.Framework.Color(255, 255, 155, 255);
         private Texture2D thatOneTexture;
         private Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch;
@@ -21,7 +20,7 @@ namespace EpsilonCore
         private Profiler profiler = new Profiler();
 
         GraphicsDeviceManager graphics;
-        public EpsilonGame()
+        public GameWindow()
         {
             graphics = new Microsoft.Xna.Framework.GraphicsDeviceManager(this)
             {
@@ -70,6 +69,7 @@ namespace EpsilonCore
         }
         protected override void Update(Microsoft.Xna.Framework.GameTime gameTime)
         {
+            
             profiler.AddSample(gameTime.ElapsedGameTime.Ticks);
             profiler.PrintValue();
             base.Update(gameTime);
@@ -86,9 +86,10 @@ namespace EpsilonCore
             //Big Rendering
             GraphicsDevice.Clear(Color.Black);
             spriteBatch.Begin(samplerState: Microsoft.Xna.Framework.Graphics.SamplerState.PointClamp);
-            spriteBatch.Draw(renderTarget, new Microsoft.Xna.Framework.Rectangle(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height), new Microsoft.Xna.Framework.Rectangle(0, 0, renderTarget.Width, renderTarget.Height), Microsoft.Xna.Framework.Color.White, 57.0f, new Microsoft.Xna.Framework.Vector2(renderTarget.Width / 2.0f, renderTarget.Height / 2.0f), Microsoft.Xna.Framework.Graphics.SpriteEffects.None, 0);
+            spriteBatch.Draw(renderTarget, new Microsoft.Xna.Framework.Rectangle(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height), new Microsoft.Xna.Framework.Rectangle(0, 0, renderTarget.Width, renderTarget.Height), Microsoft.Xna.Framework.Color.White, 0f, new Microsoft.Xna.Framework.Vector2(renderTarget.Width / 2.0f, renderTarget.Height / 2.0f), Microsoft.Xna.Framework.Graphics.SpriteEffects.None, 0);
             spriteBatch.End();
             base.Draw(gameTime);
         }
+       // public void DrawTexture(Texture2D texture, )
     }
 }

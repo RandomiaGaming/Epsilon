@@ -2,13 +2,13 @@
 using System.IO;
 using System.Collections.Generic;
 using System.Reflection;
-namespace EpsilonCore
+namespace Epsilon
 {
     public sealed class Epsilon
     {
         private string arguments = null;
-        private EpsilonGame _game = null;
-        public EpsilonGame game
+        private GameWindow _game = null;
+        public GameWindow game
         {
             get
             {
@@ -22,7 +22,7 @@ namespace EpsilonCore
         public Epsilon()
         {
             arguments = "";
-            game = new EpsilonGame();
+            game = new GameWindow();
         }
         public Epsilon(string arguments)
         {
@@ -31,7 +31,7 @@ namespace EpsilonCore
                 arguments = "";
             }
             this.arguments = arguments;
-            game = new EpsilonGame();
+            game = new GameWindow();
         }
         public Epsilon(string[] arguments)
         {
@@ -46,7 +46,7 @@ namespace EpsilonCore
                     this.arguments = this.arguments + "\"" + arg + "\"\n";
                 }
             }
-            game = new EpsilonGame();
+            game = new GameWindow();
         }
         public Profiler profiler = new Profiler();
         /*private static Assembly _epsilonCoreAssembly;
@@ -90,11 +90,11 @@ namespace EpsilonCore
         {
             game.Run();
         }
-        public void UpdateCallback()
+        internal void UpdateCallback()
         {
 
         }
-        public void DrawingCallback()
+        internal void DrawingCallback()
         {
             
         }

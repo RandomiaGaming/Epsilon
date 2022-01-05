@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace EpsilonCore
+namespace Epsilon
 {
     public class Profiler
     {
