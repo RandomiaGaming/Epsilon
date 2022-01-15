@@ -1,45 +1,5 @@
-D:\Epsilon\Epsilon - Source\obj\x86\Debug\Epsilon.csproj.AssemblyReference.cache
-D:\Epsilon\Epsilon - Source\obj\x86\Debug\Epsilon.csproj.CoreCompileInputs.cache
-D:\Epsilon\Epsilon - Source\bin\Debug\MonoGame.Framework.dll
-D:\Epsilon\Epsilon - Source\bin\Debug\Newtonsoft.Json.dll
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.Direct2D1.dll
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.Direct3D11.dll
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.Direct3D9.dll
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.dll
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.DXGI.dll
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.Mathematics.dll
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.MediaFoundation.dll
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.XAudio2.dll
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.XInput.dll
-D:\Epsilon\Epsilon - Source\bin\Debug\MonoGame.Framework.xml
-D:\Epsilon\Epsilon - Source\bin\Debug\Newtonsoft.Json.xml
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.pdb
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.Direct2D1.pdb
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.Direct2D1.xml
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.Direct3D11.pdb
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.Direct3D11.xml
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.Direct3D9.pdb
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.Direct3D9.xml
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.DXGI.pdb
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.DXGI.xml
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.Mathematics.pdb
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.Mathematics.xml
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.MediaFoundation.pdb
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.MediaFoundation.xml
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.XAudio2.pdb
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.XAudio2.xml
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.XInput.pdb
-D:\Epsilon\Epsilon - Source\bin\Debug\SharpDX.XInput.xml
-D:\Epsilon\Epsilon - Source\obj\x86\Debug\Epsilon.csproj.CopyComplete
-D:\Epsilon\Epsilon - Source\bin\Debug\Epsilon.exe.config
-D:\Epsilon\Epsilon - Source\bin\Debug\Epsilon.exe
-D:\Epsilon\Epsilon - Source\bin\Debug\Epsilon.pdb
-D:\Epsilon\Epsilon - Source\obj\x86\Debug\Epsilon.exe
-D:\Epsilon\Epsilon - Source\obj\x86\Debug\Epsilon.pdb
 D:\C# Windows Apps\Epsilon\Epsilon - Source\obj\x86\Debug\Epsilon.csproj.AssemblyReference.cache
 D:\C# Windows Apps\Epsilon\Epsilon - Source\obj\x86\Debug\Epsilon.csproj.CoreCompileInputs.cache
-D:\C# Windows Apps\Epsilon\Epsilon - Source\obj\x86\Debug\Epsilon.exe
-D:\C# Windows Apps\Epsilon\Epsilon - Source\obj\x86\Debug\Epsilon.pdb
 D:\C# Windows Apps\Epsilon\Epsilon - Source\bin\Debug\Epsilon.exe.config
 D:\C# Windows Apps\Epsilon\Epsilon - Source\bin\Debug\Epsilon.exe
 D:\C# Windows Apps\Epsilon\Epsilon - Source\bin\Debug\Epsilon.pdb
@@ -74,3 +34,5 @@ D:\C# Windows Apps\Epsilon\Epsilon - Source\bin\Debug\SharpDX.XAudio2.xml
 D:\C# Windows Apps\Epsilon\Epsilon - Source\bin\Debug\SharpDX.XInput.pdb
 D:\C# Windows Apps\Epsilon\Epsilon - Source\bin\Debug\SharpDX.XInput.xml
 D:\C# Windows Apps\Epsilon\Epsilon - Source\obj\x86\Debug\Epsilon.csproj.CopyComplete
+D:\C# Windows Apps\Epsilon\Epsilon - Source\obj\x86\Debug\Epsilon.exe
+D:\C# Windows Apps\Epsilon\Epsilon - Source\obj\x86\Debug\Epsilon.pdb

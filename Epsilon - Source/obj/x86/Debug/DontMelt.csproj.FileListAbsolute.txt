@@ -1,2 +1,0 @@
-D:\Epsilon\Epsilon - Source\obj\x86\Debug\DontMelt.csproj.AssemblyReference.cache
-D:\Epsilon\Epsilon - Source\obj\x86\Debug\DontMelt.csproj.CoreCompileInputs.cache

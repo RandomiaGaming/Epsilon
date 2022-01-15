@@ -1,0 +1,4 @@
+﻿Each frame looks like this:
+
+Clear the que.
+Initialize new objects.
