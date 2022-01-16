@@ -4,10 +4,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 namespace Epsilon
 {
-    public class GameObject
+    public class StageObject
     {
         #region Variables
-        private Texture2D _texture;
         private Point _position = new Point(0, 0);
         private List<Component> _components = new List<Component>();
         private Stage _scene = null;
@@ -15,6 +14,17 @@ namespace Epsilon
         private bool _destroyed = false;
         #endregion
         #region Properties
+        public Point Position
+        {
+            get
+            {
+                return _position;
+            }
+            set
+            {
+                _position = value;
+            }
+        }
         public Epsilon Engine
         {
             get
@@ -35,25 +45,6 @@ namespace Epsilon
                     throw new Exception("GameObject has been destroyed.");
                 }
                 return _scene;
-            }
-        }
-        public Texture2D Texture
-        {
-            get
-            {
-                if (_destroyed)
-                {
-                    throw new Exception("GameObject has been destroyed.");
-                }
-                return _texture;
-            }
-            set
-            {
-                if (_destroyed)
-                {
-                    throw new Exception("GameObject has been destroyed.");
-                }
-                _texture = value;
             }
         }
         public string Name
@@ -84,7 +75,7 @@ namespace Epsilon
         }
         #endregion
         #region Constructors
-        public GameObject(Stage scene)
+        public StageObject(Stage scene)
         {
             if (scene is null)
             {
@@ -93,7 +84,7 @@ namespace Epsilon
 
             _scene = scene;
 
-            _scene.AddGameObject(this);
+            _components.Add(new TextureRenderer(this));
         }
         #endregion
         #region Overrides
@@ -114,6 +105,7 @@ namespace Epsilon
             {
                 throw new Exception("GameObject has been destroyed.");
             }
+
             initialize();
         }
         public void Destroy()
@@ -144,17 +136,14 @@ namespace Epsilon
                 component.Update();
             }
         }
-        public void Render()
+        public List<DrawInstruction> Render()
         {
-            if (_destroyed)
-            {
-                throw new Exception("GameObject has been destroyed.");
-            }
-            render();
+            List<DrawInstruction> output = render();
             foreach (Component component in _components)
             {
-                component.Render();
+                output.AddRange(component.Render());
             }
+            return output;
         }
         #endregion
         #region Component Methods
@@ -355,9 +344,9 @@ namespace Epsilon
         {
 
         }
-        protected virtual void render()
+        protected virtual List<DrawInstruction> render()
         {
-
+            return new List<DrawInstruction>();
         }
         #endregion
     }

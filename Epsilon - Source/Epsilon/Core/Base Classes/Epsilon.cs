@@ -17,13 +17,20 @@ namespace Epsilon
         #endregion
         #region Variables
         private GraphicsDeviceManager _graphicsDeviceManager = null;
-        private SpriteBatch _spriteBatch = null;
+        private SpriteBatch _mainSpriteBatch = null;
         private Stage _currentStage = null;
         private TimeSpan _timeSinceStart = new TimeSpan(0);
         private TimeSpan _deltaTime = new TimeSpan(0);
         private bool _running = false;
         #endregion
         #region Properties
+        public SpriteBatch MainSpriteBatch
+        {
+            get
+            {
+                return _mainSpriteBatch;
+            }
+        }
         public Stage CurrentStage
         {
             get
@@ -96,9 +103,9 @@ namespace Epsilon
             base.IsFixedTimeStep = false;
             base.IsMouseVisible = true;
 
-            _spriteBatch = new SpriteBatch(GraphicsDevice);
-            _spriteBatch.Name = "Main SpriteBatch";
-            _spriteBatch.Tag = null;
+            _mainSpriteBatch = new SpriteBatch(GraphicsDevice);
+            _mainSpriteBatch.Name = "Main SpriteBatch";
+            _mainSpriteBatch.Tag = null;
         }
         #endregion
         #region Overrides
@@ -126,22 +133,29 @@ namespace Epsilon
             {
                 _currentStage.Update();
             }
-
             base.Update(gameTime);
         }
         protected sealed override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(BackgroundColor);
-
-            _spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, null);
-
+            Texture2D sceneRender = null;
+            
             if (_currentStage is not null)
             {
-                Texture2D sceneRender = _currentStage.Render();
-                _spriteBatch.Draw(sceneRender, new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height), new Rectangle(0, 0, sceneRender.Width, sceneRender.Height), Color.White, 0, new Vector2(0, 0), SpriteEffects.None, 0);
+                sceneRender = _currentStage.Render();
             }
 
-            _spriteBatch.End();
+            GraphicsDevice.Clear(BackgroundColor);
+
+            _mainSpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, null);
+
+            if (sceneRender is not null)
+            {
+                _mainSpriteBatch.Draw(sceneRender, new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height), new Rectangle(0, 0, sceneRender.Width, sceneRender.Height), Color.White, 0, new Vector2(0, 0), SpriteEffects.None, 0);
+            }
+
+            //Render Canvas Here
+
+            _mainSpriteBatch.End();
 
             base.Draw(gameTime);
         }

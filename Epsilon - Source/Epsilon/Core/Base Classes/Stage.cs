@@ -11,9 +11,10 @@ namespace Epsilon
         public static double AspectRatio => ViewportSize.Y / (double)ViewportSize.X;
         #endregion
         #region Variables
-        private Microsoft.Xna.Framework.Graphics.RenderTarget2D renderTarget = null;
+        private RenderTarget2D _renderTarget = null;
+        private SpriteBatch _stageSpriteBatch = null;
         private Point _cameraPosition = new Point(0, 0);
-        private List<GameObject> _gameObjects = new List<GameObject>();
+        private List<StageObject> _gameObjects = new List<StageObject>();
         private Epsilon _epsilon = null;
         public string _name = "Unnamed Stage";
         #endregion
@@ -43,7 +44,11 @@ namespace Epsilon
 
             _epsilon = epsilon;
 
-            renderTarget = new RenderTarget2D(epsilon.GraphicsDevice, ViewportSize.X, ViewportSize.Y);
+            _renderTarget = new RenderTarget2D(_epsilon.GraphicsDevice, ViewportSize.X, ViewportSize.Y, false, SurfaceFormat.Color, DepthFormat.None);
+
+            _stageSpriteBatch = new SpriteBatch(_epsilon.GraphicsDevice);
+            _stageSpriteBatch.Name = "Stage SpriteBatch";
+            _stageSpriteBatch.Tag = null;
         }
         #endregion
         #region Overrides
@@ -53,48 +58,43 @@ namespace Epsilon
         }
         #endregion
         #region Methods
-        private Texture2D renderTexture;
         public void Initialize()
         {
-            renderTexture = new Texture2D(_epsilon.GraphicsDevice, 10, 10);
-            Color[] textureBuffer = new Color[renderTexture.Width * renderTexture.Height];
-            int i = 0;
-            for (int y = renderTexture.Height - 1; y >= 0; y--)
-            {
-                for (int x = 0; x < renderTexture.Width; x++)
-                {
-                    if ((x + y) % 2 == 0)
-                    {
-                        textureBuffer[i] = new Color(255, 255, 255, 255);
-                    }
-                    else
-                    {
-                        textureBuffer[i] = new Color(0, 0, 0, 255);
-                    }
-                    i++;
-                }
-            }
-            renderTexture.SetData(textureBuffer);
+            _gameObjects.Add(new StageObject(this));
         }
         public void Update()
         {
-            foreach (GameObject gameObject in _gameObjects)
+            foreach (StageObject gameObject in _gameObjects)
             {
                 gameObject.Update();
             }
         }
         public Texture2D Render()
         {
-            foreach (GameObject gameObject in _gameObjects)
+            _epsilon.GraphicsDevice.SetRenderTarget(_renderTarget);
+
+            _stageSpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, null);
+
+            foreach (StageObject gameObject in _gameObjects)
             {
-                gameObject.Render();
+                Point gameObjectOffset = gameObject.Position - _cameraPosition;
+                List<DrawInstruction> gameObjectRender = gameObject.Render();
+                foreach (DrawInstruction drawInstruction in gameObjectRender)
+                {
+                    Point spritePosition = gameObjectOffset + drawInstruction.Offset;
+                    _stageSpriteBatch.Draw(drawInstruction.Texture, new Rectangle(spritePosition.X, spritePosition.Y, drawInstruction.Texture.Width, drawInstruction.Texture.Height), new Rectangle(0, 0, drawInstruction.Texture.Width, drawInstruction.Texture.Height), Color.White, 0, new Vector2(0, 0), SpriteEffects.None, 0);
+                }
             }
 
-            return renderTexture;
+            _stageSpriteBatch.End();
+
+            _epsilon.GraphicsDevice.SetRenderTarget(null);
+
+            return _renderTarget;
         }
         #endregion
         #region GameObject Management
-        public GameObject GetGameObject(int index)
+        public StageObject GetGameObject(int index)
         {
             if (index < 0 || index >= _gameObjects.Count)
             {
@@ -103,16 +103,16 @@ namespace Epsilon
 
             return _gameObjects[index];
         }
-        public List<GameObject> GetGameObjects()
+        public List<StageObject> GetGameObjects()
         {
-            return new List<GameObject>(_gameObjects);
+            return new List<StageObject>(_gameObjects);
         }
         public int GetGameObjectCount()
         {
             return _gameObjects.Count;
         }
         #region Internal Methods
-        internal void RemoveGameObject(GameObject gameObject)
+        internal void RemoveGameObject(StageObject gameObject)
         {
             if (gameObject is null)
             {
@@ -134,7 +134,7 @@ namespace Epsilon
             }
             throw new Exception("GameObject not found.");
         }
-        internal void AddGameObject(GameObject gameObject)
+        internal void AddGameObject(StageObject gameObject)
         {
             if (gameObject is null)
             {
@@ -146,7 +146,7 @@ namespace Epsilon
                 throw new Exception("GameObject belongs to a different Scene.");
             }
 
-            foreach (GameObject _gameObject in _gameObjects)
+            foreach (StageObject _gameObject in _gameObjects)
             {
                 if (_gameObject == gameObject)
                 {

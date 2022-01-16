@@ -83,11 +83,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Epsilon\Core\Base Classes\TextureRenderer.cs" />
     <Compile Include="Epsilon\Core\Base Classes\Component.cs" />
+    <Compile Include="Epsilon\Core\Base Classes\DrawInstruction.cs" />
     <Compile Include="Epsilon\Core\Base Classes\Epsilon.cs" />
-    <Compile Include="Epsilon\Core\Base Classes\GameObject.cs" />
+    <Compile Include="Epsilon\Core\Base Classes\StageObject.cs" />
     <Compile Include="Epsilon\Core\Base Classes\Profiler.cs" />
     <Compile Include="Epsilon\Core\Base Classes\Stage.cs" />
+    <Compile Include="Epsilon\Core\Helper Classes\ColorHelper.cs" />
+    <Compile Include="Epsilon\Core\Helper Classes\MathHelper.cs" />
+    <Compile Include="Epsilon\Core\Helper Classes\RandomnessHelper.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>
   <ItemGroup />

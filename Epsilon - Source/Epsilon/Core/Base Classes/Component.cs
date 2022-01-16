@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 namespace Epsilon
@@ -6,7 +7,7 @@ namespace Epsilon
     public abstract class Component
     {
         #region Variables
-        private GameObject _gameObject = null;
+        private StageObject _gameObject = null;
         public string _name = "Unnamed Component";
         private bool _destroyed = false;
         #endregion
@@ -33,7 +34,7 @@ namespace Epsilon
                 return _gameObject.Scene;
             }
         }
-        public GameObject GameObject
+        public StageObject GameObject
         {
             get
             {
@@ -72,7 +73,7 @@ namespace Epsilon
         }
         #endregion
         #region Constructors
-        public Component(GameObject gameObject)
+        public Component(StageObject gameObject)
         {
             if (gameObject is null)
             {
@@ -80,8 +81,6 @@ namespace Epsilon
             }
 
             _gameObject = gameObject;
-
-            _gameObject.AddComponent(this);
         }
         #endregion
         #region Overrides
@@ -122,13 +121,13 @@ namespace Epsilon
             }
             update();
         }
-        public void Render()
+        public List<DrawInstruction> Render()
         {
             if (_destroyed)
             {
                 throw new Exception("Component has been destroyed.");
             }
-            render();
+            return render();
         }
         #endregion
         #region Overridables
@@ -144,9 +143,9 @@ namespace Epsilon
         {
 
         }
-        protected virtual void render()
+        protected virtual List<DrawInstruction> render()
         {
-
+            return new List<DrawInstruction>();
         }
         #endregion
     }

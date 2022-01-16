@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System;
-namespace Epsilon
+namespace EpsilonEngine
 {
     public sealed class KeyboardState
     {
