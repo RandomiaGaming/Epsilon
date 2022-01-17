@@ -83,8 +83,6 @@ namespace Epsilon
             }
 
             _scene = scene;
-
-            _components.Add(new TextureRenderer(this));
         }
         #endregion
         #region Overrides
@@ -126,10 +124,6 @@ namespace Epsilon
         }
         public void Update()
         {
-            if (_destroyed)
-            {
-                throw new Exception("GameObject has been destroyed.");
-            }
             update();
             foreach (Component component in _components)
             {

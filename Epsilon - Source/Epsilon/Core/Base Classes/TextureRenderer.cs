@@ -6,14 +6,15 @@ namespace Epsilon
 {
     public sealed class TextureRenderer : Component
     {
-        public Texture2D texture;
+        public Texture2D texture = null;
+        public Point offset = new Point(0, 0);
         public TextureRenderer(StageObject stageObject) : base(stageObject)
         {
-            texture = Texture2D.FromFile(stageObject.Engine.GraphicsDevice, @"D:\C# Windows Apps\Epsilon\Epsilon - Source\Old Code\Default\Assets\Textures\Item Textures\NoJump.png");
+
         }
         protected override List<DrawInstruction> render()
         {
-            return new List<DrawInstruction>() { new DrawInstruction(texture, Point.Zero) };
+            return new List<DrawInstruction>() { new DrawInstruction(texture, offset) };
         }
     }
 }

@@ -36,3 +36,41 @@ D:\C# Windows Apps\Epsilon\Epsilon - Source\bin\Debug\SharpDX.XInput.xml
 D:\C# Windows Apps\Epsilon\Epsilon - Source\obj\x86\Debug\Epsilon.csproj.CopyComplete
 D:\C# Windows Apps\Epsilon\Epsilon - Source\obj\x86\Debug\Epsilon.exe
 D:\C# Windows Apps\Epsilon\Epsilon - Source\obj\x86\Debug\Epsilon.pdb
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\Epsilon.exe.config
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\Epsilon.exe
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\Epsilon.pdb
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\MonoGame.Framework.dll
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\Newtonsoft.Json.dll
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.Direct2D1.dll
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.Direct3D11.dll
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.Direct3D9.dll
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.dll
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.DXGI.dll
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.Mathematics.dll
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.MediaFoundation.dll
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.XAudio2.dll
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.XInput.dll
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\MonoGame.Framework.xml
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\Newtonsoft.Json.xml
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.pdb
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.Direct2D1.pdb
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.Direct2D1.xml
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.Direct3D11.pdb
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.Direct3D11.xml
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.Direct3D9.pdb
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.Direct3D9.xml
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.DXGI.pdb
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.DXGI.xml
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.Mathematics.pdb
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.Mathematics.xml
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.MediaFoundation.pdb
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.MediaFoundation.xml
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.XAudio2.pdb
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.XAudio2.xml
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.XInput.pdb
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\bin\Debug\SharpDX.XInput.xml
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\obj\x86\Debug\Epsilon.csproj.AssemblyReference.cache
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\obj\x86\Debug\Epsilon.csproj.CoreCompileInputs.cache
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\obj\x86\Debug\Epsilon.csproj.CopyComplete
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\obj\x86\Debug\Epsilon.exe
+C:\Users\RandomiaGaming\Documents\Epsilon\Epsilon - Source\obj\x86\Debug\Epsilon.pdb

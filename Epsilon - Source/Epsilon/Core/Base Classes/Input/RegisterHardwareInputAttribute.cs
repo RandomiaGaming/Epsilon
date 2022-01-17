@@ -2,10 +2,10 @@
 
 namespace Epsilon
 {
-    [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true, Inherited = false)]
-    public sealed class RegisterVirtualInputAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+    public sealed class RegisterHardwareInputAttribute : Attribute
     {
-        private string _name = "Unnamed Virtual Input";
+        private string _name = "Unnamed Hardware Input";
         public string Name
         {
             get
@@ -13,17 +13,17 @@ namespace Epsilon
                 return _name;
             }
         }
-        private RegisterVirtualInputAttribute()
+        private RegisterHardwareInputAttribute()
         {
-            _name = "Unnamed Virtual Input";
+            _name = "Unnamed Hardware Input";
         }
-        public RegisterVirtualInputAttribute(string name)
+        public RegisterHardwareInputAttribute(string name)
         {
             if (name is null)
             {
                 throw new Exception("name cannot be null.");
             }
-            if (name == "")
+            if(name == "")
             {
                 throw new Exception("name cannot be empty.");
             }
@@ -31,7 +31,7 @@ namespace Epsilon
         }
         public override string ToString()
         {
-            return $"Epsilon.RegisterVirtualInputAttribute({_name})";
+            return $"Epsilon.RegisterHardwareInputAttribute({_name})";
         }
     }
 }

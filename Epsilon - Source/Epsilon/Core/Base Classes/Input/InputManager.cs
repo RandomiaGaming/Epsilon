@@ -1,357 +1,203 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+using System.Reflection;
 namespace Epsilon
 {
-    public class InputManager
+    public sealed class InputManager
     {
-        private bool _rightPressed;
-        public bool rightPressed
+        private Epsilon _epsilon = null;
+        private List<HardwareInput> _hardwareInputs = new List<HardwareInput>();
+        private List<VirtualInput> _virtualInputs = new List<VirtualInput>();
+        private List<InputBinding> _inputBindings = new List<InputBinding>();
+        public Epsilon Epsilon
         {
             get
             {
-                return _rightPressed;
+                return _epsilon;
             }
         }
-        private bool _leftPressed;
-        public bool leftPressed
+        public InputManager(Epsilon epsilon)
         {
-            get
+            if (epsilon is null)
             {
-                return _leftPressed;
+                throw new Exception("epsilon cannot be null.");
             }
+            _epsilon = epsilon;
+
+            ReloadInputs();
         }
-        public int horizontalAxis
+        public override string ToString()
         {
-            get
+            return $"Epsilon.InputManager()";
+        }
+        public void Update()
+        {
+            foreach (HardwareInput hardwareInput in _hardwareInputs)
             {
-                if (rightPressed && !leftPressed)
-                {
-                    return 1;
-                }
-                else if (leftPressed && !rightPressed)
-                {
-                    return -1;
-                }
-                else
-                {
-                    return 0;
-                }
+                hardwareInput.Update();
             }
-        }
-        private bool _upPressed;
-        public bool upPressed
-        {
-            get
+            foreach (VirtualInput virtualInput in _virtualInputs)
             {
-                return _upPressed;
+                virtualInput.SetPressed(false);
             }
-        }
-        private bool _downPressed;
-        public bool downPressed
-        {
-            get
+            foreach (InputBinding inputBinding in _inputBindings)
             {
-                return _downPressed;
-            }
-        }
-        public int verticalAxis
-        {
-            get
-            {
-                if (upPressed && !downPressed)
+                if (inputBinding.HardwareInput.Pressed)
                 {
-                    return 1;
-                }
-                else if (downPressed && !upPressed)
-                {
-                    return -1;
-                }
-                else
-                {
-                    return 0;
+                    inputBinding.VirtualInput.SetPressed(true);
                 }
             }
         }
-        private InputPacket CreateInputPacket()
+        public void ReloadInputs()
         {
-            Microsoft.Xna.Framework.Input.KeyboardState keyboardState = Microsoft.Xna.Framework.Input.Keyboard.GetState();
-            List<KeyboardButton> pressedKeyboardButtons = new List<KeyboardButton>();
-            foreach (Microsoft.Xna.Framework.Input.Keys key in keyboardState.GetPressedKeys())
+            _hardwareInputs = new List<HardwareInput>();
+            _virtualInputs = new List<VirtualInput>();
+            _inputBindings = new List<InputBinding>();
+
+            Assembly assembly = Assembly.GetCallingAssembly();
+
+            foreach (Type type in assembly.GetTypes())
             {
-                switch (key)
+                foreach (MethodInfo methodInfo in type.GetMethods())
                 {
-                    case Microsoft.Xna.Framework.Input.Keys.A:
-                        pressedKeyboardButtons.Add(KeyboardButton.A);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.B:
-                        pressedKeyboardButtons.Add(KeyboardButton.B);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.C:
-                        pressedKeyboardButtons.Add(KeyboardButton.C);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.D:
-                        pressedKeyboardButtons.Add(KeyboardButton.D);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.E:
-                        pressedKeyboardButtons.Add(KeyboardButton.E);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.F:
-                        pressedKeyboardButtons.Add(KeyboardButton.F);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.G:
-                        pressedKeyboardButtons.Add(KeyboardButton.G);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.H:
-                        pressedKeyboardButtons.Add(KeyboardButton.H);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.I:
-                        pressedKeyboardButtons.Add(KeyboardButton.I);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.J:
-                        pressedKeyboardButtons.Add(KeyboardButton.J);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.K:
-                        pressedKeyboardButtons.Add(KeyboardButton.K);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.L:
-                        pressedKeyboardButtons.Add(KeyboardButton.L);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.M:
-                        pressedKeyboardButtons.Add(KeyboardButton.M);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.N:
-                        pressedKeyboardButtons.Add(KeyboardButton.N);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.O:
-                        pressedKeyboardButtons.Add(KeyboardButton.O);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.P:
-                        pressedKeyboardButtons.Add(KeyboardButton.P);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.Q:
-                        pressedKeyboardButtons.Add(KeyboardButton.Q);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.R:
-                        pressedKeyboardButtons.Add(KeyboardButton.R);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.S:
-                        pressedKeyboardButtons.Add(KeyboardButton.S);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.T:
-                        pressedKeyboardButtons.Add(KeyboardButton.T);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.U:
-                        pressedKeyboardButtons.Add(KeyboardButton.U);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.V:
-                        pressedKeyboardButtons.Add(KeyboardButton.V);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.W:
-                        pressedKeyboardButtons.Add(KeyboardButton.W);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.X:
-                        pressedKeyboardButtons.Add(KeyboardButton.X);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.Y:
-                        pressedKeyboardButtons.Add(KeyboardButton.Y);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.Z:
-                        pressedKeyboardButtons.Add(KeyboardButton.Z);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.NumPad0:
-                        pressedKeyboardButtons.Add(KeyboardButton.NumPad0);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.NumPad1:
-                        pressedKeyboardButtons.Add(KeyboardButton.NumPad1);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.NumPad2:
-                        pressedKeyboardButtons.Add(KeyboardButton.NumPad2);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.NumPad3:
-                        pressedKeyboardButtons.Add(KeyboardButton.NumPad3);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.NumPad4:
-                        pressedKeyboardButtons.Add(KeyboardButton.NumPad4);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.NumPad5:
-                        pressedKeyboardButtons.Add(KeyboardButton.NumPad5);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.NumPad6:
-                        pressedKeyboardButtons.Add(KeyboardButton.NumPad6);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.NumPad7:
-                        pressedKeyboardButtons.Add(KeyboardButton.NumPad7);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.NumPad8:
-                        pressedKeyboardButtons.Add(KeyboardButton.NumPad8);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.NumPad9:
-                        pressedKeyboardButtons.Add(KeyboardButton.NumPad9);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.OemPlus:
-                        pressedKeyboardButtons.Add(KeyboardButton.NumPadPlus);
-                        pressedKeyboardButtons.Add(KeyboardButton.Plus);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.OemMinus:
-                        pressedKeyboardButtons.Add(KeyboardButton.NumPadMinus);
-                        pressedKeyboardButtons.Add(KeyboardButton.Minus);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.NumLock:
-                        pressedKeyboardButtons.Add(KeyboardButton.NumLock);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.LeftShift:
-                        pressedKeyboardButtons.Add(KeyboardButton.LeftShift);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.RightShift:
-                        pressedKeyboardButtons.Add(KeyboardButton.RightShift);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.LeftControl:
-                        pressedKeyboardButtons.Add(KeyboardButton.LeftControl);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.RightControl:
-                        pressedKeyboardButtons.Add(KeyboardButton.RightControl);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.LeftAlt:
-                        pressedKeyboardButtons.Add(KeyboardButton.LeftAlt);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.RightAlt:
-                        pressedKeyboardButtons.Add(KeyboardButton.RightAlt);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.LeftWindows:
-                        pressedKeyboardButtons.Add(KeyboardButton.LeftWindows);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.RightWindows:
-                        pressedKeyboardButtons.Add(KeyboardButton.RightWindows);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.F1:
-                        pressedKeyboardButtons.Add(KeyboardButton.F1);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.F2:
-                        pressedKeyboardButtons.Add(KeyboardButton.F2);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.F3:
-                        pressedKeyboardButtons.Add(KeyboardButton.F3);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.F4:
-                        pressedKeyboardButtons.Add(KeyboardButton.F4);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.F5:
-                        pressedKeyboardButtons.Add(KeyboardButton.F5);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.F6:
-                        pressedKeyboardButtons.Add(KeyboardButton.F6);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.F7:
-                        pressedKeyboardButtons.Add(KeyboardButton.F7);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.F8:
-                        pressedKeyboardButtons.Add(KeyboardButton.F8);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.F9:
-                        pressedKeyboardButtons.Add(KeyboardButton.F9);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.F10:
-                        pressedKeyboardButtons.Add(KeyboardButton.F10);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.F11:
-                        pressedKeyboardButtons.Add(KeyboardButton.F11);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.F12:
-                        pressedKeyboardButtons.Add(KeyboardButton.F12);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.Back:
-                        pressedKeyboardButtons.Add(KeyboardButton.Backspace);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.Delete:
-                        pressedKeyboardButtons.Add(KeyboardButton.Delete);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.Scroll:
-                        pressedKeyboardButtons.Add(KeyboardButton.ScrollLock);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.Escape:
-                        pressedKeyboardButtons.Add(KeyboardButton.Escape);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.Tab:
-                        pressedKeyboardButtons.Add(KeyboardButton.Tab);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.OemTilde:
-                        pressedKeyboardButtons.Add(KeyboardButton.Tilde);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.Space:
-                        pressedKeyboardButtons.Add(KeyboardButton.Space);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.PrintScreen:
-                        pressedKeyboardButtons.Add(KeyboardButton.PrintScreen);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.Insert:
-                        pressedKeyboardButtons.Add(KeyboardButton.Insert);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.Home:
-                        pressedKeyboardButtons.Add(KeyboardButton.Home);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.PageUp:
-                        pressedKeyboardButtons.Add(KeyboardButton.PageUp);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.PageDown:
-                        pressedKeyboardButtons.Add(KeyboardButton.PageDown);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.End:
-                        pressedKeyboardButtons.Add(KeyboardButton.End);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.OemBackslash:
-                        pressedKeyboardButtons.Add(KeyboardButton.Backslash);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.Divide:
-                        pressedKeyboardButtons.Add(KeyboardButton.Slash);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.OemComma:
-                        pressedKeyboardButtons.Add(KeyboardButton.Comma);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.OemPeriod:
-                        pressedKeyboardButtons.Add(KeyboardButton.Period);
-                        pressedKeyboardButtons.Add(KeyboardButton.NumPadPoint);
-                        break;
-                    case Microsoft.Xna.Framework.Input.Keys.Help:
-                        pressedKeyboardButtons.Add(KeyboardButton.Help);
-                        break;
+                    if (HardwareInput.MethodIsHardwareInput(methodInfo))
+                    {
+                        AddHardwareInput(new HardwareInput(this, methodInfo));
+                    }
                 }
             }
 
-            KeyboardState dmKeyboardState = new KeyboardState(keyboardState.CapsLock, false, keyboardState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.LeftShift | Microsoft.Xna.Framework.Input.Keys.RightShift), keyboardState.NumLock, pressedKeyboardButtons);
-
-
-
-            Microsoft.Xna.Framework.Input.MouseState mouseState = Microsoft.Xna.Framework.Input.Mouse.GetState();
-
-            Point position = new Point(mouseState.X, mouseState.Y);
-
-            int scrollWheelValue = mouseState.ScrollWheelValue - lastScrollWheelValue;
-
-            bool rightMouseButton = mouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
-            bool leftMouseButton = mouseState.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
-            bool middleMouseButton = mouseState.MiddleButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
-
-            List<MouseButton> pressedMouseButtons = new List<MouseButton>();
-
-            if (mouseState.XButton1 == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
+            foreach (RegisterVirtualInputAttribute registerVirtualInputAttribute in assembly.GetCustomAttributes<RegisterVirtualInputAttribute>())
             {
-                pressedMouseButtons.Add(MouseButton.Button0);
-            }
-            if (mouseState.XButton2 == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
-            {
-                pressedMouseButtons.Add(MouseButton.Button1);
+                AddVirtualInput(new VirtualInput(this, registerVirtualInputAttribute.Name));
             }
 
-            MouseState dmMouseState = new MouseState(position, scrollWheelValue, rightMouseButton, leftMouseButton, middleMouseButton, pressedMouseButtons);
+            foreach (DefaultInputBindingAttribute defaultInputBindingAttribute in assembly.GetCustomAttributes<DefaultInputBindingAttribute>())
+            {
+                AddInputBinding(CreateBindingFromNames(defaultInputBindingAttribute.HardwareInputName, defaultInputBindingAttribute.VirtualInputName));
+            }
+        }
+        public InputBinding CreateBindingFromNames(string hardwareInputName, string virtualInputName)
+        {
+            if (hardwareInputName is null)
+            {
+                throw new Exception("hardwareInputName cannot be null.");
+            }
 
-            InputPacket iPacket = new InputPacket(dmKeyboardState, dmMouseState);
+            if (virtualInputName is null)
+            {
+                throw new Exception("virtualInputName cannot be null.");
+            }
 
-            lastScrollWheelValue = scrollWheelValue;
-            return iPacket;
+            HardwareInput matchHardwareInput = GetHardwareInputFromName(hardwareInputName);
+            if (matchHardwareInput is null)
+            {
+                throw new Exception("HardwareInput with requested name could not be found.");
+            }
+
+            VirtualInput matchVirtualInput = GetVirtualInputFromName(virtualInputName);
+            if (matchVirtualInput is null)
+            {
+                throw new Exception("VirtualInput with requested name could not be found.");
+            }
+
+            return new InputBinding(this, matchHardwareInput, matchVirtualInput);
+        }
+        public HardwareInput GetHardwareInputFromName(string hardwareInputName)
+        {
+            HardwareInput matchHardwareInput = null;
+
+            foreach (HardwareInput hardwareInput in _hardwareInputs)
+            {
+                if (hardwareInput.Name == hardwareInputName)
+                {
+                    matchHardwareInput = hardwareInput;
+                    break;
+                }
+            }
+
+            return matchHardwareInput;
+        }
+        public VirtualInput GetVirtualInputFromName(string virtualInputName)
+        {
+            VirtualInput matchVirtualInput = null;
+
+            foreach (VirtualInput virtualInput in _virtualInputs)
+            {
+                if (virtualInput.Name == virtualInputName)
+                {
+                    matchVirtualInput = virtualInput;
+                    break;
+                }
+            }
+
+            return matchVirtualInput;
+        }
+        public void AddHardwareInput(HardwareInput hardwareInput)
+        {
+            if (hardwareInput is null)
+            {
+                throw new Exception("hardwareInput cannot be null.");
+            }
+
+            if (hardwareInput.InputManager != this)
+            {
+                throw new Exception("hardwareInput belongs to a different InputManager.");
+            }
+
+            foreach (HardwareInput potentialDuplicate in _hardwareInputs)
+            {
+                if (potentialDuplicate.Name == hardwareInput.Name)
+                {
+                    throw new Exception("hardwareInput must have a unique name.");
+                }
+            }
+
+            _hardwareInputs.Add(hardwareInput);
+        }
+        public void AddVirtualInput(VirtualInput virtualInput)
+        {
+            if (virtualInput is null)
+            {
+                throw new Exception("virtualInput cannot be null.");
+            }
+
+            if (virtualInput.InputManager != this)
+            {
+                throw new Exception("virtualInput belongs to a different InputManager.");
+            }
+
+            foreach (VirtualInput potentialDuplicate in _virtualInputs)
+            {
+                if (potentialDuplicate.Name == virtualInput.Name)
+                {
+                    throw new Exception("virtualInput must have a unique name.");
+                }
+            }
+
+            _virtualInputs.Add(virtualInput);
+        }
+        public void AddInputBinding(InputBinding inputBinding)
+        {
+            if (inputBinding is null)
+            {
+                throw new Exception("inputBinding cannot be null.");
+            }
+
+            if (inputBinding.InputManager != this)
+            {
+                throw new Exception("inputBinding belongs to a different InputManager.");
+            }
+
+            foreach (InputBinding potentialDuplicate in _inputBindings)
+            {
+                if (potentialDuplicate.HardwareInput == inputBinding.HardwareInput && potentialDuplicate.VirtualInput == inputBinding.VirtualInput)
+                {
+                    throw new Exception("inputBinding must have a unique hardwareInput or a unique VirtualInput.");
+                }
+            }
+
+            _inputBindings.Add(inputBinding);
         }
     }
 }
