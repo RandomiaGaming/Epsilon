@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 namespace Epsilon
 {
+    //public enum VirtualInput { Jump, Right, Left, MenuUp, MenuDown, MenuRight, MenuLeft, MenuEnter, MenuBack };
     public sealed class InputManager
     {
         private Epsilon _epsilon = null;
