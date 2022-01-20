@@ -1,12 +1,11 @@
-﻿namespace EpsilonEngine
+﻿using Microsoft.Xna.Framework;
+using System;
+
+namespace Epsilon
 {
     public struct SideInfo
     {
-        public readonly bool top;
-        public readonly bool bottom;
-        public readonly bool right;
-        public readonly bool left;
-
+        #region Constants
         public static readonly SideInfo False = new SideInfo(false, false, false, false);
         public static readonly SideInfo True = new SideInfo(true, true, true, true);
 
@@ -14,7 +13,13 @@
         public static readonly SideInfo Bottom = new SideInfo(false, true, false, false);
         public static readonly SideInfo Right = new SideInfo(false, false, true, false);
         public static readonly SideInfo Left = new SideInfo(false, false, false, true);
-
+        #endregion
+        #region Properties
+        public readonly bool top;
+        public readonly bool bottom;
+        public readonly bool right;
+        public readonly bool left;
+        #endregion
         public SideInfo(bool top, bool bottom, bool right, bool left)
         {
             this.top = top;
@@ -52,14 +57,18 @@
                     break;
             }
         }
-        public SideInfo(Vector normal)
+        public SideInfo Invert()
         {
-            if(normal.x > 0)
+            return new SideInfo(!top, !bottom, !right, !left);
+        }
+        public SideInfo(Vector2 normal)
+        {
+            if(normal.X > 0)
             {
                 right = true;
                 left = false;
             }
-            else if (normal.x < 0)
+            else if (normal.X < 0)
             {
                 right = false;
                 left = true;
@@ -69,12 +78,12 @@
                 right = false;
                 left = false;
             }
-            if (normal.y > 0)
+            if (normal.Y > 0)
             {
                 top = true;
                 bottom = false;
             }
-            else if (normal.y < 0)
+            else if (normal.Y < 0)
             {
                 top = false;
                 bottom = true;
@@ -87,12 +96,12 @@
         }
         public SideInfo(Point normal)
         {
-            if (normal.x > 0)
+            if (normal.X > 0)
             {
                 right = true;
                 left = false;
             }
-            else if (normal.x < 0)
+            else if (normal.X < 0)
             {
                 right = false;
                 left = true;
@@ -102,12 +111,12 @@
                 right = false;
                 left = false;
             }
-            if (normal.y > 0)
+            if (normal.Y > 0)
             {
                 top = true;
                 bottom = false;
             }
-            else if (normal.y < 0)
+            else if (normal.Y < 0)
             {
                 top = false;
                 bottom = true;

@@ -21,5 +21,15 @@ namespace Epsilon
         {
             return Keyboard.GetState().IsKeyDown(Keys.A);
         }
+        [RegisterHardwareInput("W")]
+        public static bool WHardwareInput()
+        {
+            return Keyboard.GetState().IsKeyDown(Keys.W);
+        }
+        [RegisterHardwareInput("S")]
+        public static bool SHardwareInput()
+        {
+            return Keyboard.GetState().IsKeyDown(Keys.S);
+        }
     }
 }

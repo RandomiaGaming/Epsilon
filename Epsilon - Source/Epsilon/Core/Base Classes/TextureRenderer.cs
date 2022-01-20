@@ -12,7 +12,7 @@ namespace Epsilon
         {
 
         }
-        protected override List<DrawInstruction> render()
+        protected override List<DrawInstruction> OnRender()
         {
             return new List<DrawInstruction>() { new DrawInstruction(texture, offset) };
         }

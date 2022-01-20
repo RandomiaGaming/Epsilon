@@ -1,5 +1,5 @@
 ﻿using System;
-namespace EpsilonEngine
+namespace Epsilon
 {
     public static class MathHelper
     {

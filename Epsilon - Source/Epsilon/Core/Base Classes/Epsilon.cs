@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -12,13 +11,19 @@ namespace Epsilon
         public const bool ProfilerEnabled = true;
         public const string Name = "Epsilon";
         public const string VersionString = "1.0.0";
-        public string FullName => Name + " - " + VersionString;
+        public static string FullName
+        {
+            get
+            {
+                return Name + " - " + VersionString;
+            }
+        }
         public const ushort VersionCode = 1;
         #endregion
         #region Variables
         private GraphicsDeviceManager _graphicsDeviceManager = null;
         private SpriteBatch _mainSpriteBatch = null;
-        private Stage _currentStage = null;
+        private StageQue _stageQue = new StageQue(null);
         private InputManager _inputManager = null;
         private TimeSpan _timeSinceStart = new TimeSpan(0);
         private TimeSpan _deltaTime = new TimeSpan(0);
@@ -42,11 +47,11 @@ namespace Epsilon
         {
             get
             {
-                return _currentStage;
+                return _stageQue.CurrentStage;
             }
             set
             {
-                _currentStage = value;
+                _stageQue.QuedStage = value;
             }
         }
         public InputManager InputManager
@@ -104,9 +109,11 @@ namespace Epsilon
             _mainSpriteBatch.Tag = null;
 
             _inputManager = new InputManager(this);
-            _currentStage = new Stage(this);
-            Player player = new Player(_currentStage);
-            _currentStage.AddGameObject(player);
+
+            Stage stage = new Stage(this);
+            Player player = new Player(stage);
+            stage.AddStageObject(player);
+            _stageQue = new StageQue(stage);
 
             Window.ClientSizeChanged += WindowClientSizeChanged;
 
@@ -171,23 +178,28 @@ namespace Epsilon
                 DebugProfiler.Print();
             }
 
+            if (!_stageQue.QueClear)
+            {
+                _stageQue.SquashQue();
+            }
+
             if (_inputManager is not null)
             {
                 _inputManager.Update();
             }
 
-            if (_currentStage is not null)
+            if (_stageQue.CurrentStage is not null)
             {
-                _currentStage.Update();
+                _stageQue.CurrentStage.Update();
             }
         }
         protected sealed override void Draw(GameTime gameTime)
         {
             Texture2D stageRender = null;
 
-            if (_currentStage is not null)
+            if (_stageQue.CurrentStage is not null)
             {
-                stageRender = _currentStage.Render();
+                stageRender = _stageQue.CurrentStage.Render();
             }
 
             GraphicsDevice.Clear(BackgroundColor);

@@ -77,19 +77,17 @@ namespace Epsilon
 
             _stageSpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, null);
 
-            int stageObjectsCount = _stageObjects.Count;
-            for (int i = 0; i < stageObjectsCount; i++)
+            foreach (StageObject stageObject in _stageObjects)
             {
-                StageObject stageObject = _stageObjects[i];
-                Point gameObjectOffset = stageObject.Position - _cameraPosition;
-                List<DrawInstruction> drawInstructions = stageObject.Render();
-                int drawInstructionsCount = drawInstructions.Count;
-                for (int i2 = 0; i2 < drawInstructionsCount; i2++)
+                foreach (DrawInstruction drawInstruction in stageObject.Render())
                 {
-                    DrawInstruction drawInstruction = drawInstructions[i2];
+                    Point texturePosition = stageObject.Position;
+                    texturePosition = texturePosition + drawInstruction.Offset;
+                    texturePosition = texturePosition - CameraPosition;
                     Texture2D drawInstructionTexture = drawInstruction.Texture;
-                    Point drawInstructionPosition = gameObjectOffset + drawInstruction.Offset;
-                    _stageSpriteBatch.Draw(drawInstructionTexture, new Rectangle(drawInstructionPosition.X, drawInstructionPosition.Y, drawInstructionTexture.Width, drawInstructionTexture.Height), new Rectangle(0, 0, drawInstructionTexture.Width, drawInstructionTexture.Height), Color.White, 0, new Vector2(0, 0), SpriteEffects.None, 0);
+                    texturePosition = new Point(texturePosition.X, ViewportSize.Y - texturePosition.Y);
+                    texturePosition = new Point(texturePosition.X, texturePosition.Y - drawInstructionTexture.Height);
+                    _stageSpriteBatch.Draw(drawInstructionTexture, new Rectangle(texturePosition.X, texturePosition.Y, drawInstructionTexture.Width, drawInstructionTexture.Height), new Rectangle(0, 0, drawInstructionTexture.Width, drawInstructionTexture.Height), Color.White, 0, new Vector2(0, 0), SpriteEffects.None, 0);
                 }
             }
 
@@ -99,9 +97,17 @@ namespace Epsilon
 
             return _renderTarget;
         }
+        public void OnRemove()
+        {
+
+        }
+        public void OnAdd()
+        {
+
+        }
         #endregion
-        #region GameObject Management
-        public StageObject GetGameObject(int index)
+        #region StageObject Management
+        public StageObject GetStageObject(int index)
         {
             if (index < 0 || index >= _stageObjects.Count)
             {
@@ -110,60 +116,58 @@ namespace Epsilon
 
             return _stageObjects[index];
         }
-        public List<StageObject> GetGameObjects()
+        public List<StageObject> GetStageObjects()
         {
             return new List<StageObject>(_stageObjects);
         }
-        public int GetGameObjectCount()
+        public int GetStageObjectCount()
         {
             return _stageObjects.Count;
         }
-        #region Internal Methods
-        internal void RemoveGameObject(StageObject gameObject)
+        public void RemoveStageObject(StageObject stageObject)
         {
-            if (gameObject is null)
+            if (stageObject is null)
             {
-                throw new Exception("GameObject was null.");
+                throw new Exception("StageObject was null.");
             }
 
-            if (gameObject.Scene != this)
+            if (stageObject.Stage != this)
             {
-                throw new Exception("GameObject belongs on a different Scene.");
+                throw new Exception("StageObject belongs on a different Stage.");
             }
 
             for (int i = 0; i < _stageObjects.Count; i++)
             {
-                if (_stageObjects[i] == gameObject)
+                if (_stageObjects[i] == stageObject)
                 {
                     _stageObjects.RemoveAt(i);
                     return;
                 }
             }
-            throw new Exception("GameObject not found.");
+            throw new Exception("StageObject not found.");
         }
-        internal void AddGameObject(StageObject gameObject)
+        public void AddStageObject(StageObject stageObject)
         {
-            if (gameObject is null)
+            if (stageObject is null)
             {
-                throw new Exception("GameObject was null.");
+                throw new Exception("StageObject was null.");
             }
 
-            if (gameObject.Scene != this)
+            if (stageObject.Stage != this)
             {
-                throw new Exception("GameObject belongs to a different Scene.");
+                throw new Exception("StageObject belongs to a different Stage.");
             }
 
-            foreach (StageObject _gameObject in _stageObjects)
+            foreach (StageObject _stageObject in _stageObjects)
             {
-                if (_gameObject == gameObject)
+                if (_stageObject == stageObject)
                 {
-                    throw new Exception("GameObject was already added.");
+                    throw new Exception("StageObject was already added.");
                 }
             }
 
-            _stageObjects.Add(gameObject);
+            _stageObjects.Add(stageObject);
         }
-        #endregion
         #endregion
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 namespace Epsilon
 {
     public class StageObject
@@ -9,9 +8,8 @@ namespace Epsilon
         #region Variables
         private Point _position = new Point(0, 0);
         private List<Component> _components = new List<Component>();
-        private Stage _scene = null;
-        public string _name = "Unnamed Scene";
-        private bool _destroyed = false;
+        private Stage _stage = null;
+        public string _name = "Unnamed StageObject";
         #endregion
         #region Properties
         public Point Position
@@ -25,106 +23,53 @@ namespace Epsilon
                 _position = value;
             }
         }
-        public Epsilon Engine
+        public Epsilon Epsilon
         {
             get
             {
-                if (_destroyed)
-                {
-                    throw new Exception("GameObject has been destroyed.");
-                }
-                return _scene.Epsilon;
+                return _stage.Epsilon;
             }
         }
-        public Stage Scene
+        public Stage Stage
         {
             get
             {
-                if (_destroyed)
-                {
-                    throw new Exception("GameObject has been destroyed.");
-                }
-                return _scene;
+                return _stage;
             }
         }
         public string Name
         {
             get
             {
-                if (_destroyed)
-                {
-                    throw new Exception("GameObject has been destroyed.");
-                }
                 return _name;
             }
             set
             {
-                if (_destroyed)
-                {
-                    throw new Exception("GameObject has been destroyed.");
-                }
                 _name = value;
-            }
-        }
-        public bool Destroyed
-        {
-            get
-            {
-                return _destroyed;
             }
         }
         #endregion
         #region Constructors
-        public StageObject(Stage scene)
+        public StageObject(Stage stage)
         {
-            if (scene is null)
+            if (stage is null)
             {
-                throw new Exception("scene cannot be null.");
+                throw new Exception("stage cannot be null.");
             }
 
-            _scene = scene;
+            _stage = stage;
         }
         #endregion
         #region Overrides
         public override string ToString()
         {
-            if (_destroyed)
-            {
-                throw new Exception("GameObject has been destroyed.");
-            }
-            return $"EpsilonEngine.GameObject({_name})";
+            return $"Epsilon.StageObject({_name})";
         }
         #endregion
         #region Methods
-        #region Basic Methods
-        public void Initialize()
-        {
-            if (_destroyed)
-            {
-                throw new Exception("GameObject has been destroyed.");
-            }
-
-            initialize();
-        }
-        public void Destroy()
-        {
-            if (_destroyed)
-            {
-                return;
-            }
-
-            destroy();
-
-            foreach (Component component in _components)
-            {
-                component.Destroy();
-            }
-
-            _destroyed = true;
-        }
         public void Update()
         {
-            update();
+            OnUpdate();
             foreach (Component component in _components)
             {
                 component.Update();
@@ -132,7 +77,7 @@ namespace Epsilon
         }
         public List<DrawInstruction> Render()
         {
-            List<DrawInstruction> output = render();
+            List<DrawInstruction> output = OnRender();
             foreach (Component component in _components)
             {
                 output.AddRange(component.Render());
@@ -140,14 +85,9 @@ namespace Epsilon
             return output;
         }
         #endregion
-        #region Component Methods
+        #region Component Management
         public Component GetComponent(int index)
         {
-            if (_destroyed)
-            {
-                throw new Exception("GameObject has been destroyed.");
-            }
-
             if (index < 0 || index >= _components.Count)
             {
                 throw new Exception("index was out of range.");
@@ -157,11 +97,6 @@ namespace Epsilon
         }
         public Component GetComponent(Type type)
         {
-            if (_destroyed)
-            {
-                throw new Exception("GameObject has been destroyed.");
-            }
-
             if (type is null)
             {
                 throw new Exception("type cannot be null.");
@@ -184,11 +119,6 @@ namespace Epsilon
         }
         public T GetComponent<T>() where T : Component
         {
-            if (_destroyed)
-            {
-                throw new Exception("GameObject has been destroyed.");
-            }
-
             foreach (Component component in _components)
             {
                 if (component.GetType().IsAssignableFrom(typeof(T)))
@@ -201,20 +131,10 @@ namespace Epsilon
         }
         public List<Component> GetComponents()
         {
-            if (_destroyed)
-            {
-                throw new Exception("GameObject has been destroyed.");
-            }
-
             return new List<Component>(_components);
         }
         public List<Component> GetComponents(Type type)
         {
-            if (_destroyed)
-            {
-                throw new Exception("GameObject has been destroyed.");
-            }
-
             if (type is null)
             {
                 throw new Exception("type cannot be null.");
@@ -239,11 +159,6 @@ namespace Epsilon
         }
         public List<T> GetComponents<T>() where T : Component
         {
-            if (_destroyed)
-            {
-                throw new Exception("GameObject has been destroyed.");
-            }
-
             List<T> output = new List<T>();
 
             foreach (Component component in _components)
@@ -258,29 +173,18 @@ namespace Epsilon
         }
         public int GetComponentCount()
         {
-            if (_destroyed)
-            {
-                throw new Exception("GameObject has been destroyed.");
-            }
-
             return _components.Count;
         }
-        #region Internal Methods
-        internal void RemoveComponent(Component component)
+        public void RemoveComponent(Component component)
         {
-            if (_destroyed)
-            {
-                throw new Exception("GameObject has been destroyed.");
-            }
-
             if (component is null)
             {
                 throw new Exception("Component was null.");
             }
 
-            if (component.GameObject != this)
+            if (component.StageObject != this)
             {
-                throw new Exception("Component belongs on a different GameObject.");
+                throw new Exception("Component belongs on a different StageObject.");
             }
 
             for (int i = 0; i < _components.Count; i++)
@@ -293,21 +197,16 @@ namespace Epsilon
             }
             throw new Exception("Component not found.");
         }
-        internal void AddComponent(Component component)
+        public void AddComponent(Component component)
         {
-            if (_destroyed)
-            {
-                throw new Exception("GameObject has been destroyed.");
-            }
-
             if (component is null)
             {
                 throw new Exception("Component was null.");
             }
 
-            if (component.GameObject != this)
+            if (component.StageObject != this)
             {
-                throw new Exception("Component belongs on a different GameObject.");
+                throw new Exception("Component belongs on a different StageObject.");
             }
 
             foreach (Component _component in _components)
@@ -319,26 +218,14 @@ namespace Epsilon
             }
 
             _components.Add(component);
-
-            component.Initialize();
         }
-        #endregion
-        #endregion
         #endregion
         #region Overridables
-        protected virtual void destroy()
+        protected virtual void OnUpdate()
         {
 
         }
-        protected virtual void initialize()
-        {
-
-        }
-        protected virtual void update()
-        {
-
-        }
-        protected virtual List<DrawInstruction> render()
+        protected virtual List<DrawInstruction> OnRender()
         {
             return new List<DrawInstruction>();
         }

@@ -1,5 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
-namespace EpsilonEngine
+namespace Epsilon
 { 
     public static class ColorHelper
     {

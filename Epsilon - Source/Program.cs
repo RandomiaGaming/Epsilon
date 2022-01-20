@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 public static class Program
 {
     [STAThread]
