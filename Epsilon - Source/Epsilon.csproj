@@ -37,7 +37,7 @@
   </PropertyGroup>
   <PropertyGroup />
   <PropertyGroup>
-    <StartupObject>Program</StartupObject>
+    <StartupObject>Epsilon.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework, Version=3.8.0.1641, Culture=neutral, processorArchitecture=MSIL">
@@ -77,7 +77,6 @@
     <Compile Include="Epsilon\Core\Helper Classes\RandomnessHelper.cs" />
     <Compile Include="Epsilon\Particle.cs" />
     <Compile Include="Epsilon\Player.cs" />
-    <Compile Include="Epsilon\Core\Base Classes\StageQue.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>
   <ItemGroup />

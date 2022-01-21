@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Epsilon
 {
+    public enum EpsilonState { Initialing, Updating, Drawing, Exiting, Exited };
     public sealed class Epsilon : Game
     {
         #region Constants
@@ -23,12 +24,21 @@ namespace Epsilon
         #region Variables
         private GraphicsDeviceManager _graphicsDeviceManager = null;
         private SpriteBatch _mainSpriteBatch = null;
-        private StageQue _stageQue = new StageQue(null);
+        private Stage _currentStage = null;
+        private Stage _newStageQue = null;
         private InputManager _inputManager = null;
         private TimeSpan _timeSinceStart = new TimeSpan(0);
         private TimeSpan _deltaTime = new TimeSpan(0);
+        private EpsilonState _currentState = EpsilonState.Initialing;
         #endregion
         #region Properties
+        public EpsilonState CurrentState
+        {
+            get
+            {
+                return _currentState;
+            }
+        }
         public GraphicsDeviceManager GraphicsDeviceManager
         {
             get
@@ -47,11 +57,7 @@ namespace Epsilon
         {
             get
             {
-                return _stageQue.CurrentStage;
-            }
-            set
-            {
-                _stageQue.QuedStage = value;
+                return _currentStage;
             }
         }
         public InputManager InputManager
@@ -79,6 +85,8 @@ namespace Epsilon
         #region Constructors
         public Epsilon()
         {
+            _currentState = EpsilonState.Initialing;
+
             _graphicsDeviceManager = new GraphicsDeviceManager(this);
 
             _graphicsDeviceManager.GraphicsProfile = GraphicsProfile.Reach;
@@ -108,25 +116,19 @@ namespace Epsilon
             _mainSpriteBatch.Name = "Main SpriteBatch";
             _mainSpriteBatch.Tag = null;
 
-            _inputManager = new InputManager(this);
-
-            Stage stage = new Stage(this);
-            Player player = new Player(stage);
-            stage.AddStageObject(player);
-            _stageQue = new StageQue(stage);
-
             Window.ClientSizeChanged += WindowClientSizeChanged;
-
-            WindowClientSizeChanged(null, null);
         }
         #endregion
         #region Window Management
         private void WindowClientSizeChanged(object sender, EventArgs e)
         {
             Point viewportSize = GetViewportSize();
-            _graphicsDeviceManager.PreferredBackBufferWidth = viewportSize.X;
-            _graphicsDeviceManager.PreferredBackBufferHeight = viewportSize.Y;
-            _graphicsDeviceManager.ApplyChanges();
+            if (_graphicsDeviceManager.PreferredBackBufferWidth != viewportSize.X || _graphicsDeviceManager.PreferredBackBufferHeight != viewportSize.Y)
+            {
+                _graphicsDeviceManager.PreferredBackBufferWidth = viewportSize.X;
+                _graphicsDeviceManager.PreferredBackBufferHeight = viewportSize.Y;
+                _graphicsDeviceManager.ApplyChanges();
+            }
         }
         public void SetWindowed()
         {
@@ -167,8 +169,18 @@ namespace Epsilon
         }
         #endregion
         #region Overrides
+        protected override void Initialize()
+        {
+            _currentState = EpsilonState.Initialing;
+
+            _inputManager = new InputManager(this);
+
+            SetWindowed();
+        }
         protected sealed override void Update(GameTime gameTime)
         {
+            _currentState = EpsilonState.Updating;
+
             _timeSinceStart = gameTime.TotalGameTime;
             _deltaTime = gameTime.ElapsedGameTime;
 
@@ -178,28 +190,27 @@ namespace Epsilon
                 DebugProfiler.Print();
             }
 
-            if (!_stageQue.QueClear)
-            {
-                _stageQue.SquashQue();
-            }
+            SquashStageQue();
 
             if (_inputManager is not null)
             {
                 _inputManager.Update();
             }
 
-            if (_stageQue.CurrentStage is not null)
+            if (_currentStage is not null)
             {
-                _stageQue.CurrentStage.Update();
+                _currentStage.Update();
             }
         }
         protected sealed override void Draw(GameTime gameTime)
         {
+            _currentState = EpsilonState.Drawing;
+
             Texture2D stageRender = null;
 
-            if (_stageQue.CurrentStage is not null)
+            if (_currentStage is not null)
             {
-                stageRender = _stageQue.CurrentStage.Render();
+                stageRender = _currentStage.Draw();
             }
 
             GraphicsDevice.Clear(BackgroundColor);
@@ -220,6 +231,63 @@ namespace Epsilon
         public override string ToString()
         {
             return $"Epsilon.Epsilon({FullName})";
+        }
+        protected override void EndRun()
+        {
+            _currentState = EpsilonState.Exiting;
+        }
+        protected override void OnExiting(object sender, EventArgs args)
+        {
+            this.Dispose();
+            _currentState = EpsilonState.Exited;
+        }
+        #endregion
+        #region Methods
+        private void SquashStageQue()
+        {
+            if (_newStageQue != _currentStage)
+            {
+                if (_currentStage is not null)
+                {
+                    _currentStage.OnRemove();
+                }
+                if (_newStageQue is not null)
+                {
+                    _newStageQue.Initialize();
+                }
+                _currentStage = _newStageQue;
+            }
+        }
+        public void ChangeStage(Stage newStage)
+        {
+            if (_currentState == EpsilonState.Initialing)
+            {
+                _newStageQue = newStage;
+                _currentStage = _newStageQue;
+            }
+            else if (_currentState == EpsilonState.Updating)
+            {
+                if (newStage is null)
+                {
+                    _newStageQue = null;
+                }
+                else if (newStage.Epsilon == this)
+                {
+                    _newStageQue = newStage;
+                }
+                else
+                {
+                    throw new Exception("newStage belongs to a different Epsilon.");
+                }
+            }
+            else if (_currentState == EpsilonState.Drawing)
+            {
+                throw new Exception("Cannot set stage during drawing.");
+            }
+            else if (_currentState == (EpsilonState.Exited | EpsilonState.Exited))
+            {
+                throw new Exception("Cannot set stage because game has exited.");
+            }
         }
         #endregion
     }

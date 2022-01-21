@@ -4,11 +4,12 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 namespace Epsilon
 {
+    public enum StageState { Initializing, Updating, Drawing, Removed };
     public sealed class Stage
     {
         #region Constants
         public static readonly Color BackgroundColor = new Color(byte.MaxValue, (byte)150, byte.MaxValue, byte.MaxValue);
-        public static readonly Point ViewportSize = new Point(256, 144);
+        public static readonly Point ViewportSize = new Point(256 * 2, 144 * 2);
         public static double AspectRatio => (double)ViewportSize.Y / (double)ViewportSize.X;
         #endregion
         #region Variables
@@ -16,7 +17,10 @@ namespace Epsilon
         private RenderTarget2D _renderTarget = null;
         private SpriteBatch _stageSpriteBatch = null;
         private Point _cameraPosition = new Point(0, 0);
+        private StageState _currentState = StageState.Initializing;
         private List<StageObject> _stageObjects = new List<StageObject>();
+        private List<StageObject> _addStageObjectRequests = new List<StageObject>();
+        private List<StageObject> _removeStageObjectRequests = new List<StageObject>();
         #endregion
         #region Properties
         public Epsilon Epsilon
@@ -62,14 +66,20 @@ namespace Epsilon
         }
         #endregion
         #region Methods
+        public void Initialize()
+        {
+
+        }
         public void Update()
         {
+            SquashStageObjectQue();
+
             foreach (StageObject stageObject in _stageObjects)
             {
                 stageObject.Update();
             }
         }
-        public Texture2D Render()
+        public Texture2D Draw()
         {
             _epsilon.GraphicsDevice.SetRenderTarget(_renderTarget);
 
@@ -98,10 +108,6 @@ namespace Epsilon
             return _renderTarget;
         }
         public void OnRemove()
-        {
-
-        }
-        public void OnAdd()
         {
 
         }
@@ -140,7 +146,7 @@ namespace Epsilon
             {
                 if (_stageObjects[i] == stageObject)
                 {
-                    _stageObjects.RemoveAt(i);
+                    _removeStageObjectRequests.Add(stageObject);
                     return;
                 }
             }
@@ -166,8 +172,32 @@ namespace Epsilon
                 }
             }
 
-            _stageObjects.Add(stageObject);
+            _addStageObjectRequests.Add(stageObject);
+        }
+        private void SquashStageObjectQue()
+        {
+            if (_stageObjects is null)
+            {
+                _stageObjects = new List<StageObject>();
+            }
+            else
+            {
+                if (_removeStageObjectRequests is not null)
+                {
+                    foreach (StageObject removeStageObjectRequest in _removeStageObjectRequests)
+                    {
+                        _stageObjects.Remove(removeStageObjectRequest);
+                    }
+                }
+                _removeStageObjectRequests = new List<StageObject>();
+            }
+            if(_addStageObjectRequests is not null)
+            {
+                _stageObjects.AddRange(_addStageObjectRequests);
+            }
+            _addStageObjectRequests = new List<StageObject>();
         }
         #endregion
+
     }
 }
