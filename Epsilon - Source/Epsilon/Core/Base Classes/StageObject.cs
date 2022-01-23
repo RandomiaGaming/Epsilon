@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 namespace Epsilon
 {
     public class StageObject
@@ -75,14 +76,18 @@ namespace Epsilon
                 component.Update();
             }
         }
-        public List<DrawInstruction> Render()
+        public void Render()
         {
-            List<DrawInstruction> output = OnRender();
+            OnRender();
             foreach (Component component in _components)
             {
-                output.AddRange(component.Render());
+                component.Render();
             }
-            return output;
+        }
+        public void DrawTexture(Texture2D texture, Point offset, Color color)
+        {
+            Point drawPosition = offset + _position;
+            Stage.DrawTexture(texture, drawPosition, color);
         }
         #endregion
         #region Component Management
@@ -225,9 +230,8 @@ namespace Epsilon
         {
 
         }
-        protected virtual List<DrawInstruction> OnRender()
+        protected virtual void OnRender()
         {
-            return new List<DrawInstruction>();
         }
         #endregion
     }

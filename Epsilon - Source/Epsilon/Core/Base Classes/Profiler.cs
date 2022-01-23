@@ -18,8 +18,8 @@ namespace Epsilon
         }
         public static void AddSample(long elapsedTicks)
         {
-            totalElapsedTicks += elapsedTicks;
-            currentWeight++;
+            totalElapsedTicks = elapsedTicks;
+            currentWeight = 1;
         }
         public static void Print()
         {

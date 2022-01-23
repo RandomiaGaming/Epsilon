@@ -8,14 +8,14 @@ namespace Epsilon
     public sealed class Stage
     {
         #region Constants
-        public static readonly Color BackgroundColor = new Color(byte.MaxValue, (byte)150, byte.MaxValue, byte.MaxValue);
-        public static readonly Point ViewportSize = new Point(256 * 2, 144 * 2);
+        public static readonly Point ViewportSize = new Point(256, 144);
         public static double AspectRatio => (double)ViewportSize.Y / (double)ViewportSize.X;
         #endregion
         #region Variables
         private Epsilon _epsilon = null;
         private RenderTarget2D _renderTarget = null;
-        private SpriteBatch _stageSpriteBatch = null;
+        private SpriteBatch _spriteBatch = null;
+        private BasicEffect _basicEffect = null;
         private Point _cameraPosition = new Point(0, 0);
         private StageState _currentState = StageState.Initializing;
         private List<StageObject> _stageObjects = new List<StageObject>();
@@ -54,9 +54,15 @@ namespace Epsilon
 
             _renderTarget = new RenderTarget2D(_epsilon.GraphicsDevice, ViewportSize.X, ViewportSize.Y, false, SurfaceFormat.Color, DepthFormat.None);
 
-            _stageSpriteBatch = new SpriteBatch(_epsilon.GraphicsDevice);
-            _stageSpriteBatch.Name = "Stage SpriteBatch";
-            _stageSpriteBatch.Tag = null;
+            _spriteBatch = new SpriteBatch(_epsilon.GraphicsDevice);
+            _spriteBatch.Name = "Stage SpriteBatch";
+            _spriteBatch.Tag = null;
+
+            _basicEffect = new BasicEffect(epsilon.GraphicsDevice);
+            _basicEffect.LightingEnabled = false;
+            _basicEffect.VertexColorEnabled = true;
+            _basicEffect.World = Matrix.CreateOrthographic(ViewportSize.X, ViewportSize.Y, 0, float.PositiveInfinity);
+            _basicEffect.FogEnabled = false;
         }
         #endregion
         #region Overrides
@@ -83,29 +89,59 @@ namespace Epsilon
         {
             _epsilon.GraphicsDevice.SetRenderTarget(_renderTarget);
 
-            _epsilon.GraphicsDevice.Clear(BackgroundColor);
+            _epsilon.GraphicsDevice.Clear(Color.Transparent);
 
-            _stageSpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, null);
+            _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, null);
 
             foreach (StageObject stageObject in _stageObjects)
             {
-                foreach (DrawInstruction drawInstruction in stageObject.Render())
-                {
-                    Point texturePosition = stageObject.Position;
-                    texturePosition = texturePosition + drawInstruction.Offset;
-                    texturePosition = texturePosition - CameraPosition;
-                    Texture2D drawInstructionTexture = drawInstruction.Texture;
-                    texturePosition = new Point(texturePosition.X, ViewportSize.Y - texturePosition.Y);
-                    texturePosition = new Point(texturePosition.X, texturePosition.Y - drawInstructionTexture.Height);
-                    _stageSpriteBatch.Draw(drawInstructionTexture, new Rectangle(texturePosition.X, texturePosition.Y, drawInstructionTexture.Width, drawInstructionTexture.Height), new Rectangle(0, 0, drawInstructionTexture.Width, drawInstructionTexture.Height), Color.White, 0, new Vector2(0, 0), SpriteEffects.None, 0);
-                }
+                stageObject.Render();
             }
 
-            _stageSpriteBatch.End();
+            _spriteBatch.End();
 
             _epsilon.GraphicsDevice.SetRenderTarget(null);
 
             return _renderTarget;
+        }
+        public void DrawTexture(Texture2D texture, Point position, Color color)
+        {
+            position = new Point(position.X, position.Y);
+            position = position - _cameraPosition;
+            position = new Point(position.X, ViewportSize.Y - position.Y);
+            position = new Point(position.X, position.Y - texture.Height);
+
+            if (position.X + texture.Width < 0 || position.Y + texture.Height < 0 || position.X > ViewportSize.X || position.Y > ViewportSize.Y)
+            {
+                return;
+            }
+
+            _spriteBatch.Draw(texture, new Rectangle(position.X, position.Y, texture.Width, texture.Height), new Rectangle(0, 0, texture.Width, texture.Height), color, 0, new Vector2(0, 0), SpriteEffects.None, 0);
+        }
+        public void DrawBox(Rectangle rectangle, Color color)
+        {
+            Point min = new Point(rectangle.X - (ViewportSize.X / 2), rectangle.Y - (ViewportSize.Y / 2));
+            min = min - CameraPosition;
+            Point max = min + new Point(rectangle.Width, rectangle.Height);
+            max = max - CameraPosition;
+
+            if (min.X < 0 || min.Y < 0 || max.X > ViewportSize.X || max.Y > ViewportSize.Y)
+            {
+                return;
+            }
+
+            _basicEffect.CurrentTechnique.Passes[0].Apply();
+            VertexPositionColor[] tris = new VertexPositionColor[]
+            {
+                new VertexPositionColor(new Vector3(min.X, min.Y, 0), color),
+                new VertexPositionColor(new Vector3(min.X, max.Y, 0), color),
+                new VertexPositionColor(new Vector3(max.X, max.Y, 0), color),
+
+                new VertexPositionColor(new Vector3(min.X, min.Y, 0), color),
+                new VertexPositionColor(new Vector3(max.X, max.Y, 0), color),
+                new VertexPositionColor(new Vector3(max.X, min.Y, 0), color)
+            };
+            Epsilon.GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, tris, 0, 2);
         }
         public void OnRemove()
         {
@@ -191,13 +227,12 @@ namespace Epsilon
                 }
                 _removeStageObjectRequests = new List<StageObject>();
             }
-            if(_addStageObjectRequests is not null)
+            if (_addStageObjectRequests is not null)
             {
                 _stageObjects.AddRange(_addStageObjectRequests);
             }
             _addStageObjectRequests = new List<StageObject>();
         }
         #endregion
-
     }
 }

@@ -67,7 +67,6 @@
     <Compile Include="Epsilon\Core\Base Classes\Input\VirtualInput.cs" />
     <Compile Include="Epsilon\Core\Base Classes\TextureRenderer.cs" />
     <Compile Include="Epsilon\Core\Base Classes\Component.cs" />
-    <Compile Include="Epsilon\Core\Base Classes\DrawInstruction.cs" />
     <Compile Include="Epsilon\Core\Base Classes\Epsilon.cs" />
     <Compile Include="Epsilon\Core\Base Classes\StageObject.cs" />
     <Compile Include="Epsilon\Core\Base Classes\Profiler.cs" />
@@ -75,11 +74,15 @@
     <Compile Include="Epsilon\Core\Helper Classes\ColorHelper.cs" />
     <Compile Include="Epsilon\Core\Helper Classes\MathHelper.cs" />
     <Compile Include="Epsilon\Core\Helper Classes\RandomnessHelper.cs" />
-    <Compile Include="Epsilon\Particle.cs" />
+    <Compile Include="Epsilon\ParticleSystem.cs" />
+    <Compile Include="Epsilon\BouncyBoi.cs" />
     <Compile Include="Epsilon\Player.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Icon.png" />
+    <Content Include="packages\MonoGame.Framework.DesktopGL.3.8.0.1641\Icon.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\MonoGame.Framework.DesktopGL.3.8.0.1641\build\MonoGame.Framework.DesktopGL.targets" Condition="Exists('..\packages\MonoGame.Framework.DesktopGL.3.8.0.1641\build\MonoGame.Framework.DesktopGL.targets')" />
   <ProjectExtensions>

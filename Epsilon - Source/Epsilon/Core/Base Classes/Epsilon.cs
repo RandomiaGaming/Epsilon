@@ -88,17 +88,18 @@ namespace Epsilon
             _currentState = EpsilonState.Initialing;
 
             _graphicsDeviceManager = new GraphicsDeviceManager(this);
-
             _graphicsDeviceManager.GraphicsProfile = GraphicsProfile.Reach;
+            _graphicsDeviceManager.SynchronizeWithVerticalRetrace = false;
             _graphicsDeviceManager.HardwareModeSwitch = true;
             _graphicsDeviceManager.IsFullScreen = false;
             _graphicsDeviceManager.PreferHalfPixelOffset = false;
             _graphicsDeviceManager.PreferredBackBufferFormat = SurfaceFormat.Color;
             _graphicsDeviceManager.SupportedOrientations = DisplayOrientation.LandscapeLeft | DisplayOrientation.LandscapeRight | DisplayOrientation.Portrait | DisplayOrientation.PortraitDown | DisplayOrientation.Unknown | DisplayOrientation.Default;
-            _graphicsDeviceManager.SynchronizeWithVerticalRetrace = false;
             _graphicsDeviceManager.ApplyChanges();
 
             base.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+            base.GraphicsDevice.DepthStencilState = DepthStencilState.None;
+            base.GraphicsDevice.RasterizerState = RasterizerState.CullNone;
 
             base.Window.AllowAltF4 = true;
             base.Window.AllowUserResizing = true;
@@ -215,7 +216,7 @@ namespace Epsilon
 
             GraphicsDevice.Clear(BackgroundColor);
 
-            _mainSpriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, null);
+            _mainSpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, null);
 
             if (stageRender is not null)
             {

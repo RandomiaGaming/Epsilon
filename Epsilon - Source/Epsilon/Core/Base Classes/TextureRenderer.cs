@@ -6,15 +6,16 @@ namespace Epsilon
 {
     public sealed class TextureRenderer : Component
     {
-        public Texture2D texture = null;
-        public Point offset = new Point(0, 0);
+        public Texture2D Texture = null;
+        public Point Offset = new Point(0, 0);
+        public Color Color = Color.White;
         public TextureRenderer(StageObject stageObject) : base(stageObject)
         {
 
         }
-        protected override List<DrawInstruction> OnRender()
+        protected override void OnRender()
         {
-            return new List<DrawInstruction>() { new DrawInstruction(texture, offset) };
+            StageObject.DrawTexture(Texture, Offset, Color);
         }
     }
 }

@@ -66,9 +66,9 @@ namespace Epsilon
         {
             OnUpdate();
         }
-        public List<DrawInstruction> Render()
+        public void Render()
         {
-            return OnRender();
+            OnRender();
         }
         #endregion
         #region Overridables
@@ -76,9 +76,9 @@ namespace Epsilon
         {
 
         }
-        protected virtual List<DrawInstruction> OnRender()
+        protected virtual void OnRender()
         {
-            return new List<DrawInstruction>();
+
         }
         #endregion
     }

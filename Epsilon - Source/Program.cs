@@ -13,11 +13,12 @@ namespace Epsilon
             Stage stage = new Stage(epsilon);
             Player player = new Player(stage);
             TextureRenderer textureRenderer = new TextureRenderer(player);
-            textureRenderer.texture = Texture2D.FromFile(epsilon.GraphicsDevice, @"D:\C# Windows Apps\Epsilon\Epsilon - Source\Old Code\Default\Assets\Textures\Item Textures\LavaBubble.png");
-            textureRenderer.offset = new Point(0, 0);
+            textureRenderer.Texture = Texture2D.FromFile(epsilon.GraphicsDevice, @"D:\C# Windows Apps\Epsilon\Epsilon - Source\Old Code\Default\Assets\Textures\Item Textures\LavaBubble.png");
+            textureRenderer.Offset = new Point(0, 0);
             player.AddComponent(textureRenderer);
             stage.AddStageObject(player);
             epsilon.ChangeStage(stage);
+
             epsilon.Run();
         }
     }
