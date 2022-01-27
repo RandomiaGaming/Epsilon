@@ -2,29 +2,31 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-namespace Epsilon
+namespace EpsilonEngine
 {
-    public sealed class Player : StageObject
+    public sealed class Player : GameObject
     {
         private VirtualInput jumpVirtualInput = null;
         private VirtualInput rightVirtualInput = null;
         private VirtualInput leftVirtualInput = null;
         private VirtualInput upVirtualInput = null;
         private VirtualInput downVirtualInput = null;
-        public Player(Stage stage) : base(stage)
+        public Player(Scene stage) : base(stage)
         {
             
         }
         private Vector2 _subPixelPosition = Vector2.Zero;
         private double moveSpeed = 0.1;
-        protected override void OnUpdate()
+        protected override void Initialize()
         {
-            jumpVirtualInput = Epsilon.InputManager.GetVirtualInputFromName("Jump");
-            rightVirtualInput = Epsilon.InputManager.GetVirtualInputFromName("Right");
-            leftVirtualInput = Epsilon.InputManager.GetVirtualInputFromName("Left");
-            upVirtualInput = Epsilon.InputManager.GetVirtualInputFromName("Up");
-            downVirtualInput = Epsilon.InputManager.GetVirtualInputFromName("Down");
-
+            jumpVirtualInput = Engine.InputManager.GetVirtualInputFromName("Jump");
+            rightVirtualInput = Engine.InputManager.GetVirtualInputFromName("Right");
+            leftVirtualInput = Engine.InputManager.GetVirtualInputFromName("Left");
+            upVirtualInput = Engine.InputManager.GetVirtualInputFromName("Up");
+            downVirtualInput = Engine.InputManager.GetVirtualInputFromName("Down");
+        }
+        protected override void Update()
+        {
             int horizontalAxis = 0;
 
             if (rightVirtualInput.Pressed && !leftVirtualInput.Pressed)
@@ -50,8 +52,6 @@ namespace Epsilon
             _subPixelPosition += new Vector2((float)(horizontalAxis * moveSpeed), (float)(vericalAxis * moveSpeed));
 
             Position = new Point((int)_subPixelPosition.X, (int)_subPixelPosition.Y);
-
-            Stage.CameraPosition = Position - new Point(Stage.ViewportSize.X / 2, Stage.ViewportSize.Y / 2) + new Point(8, 8);
         }
     }
 }
