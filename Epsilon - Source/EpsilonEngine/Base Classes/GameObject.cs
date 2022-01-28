@@ -12,6 +12,8 @@ namespace EpsilonEngine
         private bool _markedForDestruction = false;
         private bool _destroyed = false;
         private bool _renderring = false;
+        private int _updateOrder = 0;
+        private int _renderOrder = 0;
 
         private Point _position = new Point(0, 0);
         private List<Component> _components = new List<Component>();
@@ -120,7 +122,7 @@ namespace EpsilonEngine
 
             _markedForDestruction = true;
         }
-        public void DrawTexture(Texture2D texture, Point localSpacePosition, Color color)
+        public void DrawTexture(Texture texture, Point localSpacePosition, Color color)
         {
             if (_destroyed)
             {

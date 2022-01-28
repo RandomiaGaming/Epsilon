@@ -7,7 +7,6 @@ namespace EpsilonEngine
 {
     public sealed class ParticleSystem : GameObject
     {
-
         private class Particle
         {
             public int positionX;
@@ -39,15 +38,25 @@ namespace EpsilonEngine
             }
         }
         private List<Particle> _particles = new List<Particle>();
-        private Texture2D _particleTexture = null;
-        public ParticleSystem(Scene stage) : base(stage)
+        private Texture _particleTexture = null;
+        public float EmissionRate = 0;
+        private float _timer = 0;
+
+        public ParticleSystem(Scene stage, Texture particleTexture) : base(stage)
         {
-            _particleTexture = Texture2D.FromFile(stage.Engine.GraphicsDevice, @"D:\C# Windows Apps\Epsilon\Epsilon - Source\Old Code\Default\Assets\Textures\Item Textures\Player.png");
+            if(particleTexture is null)
+            {
+                throw new Exception("particleTexture cannot be null.");
+            }
+
+            _particleTexture = particleTexture;
         }
         protected override void Update()
         {
-            for (int i = 0; i < 1; i++)
+            _timer += EmissionRate;
+            while(_timer >= 1)
             {
+                _timer--;
                 double rot = RandomnessHelper.NextDouble() * Math.PI * 2.0;
                 _particles.Add(new Particle(0, 0, (float)Math.Cos(rot) * 0.1f, (float)Math.Sin(rot) * 0.1f, new Color((byte)RandomnessHelper.NextInt(0, 255), (byte)RandomnessHelper.NextInt(0, 255), (byte)RandomnessHelper.NextInt(0, 255), (byte)255), 1000));
             }
@@ -75,7 +84,6 @@ namespace EpsilonEngine
                 }
                 particle.lifetime--;
             }
-            Console.WriteLine(_particles.Count);
         }
         protected override void Render()
         {

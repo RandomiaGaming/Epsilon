@@ -5,10 +5,10 @@ using Microsoft.Xna.Framework.Graphics;
 namespace EpsilonEngine
 {
     public enum EpsilonState { Initialing, Updating, Drawing, Exiting, Exited };
-    public sealed class Engine : Game
+    public class Engine : Game
     {
         #region Constants
-        public static readonly Color BackgroundColor = new Color(byte.MaxValue, (byte)150, byte.MaxValue, byte.MaxValue);
+        public static readonly Color BackgroundColor = new Color(byte.MaxValue, byte.MaxValue, (byte)150, byte.MaxValue);
         public const bool ProfilerEnabled = true;
         public const string Name = "Epsilon";
         public const string VersionString = "1.0.0";
@@ -107,7 +107,7 @@ namespace EpsilonEngine
             base.Window.Position = new Point(GraphicsDevice.Adapter.CurrentDisplayMode.Width / 4, GraphicsDevice.Adapter.CurrentDisplayMode.Height / 4);
             base.Window.Title = FullName;
 
-            base.InactiveSleepTime = new TimeSpan(10000000 * 3);
+            base.InactiveSleepTime = new TimeSpan(0);
             base.TargetElapsedTime = new TimeSpan(10000000 / 60);
             base.MaxElapsedTime = new TimeSpan(10000000 / 60);
             base.IsFixedTimeStep = false;
@@ -203,7 +203,7 @@ namespace EpsilonEngine
                 _currentStage.InvokeUpdate();
             }
         }
-        protected sealed override void Draw(GameTime gameTime)
+        protected override void Draw(GameTime gameTime)
         {
             _currentState = EpsilonState.Drawing;
 
@@ -214,20 +214,18 @@ namespace EpsilonEngine
                 stageRender = _currentStage.InvokeRender();
             }
 
-            GraphicsDevice.Clear(BackgroundColor);
+            GraphicsDevice.Clear(BackgroundColor.ToXNA());
 
             _mainSpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, null);
 
             if (stageRender is not null)
             {
-                _mainSpriteBatch.Draw(stageRender, new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height), new Rectangle(0, 0, stageRender.Width, stageRender.Height), Color.White, 0, new Vector2(0, 0), SpriteEffects.None, 0);
+                _mainSpriteBatch.Draw(stageRender, new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height), new Rectangle(0, 0, stageRender.Width, stageRender.Height), Color.White.ToXNA(), 0, new Vector2(0, 0), SpriteEffects.None, 0);
             }
 
             //Render Canvas Here
 
             _mainSpriteBatch.End();
-
-            base.Draw(gameTime);
         }
         public override string ToString()
         {

@@ -15,9 +15,14 @@ namespace EpsilonEngine
         private RenderTarget2D _renderTarget = null;
         private SpriteBatch _spriteBatch = null;
         private Point _cameraPosition = new Point(0, 0);
+
         private List<GameObject> _gameObjects = new List<GameObject>();
         private List<GameObject> _gameObjectAddQue = new List<GameObject>();
         private List<GameObject> _gameObjectRemoveQue = new List<GameObject>();
+
+        private List<SceneManager> _sceneManagers = new List<SceneManager>();
+        private List<SceneManager> _sceneManagerAddQue = new List<SceneManager>();
+        private List<SceneManager> _sceneManagerRemoveQue = new List<SceneManager>();
         #endregion
         #region Properties
         public Engine Engine
@@ -105,7 +110,7 @@ namespace EpsilonEngine
         }
         #endregion
         #region Constructors
-        public Scene(Engine engine, int viewPortWidth, int viewPortHeight)
+        public Scene(Engine engine, ushort viewPortWidth, ushort viewPortHeight)
         {
             if (engine is null)
             {
@@ -149,6 +154,11 @@ namespace EpsilonEngine
                 throw new Exception("Scene has already been marked for destruction.");
             }
 
+            foreach (SceneManager sceneManager in _sceneManagers)
+            {
+                sceneManager.Destroy();
+            }
+
             foreach (GameObject gameObject in _gameObjects)
             {
                 gameObject.Destroy();
@@ -158,7 +168,7 @@ namespace EpsilonEngine
 
             _markedForDestruction = true;
         }
-        public void DrawTexture(Texture2D texture, Point worldSpacePosition, Color color)
+        public void DrawTexture(Texture texture, Point worldSpacePosition, Color color)
         {
             if (_destroyed)
             {
@@ -170,7 +180,7 @@ namespace EpsilonEngine
                 throw new Exception("Scene is not currently renderring.");
             }
 
-            if(texture is null)
+            if (texture is null)
             {
                 throw new Exception("texture cannot be null.");
             }
@@ -185,16 +195,56 @@ namespace EpsilonEngine
                 return;
             }
 
-            _spriteBatch.Draw(texture, new Rectangle(worldSpacePosition.X, worldSpacePosition.Y, texture.Width, texture.Height), new Rectangle(0, 0, texture.Width, texture.Height), color, 0, new Vector2(0, 0), SpriteEffects.None, 0);
+            _spriteBatch.Draw(texture.ToXNA(), new Rectangle(worldSpacePosition.X, worldSpacePosition.Y, texture.Width, texture.Height), new Rectangle(0, 0, texture.Width, texture.Height), color.ToXNA(), 0, new Vector2(0, 0), SpriteEffects.None, 0); ;
+        }
+        public void DrawTextureOverlay(Texture texture, Point screenSpacePosition, Color color)
+        {
+            if (_destroyed)
+            {
+                throw new Exception("Scene has been destroyed.");
+            }
+
+            if (!_renderring)
+            {
+                throw new Exception("Scene is not currently renderring.");
+            }
+
+            if (texture is null)
+            {
+                throw new Exception("texture cannot be null.");
+            }
+
+            screenSpacePosition = new Point(screenSpacePosition.X, screenSpacePosition.Y);
+            screenSpacePosition = new Point(screenSpacePosition.X, ViewPortSize.Y - screenSpacePosition.Y);
+            screenSpacePosition = new Point(screenSpacePosition.X, screenSpacePosition.Y - texture.Height);
+
+            if (screenSpacePosition.X + texture.Width < 0 || screenSpacePosition.Y + texture.Height < 0 || screenSpacePosition.X > ViewPortSize.X || screenSpacePosition.Y > ViewPortSize.Y)
+            {
+                return;
+            }
+
+            _spriteBatch.Draw(texture.ToXNA(), new Rectangle(screenSpacePosition.X, screenSpacePosition.Y, texture.Width, texture.Height), new Rectangle(0, 0, texture.Width, texture.Height), color.ToXNA(), 0, new Vector2(0, 0), SpriteEffects.None, 0);
         }
         internal void InvokeInitialize()
         {
+            foreach (SceneManager sceneManagerToAdd in _sceneManagerAddQue)
+            {
+                _sceneManagers.Add(sceneManagerToAdd);
+            }
+
             foreach (GameObject gameObjectToAdd in _gameObjectAddQue)
             {
                 _gameObjects.Add(gameObjectToAdd);
             }
 
             Initialize();
+
+            foreach (SceneManager addedSceneManager in _sceneManagerAddQue)
+            {
+                addedSceneManager.InvokeInitialize();
+            }
+
+            _sceneManagerAddQue = new List<SceneManager>();
 
             foreach (GameObject addedGameObject in _gameObjectAddQue)
             {
@@ -210,10 +260,22 @@ namespace EpsilonEngine
                 throw new Exception("Scene has been destroyed.");
             }
 
+            foreach (SceneManager sceneManagerToRemove in _sceneManagerRemoveQue)
+            {
+                sceneManagerToRemove.InvokeOnDestroy();
+            }
+
             foreach (GameObject gameObjectToRemove in _gameObjectRemoveQue)
             {
                 gameObjectToRemove.InvokeOnDestroy();
             }
+
+            foreach (SceneManager removedSceneManager in _sceneManagerRemoveQue)
+            {
+                _sceneManagers.Remove(removedSceneManager);
+            }
+
+            _sceneManagerRemoveQue = new List<SceneManager>();
 
             foreach (GameObject removedGameObject in _gameObjectRemoveQue)
             {
@@ -222,10 +284,22 @@ namespace EpsilonEngine
 
             _gameObjectRemoveQue = new List<GameObject>();
 
+            foreach (SceneManager sceneManagerToAdd in _sceneManagerAddQue)
+            {
+                _sceneManagers.Add(sceneManagerToAdd);
+            }
+
             foreach (GameObject gameObjectToAdd in _gameObjectAddQue)
             {
                 _gameObjects.Add(gameObjectToAdd);
             }
+
+            foreach (SceneManager addedSceneManager in _sceneManagerAddQue)
+            {
+                addedSceneManager.InvokeInitialize();
+            }
+
+            _sceneManagerAddQue = new List<SceneManager>();
 
             foreach (GameObject addedGameObject in _gameObjectAddQue)
             {
@@ -235,6 +309,11 @@ namespace EpsilonEngine
             _gameObjectAddQue = new List<GameObject>();
 
             Update();
+
+            foreach (SceneManager sceneManager in _sceneManagers)
+            {
+                sceneManager.InvokeUpdate();
+            }
 
             foreach (GameObject gameObject in _gameObjects)
             {
@@ -252,11 +331,16 @@ namespace EpsilonEngine
 
             _engine.GraphicsDevice.SetRenderTarget(_renderTarget);
 
-            _engine.GraphicsDevice.Clear(Color.Transparent);
+            _engine.GraphicsDevice.Clear(Color.Transparent.ToXNA());
 
             _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, null);
 
             Render();
+
+            foreach (SceneManager sceneManager in _sceneManagers)
+            {
+                sceneManager.InvokeRender();
+            }
 
             foreach (GameObject gameObject in _gameObjects)
             {
@@ -293,7 +377,7 @@ namespace EpsilonEngine
             _destroyed = true;
         }
         #endregion
-        #region StageObject Management
+        #region GameObject Management
         public GameObject GetGameObject(int index)
         {
             if (_destroyed)
@@ -493,6 +577,208 @@ namespace EpsilonEngine
             }
 
             _gameObjectAddQue.Add(gameObject);
+        }
+        #endregion
+        #region SceneManager Management
+        public SceneManager GetSceneManager(int index)
+        {
+            if (_destroyed)
+            {
+                throw new Exception("Scene has been destroyed.");
+            }
+
+            if (index < 0 || index >= _sceneManagers.Count)
+            {
+                throw new Exception("index was out of range.");
+            }
+
+            return _sceneManagers[index];
+        }
+        public SceneManager GetSceneManager(Type type)
+        {
+            if (_destroyed)
+            {
+                throw new Exception("Scene has been destroyed.");
+            }
+
+            if (type is null)
+            {
+                throw new Exception("type cannot be null.");
+            }
+
+            if (!type.IsAssignableFrom(typeof(SceneManager)))
+            {
+                throw new Exception("type must be equal to SceneManager or be assignable from SceneManager.");
+            }
+
+            foreach (SceneManager sceneManager in _sceneManagers)
+            {
+                if (sceneManager.GetType().IsAssignableFrom(type))
+                {
+                    return sceneManager;
+                }
+            }
+
+            return null;
+        }
+        public T GetSceneManager<T>() where T : SceneManager
+        {
+            if (_destroyed)
+            {
+                throw new Exception("Scene has been destroyed.");
+            }
+
+            foreach (SceneManager sceneManager in _sceneManagers)
+            {
+                if (sceneManager.GetType().IsAssignableFrom(typeof(T)))
+                {
+                    return (T)sceneManager;
+                }
+            }
+
+            return null;
+        }
+        public List<SceneManager> GetSceneManagers()
+        {
+            if (_destroyed)
+            {
+                throw new Exception("Scene has already been destroyed.");
+            }
+
+            return new List<SceneManager>(_sceneManagers);
+        }
+        public List<SceneManager> GetSceneManagers(Type type)
+        {
+            if (_destroyed)
+            {
+                throw new Exception("Scene has been destroyed.");
+            }
+
+            if (type is null)
+            {
+                throw new Exception("type cannot be null.");
+            }
+
+            if (!type.IsAssignableFrom(typeof(SceneManager)))
+            {
+                throw new Exception("type must be equal to SceneManager or be assignable from SceneManager.");
+            }
+
+            List<SceneManager> output = new List<SceneManager>();
+
+            foreach (SceneManager sceneManager in _sceneManagers)
+            {
+                if (sceneManager.GetType().IsAssignableFrom(type))
+                {
+                    output.Add(sceneManager);
+                }
+            }
+
+            return output;
+        }
+        public List<T> GetSceneManagers<T>() where T : SceneManager
+        {
+            if (_destroyed)
+            {
+                throw new Exception("Scene has been destroyed.");
+            }
+
+            List<T> output = new List<T>();
+
+            foreach (SceneManager sceneManager in _sceneManagers)
+            {
+                if (sceneManager.GetType().IsAssignableFrom(typeof(T)))
+                {
+                    output.Add((T)sceneManager);
+                }
+            }
+
+            return output;
+        }
+        public int GetSceneManagerCount()
+        {
+            if (_destroyed)
+            {
+                throw new Exception("Scene has been destroyed.");
+            }
+
+            return _sceneManagers.Count;
+        }
+        internal void RemoveSceneManager(SceneManager sceneManager)
+        {
+            if (_destroyed)
+            {
+                throw new Exception("Scene has been destroyed.");
+            }
+
+            if (sceneManager is null)
+            {
+                throw new Exception("sceneManager cannot be null.");
+            }
+
+            if (sceneManager.Scene != this)
+            {
+                throw new Exception("sceneManager belongs to a different Scene.");
+            }
+
+
+            bool sceneManagerAdded = false;
+            foreach (SceneManager addedSceneManager in _sceneManagers)
+            {
+                if (addedSceneManager == sceneManager)
+                {
+                    sceneManagerAdded = true;
+                }
+            }
+            if (!sceneManagerAdded)
+            {
+                throw new Exception("sceneManager has already been removed.");
+            }
+
+            foreach (SceneManager removeQueSceneManager in _sceneManagerRemoveQue)
+            {
+                if (removeQueSceneManager == sceneManager)
+                {
+                    throw new Exception("sceneManager has already been removed.");
+                }
+            }
+
+            _sceneManagerRemoveQue.Add(sceneManager);
+        }
+        internal void AddSceneManager(SceneManager sceneManager)
+        {
+            if (_destroyed)
+            {
+                throw new Exception("Scene has been destroyed.");
+            }
+
+            if (sceneManager is null)
+            {
+                throw new Exception("sceneManager cannot be null.");
+            }
+
+            if (sceneManager.Scene != this)
+            {
+                throw new Exception("sceneManager belongs to a different Scene.");
+            }
+
+            foreach (SceneManager addedSceneManager in _sceneManagers)
+            {
+                if (addedSceneManager == sceneManager)
+                {
+                    throw new Exception("sceneManager has already been added.");
+                }
+            }
+
+            foreach (SceneManager addQueSceneManager in _sceneManagerAddQue)
+            {
+                if (addQueSceneManager == sceneManager)
+                {
+                    throw new Exception("sceneManager has already been added.");
+                }
+            }
+
+            _sceneManagerAddQue.Add(sceneManager);
         }
         #endregion
         #region Overridables

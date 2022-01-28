@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
 
-namespace Epsilon
+namespace EpsilonEngine
 {
     public struct SideInfo
     {

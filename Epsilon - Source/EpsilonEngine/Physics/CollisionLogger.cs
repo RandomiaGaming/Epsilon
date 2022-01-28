@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-namespace Epsilon
+namespace EpsilonEngine
 {
     public sealed class CollisionLogger : Component
     {

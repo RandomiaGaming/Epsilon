@@ -65,7 +65,7 @@ namespace EpsilonEngine
         #region Overrides
         public override string ToString()
         {
-            return $"EpsilonEngine.Component()";
+            return $"EpsilonEngine.SceneManager()";
         }
         #endregion
         #region Methods
@@ -73,15 +73,15 @@ namespace EpsilonEngine
         {
             if (_destroyed)
             {
-                throw new Exception("Component has already been destroyed.");
+                throw new Exception("SceneManager has already been destroyed.");
             }
 
             if (_markedForDestruction)
             {
-                throw new Exception("Component has already been marked for destruction.");
+                throw new Exception("SceneManager has already been marked for destruction.");
             }
 
-            _gameObject.RemoveComponent(this);
+            _scene.RemoveSceneManager(this);
 
             _markedForDestruction = true;
         }
@@ -89,7 +89,7 @@ namespace EpsilonEngine
         {
             if (_destroyed)
             {
-                throw new Exception("Component has been destroyed.");
+                throw new Exception("SceneManager has been destroyed.");
             }
 
             Initialize();
@@ -98,7 +98,7 @@ namespace EpsilonEngine
         {
             if (_destroyed)
             {
-                throw new Exception("Component has been destroyed.");
+                throw new Exception("SceneManager has been destroyed.");
             }
 
             Update();
@@ -107,7 +107,7 @@ namespace EpsilonEngine
         {
             if (_destroyed)
             {
-                throw new Exception("Component has been destroyed.");
+                throw new Exception("SceneManager has been destroyed.");
             }
 
             Render();
@@ -116,12 +116,12 @@ namespace EpsilonEngine
         {
             if (_destroyed)
             {
-                throw new Exception("Component has already been destroyed.");
+                throw new Exception("SceneManager has already been destroyed.");
             }
 
             OnDestroy();
 
-            _gameObject = null;
+            _scene = null;
 
             _destroyed = true;
         }

@@ -11,14 +11,30 @@ namespace EpsilonEngine
         private VirtualInput leftVirtualInput = null;
         private VirtualInput upVirtualInput = null;
         private VirtualInput downVirtualInput = null;
+
+        private Rigidbody _rigidbody = null;
+        private float moveSpeed = 0.05f;
         public Player(Scene stage) : base(stage)
         {
-            
+            TextureRenderer textureRenderer = new TextureRenderer(this, new Texture(Engine, @"D:\C# Windows Apps\Epsilon\Epsilon - Source\Old Code\Default\Assets\Textures\Item Textures\LavaBubble.png"));
+            CameraFollower cameraFollower = new CameraFollower(this);
+            cameraFollower.Width = 16;
+            cameraFollower.Height = 16;
+            cameraFollower.PaddingRight = 16;
+            cameraFollower.PaddingLeft = 16;
+            cameraFollower.PaddingUp = 16;
+            cameraFollower.PaddingDown = 16;
+            Rigidbody rigidbody = new Rigidbody(this);
+            Collider collider = new Collider(this);
+            collider.shape = new Rectangle(0, 0, 16, 16);
         }
-        private Vector2 _subPixelPosition = Vector2.Zero;
-        private double moveSpeed = 0.1;
+        public override string ToString()
+        {
+            return $"Epsilon.Player({Position})";
+        }
         protected override void Initialize()
         {
+            _rigidbody = GetComponent<Rigidbody>();
             jumpVirtualInput = Engine.InputManager.GetVirtualInputFromName("Jump");
             rightVirtualInput = Engine.InputManager.GetVirtualInputFromName("Right");
             leftVirtualInput = Engine.InputManager.GetVirtualInputFromName("Left");
@@ -27,7 +43,7 @@ namespace EpsilonEngine
         }
         protected override void Update()
         {
-            int horizontalAxis = 0;
+            float horizontalAxis = 0;
 
             if (rightVirtualInput.Pressed && !leftVirtualInput.Pressed)
             {
@@ -38,7 +54,7 @@ namespace EpsilonEngine
                 horizontalAxis = -1;
             }
 
-            int vericalAxis = 0;
+            float vericalAxis = 0;
 
             if (upVirtualInput.Pressed && !downVirtualInput.Pressed)
             {
@@ -49,9 +65,7 @@ namespace EpsilonEngine
                 vericalAxis = -1;
             }
 
-            _subPixelPosition += new Vector2((float)(horizontalAxis * moveSpeed), (float)(vericalAxis * moveSpeed));
-
-            Position = new Point((int)_subPixelPosition.X, (int)_subPixelPosition.Y);
+            _rigidbody.velocity = new Vector2(horizontalAxis * moveSpeed, vericalAxis * moveSpeed);
         }
     }
 }

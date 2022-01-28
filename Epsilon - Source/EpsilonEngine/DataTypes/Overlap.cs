@@ -1,34 +1,27 @@
 ﻿using System;
-namespace Epsilon
+namespace EpsilonEngine
 {
     public sealed class Overlap
     {
-        public readonly Collider otherCollider = null;
-        public readonly StageObject otherStageItem = null;
-        public readonly Collider thisCollider = null;
-        public readonly StageObject thisStageItem = null;
+        public readonly Collider OtherCollider = null;
+        public readonly GameObject OtherGameObject = null;
+        public readonly Collider ThisCollider = null;
+        public readonly GameObject ThisGameObject = null;
         public Overlap(Collider thisCollider, Collider otherCollider)
         {
             if (thisCollider is null)
             {
-                throw new NullReferenceException();
+                throw new Exception("thisCollider cannot be null.");
             }
-            this.otherCollider = otherCollider;
-            if (thisCollider.stageItem is null)
-            {
-                throw new NullReferenceException();
-            }
-            thisStageItem = thisCollider.stageItem;
+            ThisCollider = thisCollider;
+            ThisGameObject = thisCollider.GameObject;
+
             if (otherCollider is null)
             {
-                throw new NullReferenceException();
+                throw new Exception("otherCollider cannot be null.");
             }
-            this.otherCollider = otherCollider;
-            if (otherCollider.stageItem is null)
-            {
-                throw new NullReferenceException();
-            }
-            otherStageItem = otherCollider.stageItem;
+            OtherCollider = otherCollider;
+            OtherGameObject = otherCollider.GameObject;
         }
     }
 }

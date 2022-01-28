@@ -6,12 +6,12 @@ namespace EpsilonEngine
 {
     public sealed class CameraFollower : Component
     {
-        public int Width = 16;
-        public int Height = 16;
-        public int PaddingRight = 16;
-        public int PaddingLeft = 16;
-        public int PaddingUp = 16;
-        public int PaddingDown = 16;
+        public int Width = 0;
+        public int Height = 0;
+        public int PaddingRight = 0;
+        public int PaddingLeft = 0;
+        public int PaddingUp = 0;
+        public int PaddingDown = 0;
         public CameraFollower(GameObject gameObject) : base(gameObject)
         {
 
