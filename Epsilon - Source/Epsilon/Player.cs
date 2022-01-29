@@ -6,6 +6,7 @@ namespace EpsilonEngine
 {
     public sealed class Player : GameObject
     {
+        public float gravityForce = -0.00008f;
         private VirtualInput jumpVirtualInput = null;
         private VirtualInput rightVirtualInput = null;
         private VirtualInput leftVirtualInput = null;
@@ -13,20 +14,13 @@ namespace EpsilonEngine
         private VirtualInput downVirtualInput = null;
 
         private Rigidbody _rigidbody = null;
-        private float moveSpeed = 0.05f;
+        private float moveSpeed = 0.00005f;
         public Player(Scene stage) : base(stage)
         {
             TextureRenderer textureRenderer = new TextureRenderer(this, new Texture(Engine, @"D:\C# Windows Apps\Epsilon\Epsilon - Source\Old Code\Default\Assets\Textures\Item Textures\LavaBubble.png"));
-            CameraFollower cameraFollower = new CameraFollower(this);
-            cameraFollower.Width = 16;
-            cameraFollower.Height = 16;
-            cameraFollower.PaddingRight = 16;
-            cameraFollower.PaddingLeft = 16;
-            cameraFollower.PaddingUp = 16;
-            cameraFollower.PaddingDown = 16;
             Rigidbody rigidbody = new Rigidbody(this);
             Collider collider = new Collider(this);
-            collider.shape = new Rectangle(0, 0, 16, 16);
+            collider.shape = new Rectangle(0, 0, 15, 15);
         }
         public override string ToString()
         {
@@ -65,7 +59,14 @@ namespace EpsilonEngine
                 vericalAxis = -1;
             }
 
-            _rigidbody.velocity = new Vector2(horizontalAxis * moveSpeed, vericalAxis * moveSpeed);
+            if (jumpVirtualInput.Pressed)
+            {
+                _rigidbody.velocity.Y = 0.1f;
+            }
+
+            _rigidbody.velocity = new Vector2(_rigidbody.velocity.X + (horizontalAxis * moveSpeed), _rigidbody.velocity.Y + gravityForce);
+
+            Scene.CameraPosition = Position - new Point(Scene.ViewPortSize.X / 2, Scene.ViewPortSize.Y / 2) + new Point(8, 8);
         }
     }
 }

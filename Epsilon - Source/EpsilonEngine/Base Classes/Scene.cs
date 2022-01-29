@@ -192,10 +192,10 @@ namespace EpsilonEngine
 
             if (worldSpacePosition.X + texture.Width < 0 || worldSpacePosition.Y + texture.Height < 0 || worldSpacePosition.X > ViewPortSize.X || worldSpacePosition.Y > ViewPortSize.Y)
             {
-                return;
+               return;
             }
 
-            _spriteBatch.Draw(texture.ToXNA(), new Rectangle(worldSpacePosition.X, worldSpacePosition.Y, texture.Width, texture.Height), new Rectangle(0, 0, texture.Width, texture.Height), color.ToXNA(), 0, new Vector2(0, 0), SpriteEffects.None, 0); ;
+            _spriteBatch.Draw(texture.ToXNA(), new Microsoft.Xna.Framework.Rectangle(worldSpacePosition.X, worldSpacePosition.Y, texture.Width, texture.Height), new Microsoft.Xna.Framework.Rectangle(0, 0, texture.Width, texture.Height), color.ToXNA(), 0, new Vector2(0, 0), SpriteEffects.None, 0); ;
         }
         public void DrawTextureOverlay(Texture texture, Point screenSpacePosition, Color color)
         {
@@ -223,7 +223,7 @@ namespace EpsilonEngine
                 return;
             }
 
-            _spriteBatch.Draw(texture.ToXNA(), new Rectangle(screenSpacePosition.X, screenSpacePosition.Y, texture.Width, texture.Height), new Rectangle(0, 0, texture.Width, texture.Height), color.ToXNA(), 0, new Vector2(0, 0), SpriteEffects.None, 0);
+            _spriteBatch.Draw(texture.ToXNA(), new Rectangle(screenSpacePosition.X, screenSpacePosition.Y, texture.Width, texture.Height).ToXNA(), new Rectangle(0, 0, texture.Width, texture.Height).ToXNA(), color.ToXNA(), 0, new Vector2(0, 0), SpriteEffects.None, 0);
         }
         internal void InvokeInitialize()
         {

@@ -4,47 +4,51 @@ namespace EpsilonEngine
 {
     public static class DebugProfiler
     {
-        private const int bufferSize = 1000;
-        private static uint[] buffer = new uint[bufferSize];
+        private static long lastFrameTime = 0;
+        private static long updateTime = 0;
+        private static long renderTime = 0;
+
+        private static long lastFrameEndTime = 0;
+        private static long updateStartTime = 0;
+        private static long renderStartTime = 0;
+
+
+        private static System.Diagnostics.Stopwatch _stopWatch = new System.Diagnostics.Stopwatch();
         static DebugProfiler()
         {
-            buffer = new uint[bufferSize];
-            for (int i = 0; i < bufferSize; i++)
-            {
-                buffer[i] = 0;
-            }
+            _stopWatch.Restart();
         }
-        public static void Reset()
+        public static void UpdateStart()
         {
-            buffer = new uint[bufferSize];
-            for (int i = 0; i < bufferSize; i++)
-            {
-                buffer[i] = 0;
-            }
+            updateStartTime = _stopWatch.ElapsedTicks;
         }
-        public static void AddSample(uint sample)
+        public static void UpdateEnd()
         {
-            for (int i = bufferSize - 1; i > 0; i--)
-            {
-                buffer[i] = buffer[i - 1];
-            }
-            buffer[0] = sample;
+            updateTime = _stopWatch.ElapsedTicks - updateStartTime;
         }
-        public static void PrintAverage()
+        public static void RenderStart()
         {
-            ulong total = 0;
-            for (int i = 0; i < bufferSize; i++)
+            renderStartTime = _stopWatch.ElapsedTicks;
+        }
+        public static void RenderEnd()
+        {
+            renderTime = _stopWatch.ElapsedTicks - renderStartTime;
+        }
+        public static void FrameElapsed()
+        {
+            long currentTime = _stopWatch.ElapsedTicks;
+            lastFrameTime = currentTime - lastFrameEndTime;
+            lastFrameEndTime = currentTime;
+        }
+        public static void Print()
+        {
+            if (lastFrameTime == 0)
             {
-                total += buffer[i];
-            }
-            ulong average = total / bufferSize;
-            if (average <= 0)
-            {
-                Console.WriteLine($"Debug Profiler - Infinity FPS - 0 TPF.");
+                Console.WriteLine($"Debug Profiler - Infinity FPS - {lastFrameTime} Tick Frame - {updateTime} Tick Update - {renderTime} Tick Render.");
             }
             else
             {
-                Console.WriteLine($"Debug Profiler - {10000000 / average} FPS - {average} TPF.");
+                Console.WriteLine($"Debug Profiler - {10000000 / lastFrameTime} FPS - {lastFrameTime} Tick Frame - {lastFrameTime - updateTime - renderTime} Tick MonoGame Update - {updateTime} Tick Update - {renderTime} Tick Render.");
             }
         }
     }

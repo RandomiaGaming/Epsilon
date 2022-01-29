@@ -1,5 +1,5 @@
 using System;
-namespace Epsilon
+namespace EpsilonEngine
 {
     public class Rectangle
     {
@@ -7,7 +7,7 @@ namespace Epsilon
         public readonly Point max = Point.One;
         public Rectangle(Point min, Point max)
         {
-            if (min.x > max.x || min.y > max.y)
+            if (min.X > max.X || min.Y > max.Y)
             {
                 throw new ArgumentException();
             }
@@ -16,10 +16,10 @@ namespace Epsilon
         }
         public Rectangle(int minX, int minY, int maxX, int maxY)
         {
-            if (maxX < minX || maxY < minY)
+            /*if (maxX < minX || maxY < minY)
             {
                 throw new ArgumentException();
-            }
+            }*/
             min = new Point(minX, minY);
             max = new Point(maxX, maxY);
         }
@@ -52,7 +52,7 @@ namespace Epsilon
         }
         public bool Incapsulates(Point a)
         {
-            if (a.x >= min.x && a.x <= max.x && a.y >= min.y && a.y <= max.y)
+            if (a.X >= min.X && a.X <= max.X && a.Y >= min.Y && a.Y <= max.Y)
             {
                 return true;
             }
@@ -63,7 +63,7 @@ namespace Epsilon
         }
         public bool Incapsulates(Rectangle a)
         {
-            if (a.max.y <= max.y && a.min.y >= min.y && a.max.x <= max.x && a.min.x >= min.x)
+            if (a.max.Y <= max.Y && a.min.Y >= min.Y && a.max.X <= max.X && a.min.X >= min.X)
             {
                 return true;
             }
@@ -74,7 +74,7 @@ namespace Epsilon
         }
         public bool Overlaps(Rectangle a)
         {
-            if (max.x < a.min.x || min.x > a.max.x || max.y < a.min.y || min.y > a.max.y)
+            if (max.X < a.min.X || min.X > a.max.X || max.Y < a.min.Y || min.Y > a.max.Y)
             {
                 return false;
             }
@@ -82,6 +82,10 @@ namespace Epsilon
             {
                 return true;
             }
+        }
+        public Microsoft.Xna.Framework.Rectangle ToXNA()
+        {
+            return new Microsoft.Xna.Framework.Rectangle(min.X, max.Y, max.X - min.X, max.Y - min.Y);
         }
     }
 }

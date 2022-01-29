@@ -27,11 +27,7 @@ namespace EpsilonEngine
         }
         public Rectangle GetWorldShape()
         {
-            return new Rectangle(shape.X + GameObject.Position.X, shape.Y + GameObject.Position.Y, shape.Width, shape.Height);
-        }
-        protected override void Render()
-        {
-            Scene.DrawTexture(_theGreatPixel, GetWorldShape().Location, Color.White);
+            return new Rectangle(shape.min + GameObject.Position, shape.max + GameObject.Position);
         }
     }
 }

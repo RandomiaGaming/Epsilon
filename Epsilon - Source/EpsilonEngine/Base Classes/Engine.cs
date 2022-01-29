@@ -104,7 +104,7 @@ namespace EpsilonEngine
             base.Window.AllowAltF4 = true;
             base.Window.AllowUserResizing = true;
             base.Window.IsBorderless = false;
-            base.Window.Position = new Point(GraphicsDevice.Adapter.CurrentDisplayMode.Width / 4, GraphicsDevice.Adapter.CurrentDisplayMode.Height / 4);
+            base.Window.Position = new Point(GraphicsDevice.Adapter.CurrentDisplayMode.Width / 4, GraphicsDevice.Adapter.CurrentDisplayMode.Height / 4).ToXNA();
             base.Window.Title = FullName;
 
             base.InactiveSleepTime = new TimeSpan(0);
@@ -137,7 +137,7 @@ namespace EpsilonEngine
             _graphicsDeviceManager.PreferredBackBufferWidth = base.GraphicsDevice.Adapter.CurrentDisplayMode.Width / 2;
             _graphicsDeviceManager.PreferredBackBufferHeight = base.GraphicsDevice.Adapter.CurrentDisplayMode.Height / 2;
             _graphicsDeviceManager.ApplyChanges();
-            Window.Position = new Point(base.GraphicsDevice.Adapter.CurrentDisplayMode.Width / 4, base.GraphicsDevice.Adapter.CurrentDisplayMode.Height / 4);
+            Window.Position = new Point(base.GraphicsDevice.Adapter.CurrentDisplayMode.Width / 4, base.GraphicsDevice.Adapter.CurrentDisplayMode.Height / 4).ToXNA();
         }
         public void SetFullscreen()
         {
@@ -180,16 +180,14 @@ namespace EpsilonEngine
         }
         protected sealed override void Update(GameTime gameTime)
         {
+            DebugProfiler.FrameElapsed();
+
+            DebugProfiler.UpdateStart();
+
             _currentState = EpsilonState.Updating;
 
             _timeSinceStart = gameTime.TotalGameTime;
             _deltaTime = gameTime.ElapsedGameTime;
-
-            if (ProfilerEnabled)
-            {
-                DebugProfiler.AddSample((uint)_deltaTime.Ticks);
-                DebugProfiler.PrintAverage();
-            }
 
             SquashStageQue();
 
@@ -202,9 +200,11 @@ namespace EpsilonEngine
             {
                 _currentStage.InvokeUpdate();
             }
-        }
-        protected override void Draw(GameTime gameTime)
-        {
+
+            DebugProfiler.UpdateEnd();
+
+            DebugProfiler.RenderStart();
+
             _currentState = EpsilonState.Drawing;
 
             Texture2D stageRender = null;
@@ -220,12 +220,16 @@ namespace EpsilonEngine
 
             if (stageRender is not null)
             {
-                _mainSpriteBatch.Draw(stageRender, new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height), new Rectangle(0, 0, stageRender.Width, stageRender.Height), Color.White.ToXNA(), 0, new Vector2(0, 0), SpriteEffects.None, 0);
+                _mainSpriteBatch.Draw(stageRender, new Microsoft.Xna.Framework.Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height), new Microsoft.Xna.Framework.Rectangle(0, 0, stageRender.Width, stageRender.Height), Color.White.ToXNA(), 0, new Vector2(0, 0), SpriteEffects.None, 0);
             }
 
             //Render Canvas Here
 
             _mainSpriteBatch.End();
+
+            DebugProfiler.RenderEnd();
+
+            DebugProfiler.Print();
         }
         public override string ToString()
         {

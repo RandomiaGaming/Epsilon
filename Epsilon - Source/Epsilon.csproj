@@ -60,6 +60,8 @@
     <Compile Include="EpsilonEngine\DataTypes\Collision.cs" />
     <Compile Include="EpsilonEngine\DataTypes\Color.cs" />
     <Compile Include="EpsilonEngine\DataTypes\Overlap.cs" />
+    <Compile Include="EpsilonEngine\DataTypes\Point.cs" />
+    <Compile Include="EpsilonEngine\DataTypes\Rectangle.cs" />
     <Compile Include="EpsilonEngine\DataTypes\Side.cs" />
     <Compile Include="EpsilonEngine\DataTypes\SideInfo.cs" />
     <Compile Include="EpsilonEngine\DataTypes\Texture.cs" />
