@@ -1,4 +1,4 @@
 ﻿namespace EpsilonEngine
 {
-    public enum Side { Top, Bottom, Left, Right };
+    public enum Side { Right, Top, Left, Bottom };
 }

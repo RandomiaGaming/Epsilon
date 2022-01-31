@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 namespace EpsilonEngine
 {
-    public sealed class ParticleSystem : GameObject
+    public sealed class ParticleSystem : Component
     {
         private class Particle
         {
@@ -41,8 +41,9 @@ namespace EpsilonEngine
         private Texture _particleTexture = null;
         public float EmissionRate = 0;
         private float _timer = 0;
+        public bool UseWorldSpace = false;
 
-        public ParticleSystem(Scene stage, Texture particleTexture) : base(stage)
+        public ParticleSystem(GameObject gameObject, Texture particleTexture) : base(gameObject)
         {
             if(particleTexture is null)
             {
@@ -57,7 +58,7 @@ namespace EpsilonEngine
             while(_timer >= 1)
             {
                 _timer--;
-                double rot = RandomnessHelper.NextDouble() * Math.PI * 2.0;
+                double rot = RandomnessHelper.NextDouble(0, Math.PI * 2);
                 _particles.Add(new Particle(0, 0, (float)Math.Cos(rot) * 0.1f, (float)Math.Sin(rot) * 0.1f, new Color((byte)RandomnessHelper.NextInt(0, 255), (byte)RandomnessHelper.NextInt(0, 255), (byte)RandomnessHelper.NextInt(0, 255), (byte)255), 1000));
             }
             for (int i = 0; i < _particles.Count; i++)
@@ -90,7 +91,14 @@ namespace EpsilonEngine
             for (int i = 0; i < _particles.Count; i++)
             {
                 Particle particle = _particles[i];
-                base.DrawTexture(_particleTexture, new Point(particle.positionX, particle.positionY), particle.color);
+                if (UseWorldSpace)
+                {
+                    Scene.DrawTexture(_particleTexture, new Point(particle.positionX, particle.positionY), particle.color);
+                }
+                else
+                {
+                    GameObject.DrawTexture(_particleTexture, new Point(particle.positionX, particle.positionY), particle.color);
+                }
             }
         }
     }

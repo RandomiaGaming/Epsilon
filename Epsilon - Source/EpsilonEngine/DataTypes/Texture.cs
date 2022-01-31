@@ -146,7 +146,7 @@ namespace EpsilonEngine
 
             for (int i = 0; i < buffer.Length; i++)
             {
-                buffer[i] = new Color(XNABuffer[i].PackedValue);
+                buffer[i] = new Color(XNABuffer[i]);
             }
 
             Apply();

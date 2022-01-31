@@ -4,7 +4,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProjectGuid>{8841B1D0-0B70-458D-960D-F8D6511ACE90}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>Epsilon</RootNamespace>
     <AssemblyName>Epsilon</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -43,12 +43,7 @@
     <Reference Include="MonoGame.Framework, Version=3.8.0.1641, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\MonoGame.Framework.DesktopGL.3.8.0.1641\lib\net452\MonoGame.Framework.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -66,39 +61,28 @@
     <Compile Include="EpsilonEngine\DataTypes\SideInfo.cs" />
     <Compile Include="EpsilonEngine\DataTypes\Texture.cs" />
     <Compile Include="EpsilonEngine\Default Components\CameraFollower.cs" />
-    <Compile Include="EpsilonEngine\Input\InputAttibutes.cs" />
-    <Compile Include="EpsilonEngine\Input\InputBinding.cs" />
-    <Compile Include="EpsilonEngine\Input\InputManager.cs" />
-    <Compile Include="EpsilonEngine\Input\KeyboardInput.cs" />
-    <Compile Include="EpsilonEngine\Input\RegisterHardwareInputAttribute.cs" />
-    <Compile Include="EpsilonEngine\Input\DefaultInputBindingAttribute.cs" />
-    <Compile Include="EpsilonEngine\Input\RegisterVirtualInputAttribute.cs" />
-    <Compile Include="EpsilonEngine\Input\HardwareInput.cs" />
-    <Compile Include="EpsilonEngine\Input\VirtualInput.cs" />
     <Compile Include="EpsilonEngine\Default Components\TextureRenderer.cs" />
     <Compile Include="EpsilonEngine\Base Classes\Component.cs" />
     <Compile Include="EpsilonEngine\Base Classes\Engine.cs" />
     <Compile Include="EpsilonEngine\Base Classes\GameObject.cs" />
     <Compile Include="EpsilonEngine\Base Classes\Profiler.cs" />
     <Compile Include="EpsilonEngine\Base Classes\Scene.cs" />
-    <Compile Include="EpsilonEngine\Helper Classes\ColorHelper.cs" />
     <Compile Include="EpsilonEngine\Helper Classes\MathHelper.cs" />
     <Compile Include="EpsilonEngine\Helper Classes\RandomnessHelper.cs" />
-    <Compile Include="EpsilonEngine\ParticleSystem.cs" />
-    <Compile Include="EpsilonEngine\Physics\Collider.cs" />
-    <Compile Include="EpsilonEngine\Physics\PhysicsManager.cs" />
-    <Compile Include="EpsilonEngine\Physics\Rigidbody.cs" />
+    <Compile Include="EpsilonEngine\Default Components\ParticleSystem.cs" />
+    <Compile Include="EpsilonEngine\Default Components\Physics\Collider.cs" />
+    <Compile Include="EpsilonEngine\Default Components\Physics\PhysicsLayer.cs" />
+    <Compile Include="EpsilonEngine\Default Components\Physics\PhysicsManager.cs" />
+    <Compile Include="EpsilonEngine\Default Components\Physics\Rigidbody.cs" />
     <Compile Include="Epsilon\Epsilon.cs" />
     <Compile Include="Epsilon\Ground.cs" />
-    <Compile Include="Epsilon\Player.cs" />
+    <Compile Include="Epsilon\BouncyBall.cs" />
     <Compile Include="Epsilon\Stage.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Icon.png" />
-    <Content Include="packages\MonoGame.Framework.DesktopGL.3.8.0.1641\Icon.png" />
+    <Folder Include="packages\" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\MonoGame.Framework.DesktopGL.3.8.0.1641\build\MonoGame.Framework.DesktopGL.targets" Condition="Exists('..\packages\MonoGame.Framework.DesktopGL.3.8.0.1641\build\MonoGame.Framework.DesktopGL.targets')" />
   <ProjectExtensions>

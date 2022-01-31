@@ -14,6 +14,7 @@ namespace EpsilonEngine
 
         private RenderTarget2D _renderTarget = null;
         private SpriteBatch _spriteBatch = null;
+        private Texture2D _pixelTexture = null;
         private Point _cameraPosition = new Point(0, 0);
 
         private List<GameObject> _gameObjects = new List<GameObject>();
@@ -133,6 +134,9 @@ namespace EpsilonEngine
             _spriteBatch = new SpriteBatch(_engine.GraphicsDevice);
             _spriteBatch.Name = "Stage SpriteBatch";
             _spriteBatch.Tag = null;
+
+            _pixelTexture = new Texture2D(_engine.GraphicsDevice, 1, 1);
+            _pixelTexture.SetData(new Microsoft.Xna.Framework.Color[] { new Microsoft.Xna.Framework.Color(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue) });
         }
         #endregion
         #region Overrides
@@ -185,14 +189,13 @@ namespace EpsilonEngine
                 throw new Exception("texture cannot be null.");
             }
 
-            worldSpacePosition = new Point(worldSpacePosition.X, worldSpacePosition.Y);
             worldSpacePosition = worldSpacePosition - _cameraPosition;
             worldSpacePosition = new Point(worldSpacePosition.X, ViewPortSize.Y - worldSpacePosition.Y);
             worldSpacePosition = new Point(worldSpacePosition.X, worldSpacePosition.Y - texture.Height);
 
             if (worldSpacePosition.X + texture.Width < 0 || worldSpacePosition.Y + texture.Height < 0 || worldSpacePosition.X > ViewPortSize.X || worldSpacePosition.Y > ViewPortSize.Y)
             {
-               return;
+                return;
             }
 
             _spriteBatch.Draw(texture.ToXNA(), new Microsoft.Xna.Framework.Rectangle(worldSpacePosition.X, worldSpacePosition.Y, texture.Width, texture.Height), new Microsoft.Xna.Framework.Rectangle(0, 0, texture.Width, texture.Height), color.ToXNA(), 0, new Vector2(0, 0), SpriteEffects.None, 0); ;
@@ -214,7 +217,6 @@ namespace EpsilonEngine
                 throw new Exception("texture cannot be null.");
             }
 
-            screenSpacePosition = new Point(screenSpacePosition.X, screenSpacePosition.Y);
             screenSpacePosition = new Point(screenSpacePosition.X, ViewPortSize.Y - screenSpacePosition.Y);
             screenSpacePosition = new Point(screenSpacePosition.X, screenSpacePosition.Y - texture.Height);
 
@@ -224,6 +226,20 @@ namespace EpsilonEngine
             }
 
             _spriteBatch.Draw(texture.ToXNA(), new Rectangle(screenSpacePosition.X, screenSpacePosition.Y, texture.Width, texture.Height).ToXNA(), new Rectangle(0, 0, texture.Width, texture.Height).ToXNA(), color.ToXNA(), 0, new Vector2(0, 0), SpriteEffects.None, 0);
+        }
+        public void DrawRect(Rectangle rectangle, Color color)
+        {
+            Rectangle screenRect = new Rectangle(CameraPosition, CameraPosition + ViewPortSize);
+            if (!rectangle.Overlaps(screenRect))
+            {
+                return;
+            }
+
+            Point worldSpacePosition = new Point(rectangle.MinX, rectangle.MinY) - _cameraPosition;
+            worldSpacePosition = new Point(worldSpacePosition.X, ViewPortSize.Y - worldSpacePosition.Y);
+            worldSpacePosition = new Point(worldSpacePosition.X, worldSpacePosition.Y - rectangle.Height);
+
+            _spriteBatch.Draw(_pixelTexture, new Microsoft.Xna.Framework.Rectangle(worldSpacePosition.X, worldSpacePosition.Y, rectangle.Width, rectangle.Height), new Microsoft.Xna.Framework.Rectangle(0, 0, 1, 1), color.ToXNA(), 0, new Vector2(0, 0), SpriteEffects.None, 0);
         }
         internal void InvokeInitialize()
         {

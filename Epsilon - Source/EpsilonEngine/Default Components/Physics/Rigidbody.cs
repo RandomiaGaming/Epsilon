@@ -7,6 +7,7 @@ namespace EpsilonEngine
     {
         private Vector2 subPixel = Vector2.Zero;
         public Vector2 velocity = Vector2.Zero;
+        public Vector2 bouncyness = Vector2.Zero;
         private Collider _collider = null;
         private PhysicsManager _physicsManager = null;
         public Rigidbody(GameObject gameObject) : base(gameObject)
@@ -48,7 +49,7 @@ namespace EpsilonEngine
             if (targetMove.X > 0)
             {
                 //We are moving right along the x-axis.
-                foreach (Collider otherCollider in _physicsManager._managedColliders)
+                foreach (Collider otherCollider in _physicsManager.GetPhysicsLayer(1))
                 {
                     if (otherCollider == _collider)
                     {
@@ -58,25 +59,25 @@ namespace EpsilonEngine
                     {
                         Rectangle otherColliderShape = otherCollider.GetWorldShape();
 
-                        if (otherColliderShape.min.Y > thisColliderShape.max.Y || otherColliderShape.max.Y < thisColliderShape.min.Y)
+                        if (otherColliderShape.MinY > thisColliderShape.MaxY || otherColliderShape.MaxY < thisColliderShape.MinY)
                         {
                             //Ignore because object is too high or low for a collision.
                         }
-                        else if (otherColliderShape.max.X < thisColliderShape.min.X)
+                        else if (otherColliderShape.MaxX < thisColliderShape.MinX)
                         {
                             //Ignore because object is behind us.
                         }
-                        else if (otherColliderShape.max.X >= thisColliderShape.min.X && otherColliderShape.min.X <= thisColliderShape.max.X)
+                        else if (otherColliderShape.MaxX >= thisColliderShape.MinX && otherColliderShape.MinX <= thisColliderShape.MaxX)
                         {
                             //Set target move to 0, and zero out the velocity because there is an object overlapping us.
-                            targetMove.X = 0;
+                            targetMove = new Point(0, targetMove.Y);
                             velocity.X = 0;
                             break;
                         }
                         else
                         {
                             //By process of elimination we know the object must be in front of us so measure how far infront.
-                            int maxMove = otherColliderShape.min.X - thisColliderShape.max.X - 1;
+                            int maxMove = otherColliderShape.MinX - thisColliderShape.MaxX - 1;
 
                             if (maxMove > targetMove.X)
                             {
@@ -85,8 +86,8 @@ namespace EpsilonEngine
                             else
                             {
                                 //Set the target move to the maximun and zero out the velocity due to a collision.
-                                targetMove.X = maxMove;
-                                velocity.X = 0;
+                                targetMove = new Point(maxMove, targetMove.Y); ;
+                                velocity.X = velocity.X * bouncyness.X;
 
                                 if (targetMove.X == 0)
                                 {
@@ -105,7 +106,7 @@ namespace EpsilonEngine
             else if(targetMove.X < 0)
             {
                 //By process of elimination We are moving left along the x-axis.
-                foreach (Collider otherCollider in _physicsManager._managedColliders)
+                foreach (Collider otherCollider in _physicsManager.GetPhysicsLayer(1))
                 {
                     if (otherCollider == _collider)
                     {
@@ -115,25 +116,25 @@ namespace EpsilonEngine
                     {
                         Rectangle otherColliderShape = otherCollider.GetWorldShape();
 
-                        if (otherColliderShape.min.Y > thisColliderShape.max.Y || otherColliderShape.max.Y < thisColliderShape.min.Y)
+                        if (otherColliderShape.MinY > thisColliderShape.MaxY || otherColliderShape.MaxY < thisColliderShape.MinY)
                         {
                             //Ignore because object is too high or low for a collision.
                         }
-                        else if (otherColliderShape.min.X > thisColliderShape.max.X)
+                        else if (otherColliderShape.MinX > thisColliderShape.MaxX)
                         {
                             //Ignore because object is infront of us.
                         }
-                        else if (otherColliderShape.max.X >= thisColliderShape.min.X && otherColliderShape.min.X <= thisColliderShape.max.X)
+                        else if (otherColliderShape.MaxX >= thisColliderShape.MinX && otherColliderShape.MinX <= thisColliderShape.MaxX)
                         {
                             //Set target move to 0, and zero out the velocity because there is an object overlapping us.
-                            targetMove.X = 0;
+                            targetMove = new Point(0, targetMove.Y); ;
                             velocity.X = 0;
                             break;
                         }
                         else
                         {
                             //By process of elimination we know the object must be in behind of us so measure how far behind.
-                            int maxMove = ((thisColliderShape.min.X - otherColliderShape.max.X) * -1) + 1;
+                            int maxMove = ((thisColliderShape.MinX - otherColliderShape.MaxX) * -1) + 1;
 
                             if (maxMove < targetMove.X)
                             {
@@ -142,8 +143,8 @@ namespace EpsilonEngine
                             else
                             {
                                 //Set the target move to the maximun and zero out the velocity due to a collision.
-                                targetMove.X = maxMove;
-                                velocity.X = 0;
+                                targetMove = new Point(maxMove, targetMove.Y); ;
+                                velocity.X = velocity.X * bouncyness.X;
 
                                 if (targetMove.X == 0)
                                 {
@@ -165,7 +166,7 @@ namespace EpsilonEngine
             if (targetMove.Y > 0)
             {
                 //We are moving right along the x-axis.
-                foreach (Collider otherCollider in _physicsManager._managedColliders)
+                foreach (Collider otherCollider in _physicsManager.GetPhysicsLayer(1))
                 {
                     if (otherCollider == _collider)
                     {
@@ -175,25 +176,25 @@ namespace EpsilonEngine
                     {
                         Rectangle otherColliderShape = otherCollider.GetWorldShape();
 
-                        if (otherColliderShape.min.X > thisColliderShape.max.X || otherColliderShape.max.X < thisColliderShape.min.X)
+                        if (otherColliderShape.MinX > thisColliderShape.MaxX || otherColliderShape.MaxX < thisColliderShape.MinX)
                         {
                             //Ignore because object is too high or low for a collision.
                         }
-                        else if (otherColliderShape.max.Y < thisColliderShape.min.Y)
+                        else if (otherColliderShape.MaxY < thisColliderShape.MinY)
                         {
                             //Ignore because object is behind us.
                         }
-                        else if (otherColliderShape.max.Y >= thisColliderShape.min.Y && otherColliderShape.min.Y <= thisColliderShape.max.Y)
+                        else if (otherColliderShape.MaxY >= thisColliderShape.MinY && otherColliderShape.MinY <= thisColliderShape.MaxY)
                         {
                             //Set target move to 0, and zero out the velocity because there is an object overlapping us.
-                            targetMove.Y = 0;
+                            targetMove = new Point(targetMove.X, 0);
                             velocity.Y = 0;
                             break;
                         }
                         else
                         {
                             //By process of elimination we know the object must be in front of us so measure how far infront.
-                            int maxMove = otherColliderShape.min.Y - thisColliderShape.max.Y - 1;
+                            int maxMove = otherColliderShape.MinY - thisColliderShape.MaxY - 1;
 
                             if (maxMove > targetMove.Y)
                             {
@@ -202,8 +203,8 @@ namespace EpsilonEngine
                             else
                             {
                                 //Set the target move to the maximun and zero out the velocity due to a collision.
-                                targetMove.Y = maxMove;
-                                velocity.Y = 0;
+                                targetMove = new Point(targetMove.X, maxMove);
+                                velocity.Y = velocity.Y * bouncyness.Y;
 
                                 if (targetMove.Y == 0)
                                 {
@@ -220,7 +221,7 @@ namespace EpsilonEngine
             else if (targetMove.Y < 0)
             {
                 //By process of elimination We are moving left along the x-axis.
-                foreach (Collider otherCollider in _physicsManager._managedColliders)
+                foreach (Collider otherCollider in _physicsManager.GetPhysicsLayer(1))
                 {
                     if (otherCollider == _collider)
                     {
@@ -230,25 +231,25 @@ namespace EpsilonEngine
                     {
                         Rectangle otherColliderShape = otherCollider.GetWorldShape();
 
-                        if (otherColliderShape.min.X > thisColliderShape.max.X || otherColliderShape.max.X < thisColliderShape.min.X)
+                        if (otherColliderShape.MinX > thisColliderShape.MaxX || otherColliderShape.MaxX < thisColliderShape.MinX)
                         {
                             //Ignore because object is too high or low for a collision.
                         }
-                        else if (otherColliderShape.min.Y > thisColliderShape.max.Y)
+                        else if (otherColliderShape.MinY > thisColliderShape.MaxY)
                         {
                             //Ignore because object is infront of us.
                         }
-                        else if (otherColliderShape.max.Y >= thisColliderShape.min.Y && otherColliderShape.min.Y <= thisColliderShape.max.Y)
+                        else if (otherColliderShape.MaxY >= thisColliderShape.MinY && otherColliderShape.MinY <= thisColliderShape.MaxY)
                         {
                             //Set target move to 0, and zero out the velocity because there is an object overlapping us.
-                            targetMove.Y = 0;
-                            velocity.Y = velocity.Y * -1;
+                            targetMove = new Point(targetMove.X, 0);
+                            velocity.Y = 0;
                             break;
                         }
                         else
                         {
                             //By process of elimination we know the object must be in behind of us so measure how far behind.
-                            int maxMove = ((thisColliderShape.min.Y - otherColliderShape.max.Y) * -1) + 1;
+                            int maxMove = ((thisColliderShape.MinY - otherColliderShape.MaxY) * -1) + 1;
 
                             if (maxMove < targetMove.Y)
                             {
@@ -257,8 +258,8 @@ namespace EpsilonEngine
                             else
                             {
                                 //Set the target move to the maximun and zero out the velocity due to a collision.
-                                targetMove.Y = maxMove;
-                                velocity.Y = velocity.Y *-1;
+                                targetMove = new Point(targetMove.X, maxMove);
+                                velocity.Y = velocity.Y * bouncyness.Y;
 
                                 if (targetMove.Y == 0)
                                 {

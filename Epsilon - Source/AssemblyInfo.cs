@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
-using System.Resources;
 using System.Reflection;
+
 [assembly: AssemblyTitle("Epsilon - 1.0.0")]
 [assembly: AssemblyProduct("Epsilon - 1.0.0")]
 [assembly: AssemblyDescription("Epsilon - 1.0.0")]
@@ -9,5 +9,4 @@ using System.Reflection;
 [assembly: AssemblyCompany("RandomiaGaming")]
 [assembly: AssemblyCopyright("Copyright RandomiaGaming 2021")]
 [assembly: AssemblyTrademark("Trademark RandomiaGaming 2021")]
-[assembly: NeutralResourcesLanguage("en")]
 [assembly: ComVisible(false)]

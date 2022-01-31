@@ -4,14 +4,13 @@ namespace EpsilonEngine
 {
     public static class DebugProfiler
     {
-        private static long lastFrameTime = 0;
-        private static long updateTime = 0;
-        private static long renderTime = 0;
+        private static long frameEnd = 0;
+        private static long updateEnd = 0;
+        private static long renderEnd = 0;
 
-        private static long lastFrameEndTime = 0;
-        private static long updateStartTime = 0;
-        private static long renderStartTime = 0;
-
+        private static long frameStart = 0;
+        private static long updateStart = 0;
+        private static long renderStart = 0;
 
         private static System.Diagnostics.Stopwatch _stopWatch = new System.Diagnostics.Stopwatch();
         static DebugProfiler()
@@ -20,35 +19,41 @@ namespace EpsilonEngine
         }
         public static void UpdateStart()
         {
-            updateStartTime = _stopWatch.ElapsedTicks;
+            updateStart = _stopWatch.ElapsedTicks;
         }
         public static void UpdateEnd()
         {
-            updateTime = _stopWatch.ElapsedTicks - updateStartTime;
+            updateEnd = _stopWatch.ElapsedTicks;
         }
         public static void RenderStart()
         {
-            renderStartTime = _stopWatch.ElapsedTicks;
+            renderStart = _stopWatch.ElapsedTicks;
         }
         public static void RenderEnd()
         {
-            renderTime = _stopWatch.ElapsedTicks - renderStartTime;
+            renderEnd = _stopWatch.ElapsedTicks;
         }
-        public static void FrameElapsed()
+        public static void FrameStart()
         {
-            long currentTime = _stopWatch.ElapsedTicks;
-            lastFrameTime = currentTime - lastFrameEndTime;
-            lastFrameEndTime = currentTime;
+            frameStart = _stopWatch.ElapsedTicks;
+        }
+        public static void FrameEnd()
+        {
+            frameEnd = _stopWatch.ElapsedTicks;
         }
         public static void Print()
         {
-            if (lastFrameTime == 0)
+            long updateTime = updateEnd - updateStart;
+            long renderTime = renderEnd - renderStart;
+            long frameTime = frameEnd - frameStart;
+
+            if (frameTime == 0)
             {
-                Console.WriteLine($"Debug Profiler - Infinity FPS - {lastFrameTime} Tick Frame - {updateTime} Tick Update - {renderTime} Tick Render.");
+                Console.WriteLine($"Debug Profiler - Infinity FPS - {frameTime} Tick Frame - {frameTime - updateTime - renderTime} Tick MonoGame Update - {updateTime} Tick Update - {renderTime} Tick Render.");
             }
             else
             {
-                Console.WriteLine($"Debug Profiler - {10000000 / lastFrameTime} FPS - {lastFrameTime} Tick Frame - {lastFrameTime - updateTime - renderTime} Tick MonoGame Update - {updateTime} Tick Update - {renderTime} Tick Render.");
+                Console.WriteLine($"Debug Profiler - {10000000 / frameTime} FPS - {frameTime} Tick Frame - {frameTime - updateTime - renderTime} Tick MonoGame Update - {updateTime} Tick Update - {renderTime} Tick Render.");
             }
         }
     }

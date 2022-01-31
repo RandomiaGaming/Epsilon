@@ -26,7 +26,6 @@ namespace EpsilonEngine
         private SpriteBatch _mainSpriteBatch = null;
         private Scene _currentStage = null;
         private Scene _newStageQue = null;
-        private InputManager _inputManager = null;
         private TimeSpan _timeSinceStart = new TimeSpan(0);
         private TimeSpan _deltaTime = new TimeSpan(0);
         private EpsilonState _currentState = EpsilonState.Initialing;
@@ -58,13 +57,6 @@ namespace EpsilonEngine
             get
             {
                 return _currentStage;
-            }
-        }
-        public InputManager InputManager
-        {
-            get
-            {
-                return _inputManager;
             }
         }
         public TimeSpan TimeSinceStart
@@ -174,14 +166,10 @@ namespace EpsilonEngine
         {
             _currentState = EpsilonState.Initialing;
 
-            _inputManager = new InputManager(this);
-
             SetWindowed();
         }
         protected sealed override void Update(GameTime gameTime)
         {
-            DebugProfiler.FrameElapsed();
-
             DebugProfiler.UpdateStart();
 
             _currentState = EpsilonState.Updating;
@@ -190,11 +178,6 @@ namespace EpsilonEngine
             _deltaTime = gameTime.ElapsedGameTime;
 
             SquashStageQue();
-
-            if (_inputManager is not null)
-            {
-                _inputManager.Update();
-            }
 
             if (_currentStage is not null)
             {
@@ -220,7 +203,7 @@ namespace EpsilonEngine
 
             if (stageRender is not null)
             {
-                _mainSpriteBatch.Draw(stageRender, new Microsoft.Xna.Framework.Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height), new Microsoft.Xna.Framework.Rectangle(0, 0, stageRender.Width, stageRender.Height), Color.White.ToXNA(), 0, new Vector2(0, 0), SpriteEffects.None, 0);
+                _mainSpriteBatch.Draw(stageRender, new Microsoft.Xna.Framework.Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height), new Microsoft.Xna.Framework.Rectangle(0, 0, stageRender.Width, stageRender.Height), Microsoft.Xna.Framework.Color.White, 0, new Vector2(0, 0), SpriteEffects.None, 0);
             }
 
             //Render Canvas Here
@@ -229,7 +212,11 @@ namespace EpsilonEngine
 
             DebugProfiler.RenderEnd();
 
+            DebugProfiler.FrameEnd();
+
             DebugProfiler.Print();
+
+            DebugProfiler.FrameStart();
         }
         public override string ToString()
         {
