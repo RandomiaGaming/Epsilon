@@ -31,7 +31,7 @@ namespace Epsilon
 
             Texture ballTexture = new Texture(Engine, @"D:\C# Windows Apps\Epsilon\Epsilon - Source\Old Code\Default\Assets\Textures\Item Textures\Ball.png");
 
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < 100; i++)
             {
                 BouncyBall bouncyBall = new BouncyBall(this, ballTexture, physicsManager);
             }

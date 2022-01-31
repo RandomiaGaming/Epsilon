@@ -8,49 +8,35 @@ namespace EpsilonEngine
 {
     public sealed class PhysicsManager : SceneManager
     {
-        private List<PhysicsLayer> _physicsLayers = new List<PhysicsLayer>();
+        private Collider[] _managedColliders = new Collider[0];
         public PhysicsManager(Scene scene) : base(scene)
         {
 
         }
-        public List<Collider> GetPhysicsLayer(int physicsLayer)
+        public Collider[] GetManagedColliders()
         {
-            foreach(PhysicsLayer pl in _physicsLayers)
-            {
-                if(pl.Index == physicsLayer)
-                {
-                    return pl.Colliders;
-                }
-            }
-            return null;
+            return _managedColliders;
         }
-        internal void ManageCollider(Collider collider, int collisionLayer)
+        public override string ToString()
         {
-            if(collider is null)
+            return $"EpsilonEngine.PhysicsManager()";
+        }
+        internal void ManageCollider(Collider collider)
+        {
+            if (collider is null)
             {
                 throw new Exception("collider cannot be null.");
             }
-            if(collider.PhysicsManager != this)
+
+            if (collider.PhysicsManager != this)
             {
                 throw new Exception("collider belongs to a difference PhysicsManager.");
             }
-            bool foundPhysicsLayer = false;
-            foreach(PhysicsLayer physicsLayer in _physicsLayers)
-            {
-                if(physicsLayer.Index == collisionLayer)
-                {
-                    physicsLayer.Colliders.Add(collider);
-                    foundPhysicsLayer = true;
-                    break;
-                }
-            }
-            if (!foundPhysicsLayer)
-            {
-                PhysicsLayer physicsLayer = new PhysicsLayer();
-                physicsLayer.Index = collisionLayer;
-                physicsLayer.Colliders.Add(collider);
-                _physicsLayers.Add(physicsLayer);
-            }
+
+            Collider[] old = _managedColliders;
+            _managedColliders = new Collider[_managedColliders.Length + 1];
+            Array.Copy(old, 0, _managedColliders, 0, old.Length);
+            _managedColliders[_managedColliders.Length - 1] = collider;
         }
     }
 }

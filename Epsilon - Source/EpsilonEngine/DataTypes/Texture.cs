@@ -5,59 +5,44 @@ namespace EpsilonEngine
 {
     public sealed class Texture
     {
+        #region Variables
         private Microsoft.Xna.Framework.Graphics.Texture2D _base = null;
-        private Engine _engine;
-
-        public readonly ushort _width = 0;
-        public readonly ushort _height = 0;
-
-        public ushort Width
-        {
-            get
-            {
-                return _width;
-            }
-        }
-        public ushort Height
-        {
-            get
-            {
-                return _height;
-            }
-        }
-
         private Color[] buffer = new Color[0];
-
-        public Engine Engine
-        {
-            get
-            {
-                return _engine;
-            }
-        }
+        #endregion
+        #region Properties
+        public ushort Width { get; private set; }
+        public ushort Height { get; private set; }
+        public Engine Engine { get; private set; }
+        #endregion
+        #region Constructors
         public Texture(Engine engine, ushort width, ushort height)
         {
             if (engine is null)
             {
                 throw new Exception("engine cannot be null.");
             }
-            _engine = engine;
+            Engine = engine;
 
             if (width <= 0)
             {
                 throw new Exception("width must be greater than 0.");
             }
-            _width = width;
+            Width = width;
 
             if (height <= 0)
             {
                 throw new Exception("height must be greater than 0.");
             }
-            _height = height;
+            Height = height;
 
-            buffer = new Color[_width * _height];
+            buffer = new Color[width * height];
 
-            _base = new Microsoft.Xna.Framework.Graphics.Texture2D(engine.GraphicsDevice, _width, _height);
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                buffer[i] = Color.Black;
+            }
+
+            _base = new Microsoft.Xna.Framework.Graphics.Texture2D(engine.GraphicsDevice, width, height);
         }
         public Texture(Engine engine, ushort width, ushort height, Color[] data)
         {
@@ -65,19 +50,19 @@ namespace EpsilonEngine
             {
                 throw new Exception("engine cannot be null.");
             }
-            _engine = engine;
+            Engine = engine;
 
             if (width <= 0)
             {
                 throw new Exception("width must be greater than 0.");
             }
-            _width = width;
+           Width = width;
 
             if (height <= 0)
             {
                 throw new Exception("height must be greater than 0.");
             }
-            _height = height;
+            Height = height;
 
             if (data is null)
             {
@@ -91,9 +76,9 @@ namespace EpsilonEngine
 
             buffer = (Color[])data.Clone();
 
-            _base = new Microsoft.Xna.Framework.Graphics.Texture2D(engine.GraphicsDevice, _width, _height);
+            _base = new Microsoft.Xna.Framework.Graphics.Texture2D(engine.GraphicsDevice, width, height);
 
-            Microsoft.Xna.Framework.Color[] XNABuffer = new Microsoft.Xna.Framework.Color[_width * _height];
+            Microsoft.Xna.Framework.Color[] XNABuffer = new Microsoft.Xna.Framework.Color[width * height];
 
             for (int i = 0; i < XNABuffer.Length; i++)
             {
@@ -108,7 +93,7 @@ namespace EpsilonEngine
             {
                 throw new Exception("engine cannot be null.");
             }
-            _engine = engine;
+            Engine = engine;
 
             if (!File.Exists(filePath))
             {
@@ -125,7 +110,7 @@ namespace EpsilonEngine
             {
                 throw new Exception("width was too large.");
             }
-            _width = (ushort)_base.Width;
+            Width = (ushort)_base.Width;
 
             if (_base.Height <= 0)
             {
@@ -135,52 +120,51 @@ namespace EpsilonEngine
             {
                 throw new Exception("height was too large.");
             }
-            _height = (ushort)_base.Height;
+            Height = (ushort)_base.Height;
 
 
-            Microsoft.Xna.Framework.Color[] XNABuffer = new Microsoft.Xna.Framework.Color[_width * _height];
+            Microsoft.Xna.Framework.Color[] XNABuffer = new Microsoft.Xna.Framework.Color[Width * Height];
 
             _base.GetData(XNABuffer);
 
-            buffer = new Color[_width * _height];
+            buffer = new Color[Width * Height];
 
             for (int i = 0; i < buffer.Length; i++)
             {
                 buffer[i] = new Color(XNABuffer[i]);
             }
-
-            Apply();
         }
-
-        public void SetPixelUnsafe(int x, int y, Color newColor)
+        public Texture(Microsoft.Xna.Framework.Graphics.Texture2D source)
         {
-            buffer[(y * _width) + x] = newColor;
-        }
-        public Color GetPixelUnsafe(int x, int y)
-        {
-            return buffer[(y * _width) + x];
-        }
 
+        }
+        #endregion
+        #region Overrides
+        public override string ToString()
+        {
+            return $"EpsilonEngine.Texture({Width}, {Height})";
+        }
+        #endregion
+        #region Methods
         public void SetPixel(int x, int y, Color newColor)
         {
-            if (x < 0 || x >= _width || y < 0 || y >= _height)
+            if (x < 0 || x >= Width || y < 0 || y >= Height)
             {
                 throw new Exception("Coordinants outside the bounds of the texture.");
             }
-            buffer[(y * _width) + x] = newColor;
+            buffer[(y * Width) + x] = newColor;
         }
         public Color GetPixel(int x, int y)
         {
-            if (x < 0 || x >= _width || y < 0 || y >= _height)
+            if (x < 0 || x >= Width || y < 0 || y >= Height)
             {
                 throw new Exception("Coordinants outside the bounds of the texture.");
             }
-            return buffer[(y * _width) + x];
+            return buffer[(y * Width) + x];
         }
-
         public void SetData(Color[] newData)
         {
-            if (newData.Length != _width * _height)
+            if (newData.Length != Width * Height)
             {
                 throw new ArgumentException();
             }
@@ -190,10 +174,9 @@ namespace EpsilonEngine
         {
             return (Color[])buffer.Clone();
         }
-
         public void Apply()
         {
-            Microsoft.Xna.Framework.Color[] XNABuffer = new Microsoft.Xna.Framework.Color[_width * _height];
+            Microsoft.Xna.Framework.Color[] XNABuffer = new Microsoft.Xna.Framework.Color[Width * Height];
 
             for (int i = 0; i < XNABuffer.Length; i++)
             {
@@ -206,5 +189,6 @@ namespace EpsilonEngine
         {
             return _base;
         }
+        #endregion
     }
 }

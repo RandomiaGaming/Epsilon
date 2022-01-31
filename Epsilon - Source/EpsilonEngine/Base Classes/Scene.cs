@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Collections.Generic;
 namespace EpsilonEngine
 {
     public class Scene
@@ -24,6 +24,8 @@ namespace EpsilonEngine
         private List<SceneManager> _sceneManagers = new List<SceneManager>();
         private List<SceneManager> _sceneManagerAddQue = new List<SceneManager>();
         private List<SceneManager> _sceneManagerRemoveQue = new List<SceneManager>();
+
+        public List<EpsilonEvent> updatePump = new List<EpsilonEvent>();
         #endregion
         #region Properties
         public Engine Engine
@@ -83,7 +85,7 @@ namespace EpsilonEngine
                 return new Rectangle(CameraPosition, ViewPortSize);
             }
         }
-        public float AspectRatio
+        public double AspectRatio
         {
             get
             {
@@ -92,7 +94,7 @@ namespace EpsilonEngine
                     throw new Exception("Scene has been destroyed.");
                 }
 
-                return (float)ViewPortSize.Y / (float)ViewPortSize.X;
+                return ViewPortSize.X / (double)ViewPortSize.Y;
             }
         }
         public bool Destroyed
@@ -347,7 +349,7 @@ namespace EpsilonEngine
 
             _engine.GraphicsDevice.SetRenderTarget(_renderTarget);
 
-            _engine.GraphicsDevice.Clear(Color.Transparent.ToXNA());
+            _engine.GraphicsDevice.Clear(Engine.BackgroundColor.ToXNA());
 
             _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, null);
 

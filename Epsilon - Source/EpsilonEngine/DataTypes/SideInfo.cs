@@ -1,6 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using System;
-
+﻿using System;
 namespace EpsilonEngine
 {
     public struct SideInfo
@@ -14,119 +12,94 @@ namespace EpsilonEngine
         public static readonly SideInfo LeftConst = new SideInfo(false, false, false, true);
         public static readonly SideInfo BottomConst = new SideInfo(false, true, false, false);
         #endregion
-        #region Variables
-        private bool _right;
-        private bool _top;
-        private bool _left;
-        private bool _bottom;
-        #endregion
         #region Properties
-        public bool Right
-        {
-            get
-            {
-                return _right;
-            }
-        }
-        public bool Top
-        {
-            get
-            {
-                return _top;
-            }
-        }
-        public bool Left
-        {
-            get
-            {
-                return _left;
-            }
-        }
-        public bool Bottom
-        {
-            get
-            {
-                return _bottom;
-            }
-        }
+        public bool Right;
+        public bool Top;
+        public bool Left;
+        public bool Bottom;
         #endregion
         #region Constructors
         public SideInfo(bool right, bool top, bool left, bool bottom)
         {
-            _right = right;
-            _top = top;
-            _left = left;
-            _bottom = bottom;
+            Right = right;
+            Top = top;
+            Left = left;
+            Bottom = bottom;
         }
         public SideInfo(Side side)
         {
-            switch (side)
+            if (side == Side.Right)
             {
-                case Side.Right:
-                    _right = true;
-                    _top = false;
-                    _left = false;
-                    _bottom = false;
-                    break;
-                case Side.Top:
-                    _right = false;
-                    _top = true;
-                    _left = false;
-                    _bottom = false;
-                    break;
-                case Side.Left:
-                    _right = false;
-                    _top = false;
-                    _left = true;
-                    _bottom = false;
-                    break;
-                default:
-                    _right = false;
-                    _top = false;
-                    _left = false;
-                    _bottom = true;
-                    break;
+                Right = true;
+                Top = false;
+                Left = false;
+                Bottom = false;
+            }
+            else if (side == Side.Top)
+            {
+                Right = false;
+                Top = true;
+                Left = false;
+                Bottom = false;
+            }
+            else if (side == Side.Left)
+            {
+                Right = false;
+                Top = false;
+                Left = true;
+                Bottom = false;
+            }
+            else if (side == Side.Bottom)
+            {
+                Right = false;
+                Top = false;
+                Left = false;
+                Bottom = true;
+            }
+            else
+            {
+                throw new Exception("side must be a valid Side.");
             }
         }
         public SideInfo(Point normal)
         {
             if (normal.X > 0)
             {
-                _right = true;
-                _left = false;
+                Right = true;
+                Left = false;
             }
             else if (normal.X < 0)
             {
-                _right = false;
-                _left = true;
+                Right = false;
+                Left = true;
             }
             else
             {
-                _right = false;
-                _left = false;
+                Right = false;
+                Left = false;
             }
 
             if (normal.Y > 0)
             {
-                _top = true;
-                _bottom = false;
+                Top = true;
+                Bottom = false;
             }
             else if (normal.Y < 0)
             {
-                _top = false;
-                _bottom = true;
+                Top = false;
+                Bottom = true;
             }
             else
             {
-                _top = false;
-                _bottom = false;
+                Top = false;
+                Bottom = false;
             }
         }
         #endregion
         #region Overrides
         public override string ToString()
         {
-            return $"EpsilonEngine.SideInfo({_right}, {_top}, {_left}, {_bottom})";
+            return $"EpsilonEngine.SideInfo({Right}, {Top}, {Left}, {Bottom})";
         }
         public override bool Equals(object obj)
         {
@@ -141,17 +114,17 @@ namespace EpsilonEngine
         }
         public static bool operator ==(SideInfo a, SideInfo b)
         {
-            return (a._right == b._right) && (a._top == b._top) && (a._left == b._left) && (a._bottom == b._bottom);
+            return (a.Right == b.Right) && (a.Top == b.Top) && (a.Left == b.Left) && (a.Bottom == b.Bottom);
         }
         public static bool operator !=(SideInfo a, SideInfo b)
         {
-            return (a._right != b._right) || (a._top != b._top) || (a._left != b._left) || (a._bottom != b._bottom);
+            return (a.Right != b.Right) || (a.Top != b.Top) || (a.Left != b.Left) || (a.Bottom != b.Bottom);
         }
         #endregion
         #region Methods
         public static SideInfo Invert(SideInfo source)
         {
-            return new SideInfo(!source._right, !source._top, !source._left, !source._bottom);
+            return new SideInfo(!source.Right, !source.Top, !source.Left, !source.Bottom);
         }
         public SideInfo Invert()
         {

@@ -1,41 +1,13 @@
 ﻿using System;
 namespace EpsilonEngine
 {
-    public sealed class Overlap
+    public struct Overlap
     {
-        #region Variables
-        private Collider _otherCollider = null;
-        private Collider _thisCollider = null;
-        #endregion
         #region Properties
-        public Collider ThisCollider
-        {
-            get
-            {
-                return _thisCollider;
-            }
-        }
-        public GameObject ThisGameObject
-        {
-            get
-            {
-                return _thisCollider.GameObject;
-            }
-        }
-        public Collider OtherCollider
-        {
-            get
-            {
-                return _otherCollider;
-            }
-        }
-        public GameObject OtherGameObject
-        {
-            get
-            {
-                return _otherCollider.GameObject;
-            }
-        }
+        public Collider ThisCollider { get; private set; }
+        public GameObject ThisGameObject { get; private set; }
+        public Collider OtherCollider { get; private set; }
+        public GameObject OtherGameObject { get; private set; }
         #endregion
         #region Contructors
         public Overlap(Collider thisCollider, Collider otherCollider)
@@ -44,19 +16,21 @@ namespace EpsilonEngine
             {
                 throw new Exception("thisCollider cannot be null.");
             }
-            _thisCollider = thisCollider;
+            ThisCollider = thisCollider;
+            ThisGameObject = thisCollider.GameObject;
 
             if (otherCollider is null)
             {
                 throw new Exception("otherCollider cannot be null.");
             }
-            _otherCollider = otherCollider;
+            OtherCollider = otherCollider;
+            OtherGameObject = OtherCollider.GameObject;
         }
         #endregion
         #region Overrides
         public override string ToString()
         {
-            return $"EpsilonEngine.Overlap({_thisCollider}, {_otherCollider})";
+            return $"EpsilonEngine.Overlap({ThisCollider}, {OtherCollider})";
         }
         public override bool Equals(object obj)
         {
@@ -71,41 +45,21 @@ namespace EpsilonEngine
         }
         public static bool operator ==(Overlap a, Overlap b)
         {
-            if (a is null && b is null)
-            {
-                return true;
-            }
-            if (a is null || b is null)
-            {
-                return false;
-            }
-            return (a._thisCollider == b.ThisCollider) && (a._otherCollider == b._otherCollider);
+            return (a.ThisCollider == b.ThisCollider) && (a.OtherCollider == b.OtherCollider);
         }
         public static bool operator !=(Overlap a, Overlap b)
         {
-            if (a is null && b is null)
-            {
-                return false;
-            }
-            if (a is null || b is null)
-            {
-                return true;
-            }
-            return (a._thisCollider != b.ThisCollider) || (a._otherCollider != b._otherCollider);
+            return (a.ThisCollider != b.ThisCollider) || (a.OtherCollider != b.OtherCollider);
         }
         #endregion
         #region Methods
         public static Overlap Invert(Overlap source)
         {
-            if (source is null)
-            {
-                throw new Exception("source cannot be null.");
-            }
-            return new Overlap(source._otherCollider, source.ThisCollider);
+            return new Overlap(source.OtherCollider, source.ThisCollider);
         }
         public Overlap Invert()
         {
-            return new Overlap(_otherCollider, _thisCollider);
+            return Invert(this);
         }
         #endregion
     }

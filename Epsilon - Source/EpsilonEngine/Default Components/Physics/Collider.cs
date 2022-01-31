@@ -7,7 +7,7 @@ namespace EpsilonEngine
     {
         public Rectangle shape = new Rectangle(Point.Zero, new Point(16, 16));
         private PhysicsManager _physicsManager = null;
-        private int _physicsLayer = 0;
+        public int _physicsLayer = 0;
         public PhysicsManager PhysicsManager
         {
             get
@@ -29,12 +29,20 @@ namespace EpsilonEngine
 
             _physicsManager = physicsManager;
 
-            _physicsManager.ManageCollider(this, physicsLayer);
+            _physicsManager.ManageCollider(this);
             _physicsLayer = physicsLayer;
+        }
+        public override string ToString()
+        {
+            return $"EpsilonEngine.Collider()";
         }
         public Rectangle GetWorldShape()
         {
             return new Rectangle(shape.Min + GameObject.Position, shape.Max + GameObject.Position);
+        }
+        protected override void Render()
+        {
+            //Scene.DrawRect(GetWorldShape(), Color.SoftGreen);
         }
     }
 }

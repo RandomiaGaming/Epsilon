@@ -51,6 +51,12 @@ namespace EpsilonEngine
             }
 
             _particleTexture = particleTexture;
+
+            gameObject.Scene.updatePump.Add(this.Update);
+        }
+        public override string ToString()
+        {
+            return $"EpsilonEngine.ParticleSystem()";
         }
         protected override void Update()
         {

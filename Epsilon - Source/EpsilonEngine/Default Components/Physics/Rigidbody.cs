@@ -12,7 +12,7 @@ namespace EpsilonEngine
         private PhysicsManager _physicsManager = null;
         public Rigidbody(GameObject gameObject) : base(gameObject)
         {
-
+            gameObject.Scene.updatePump.Add(this.Update);
         }
         protected override void Initialize()
         {
@@ -25,17 +25,22 @@ namespace EpsilonEngine
 
             _collider = GameObject.GetComponent<Collider>();
         }
+        public override string ToString()
+        {
+            return $"EpsilonEngine.Rigidbody()";
+        }
         protected override void Update()
         {
             subPixel += velocity;
             Point targetMove = new Point((int)subPixel.X, (int)subPixel.Y);
-            subPixel -= new Vector2((int)subPixel.X, (int)subPixel.Y);
 
             if (targetMove.X == 0 && targetMove.Y == 0)
             {
                 //No movement occured this frame so return.
                 return;
             }
+
+            subPixel -= new Vector2((int)subPixel.X, (int)subPixel.Y);
 
             if (_collider is null)
             {
@@ -49,9 +54,9 @@ namespace EpsilonEngine
             if (targetMove.X > 0)
             {
                 //We are moving right along the x-axis.
-                foreach (Collider otherCollider in _physicsManager.GetPhysicsLayer(1))
+                foreach (Collider otherCollider in _physicsManager.GetManagedColliders())
                 {
-                    if (otherCollider == _collider)
+                    if (otherCollider == _collider || otherCollider._physicsLayer == _collider._physicsLayer)
                     {
                         //We can safely ignore this collider because it belongs to us.
                     }
@@ -106,9 +111,9 @@ namespace EpsilonEngine
             else if(targetMove.X < 0)
             {
                 //By process of elimination We are moving left along the x-axis.
-                foreach (Collider otherCollider in _physicsManager.GetPhysicsLayer(1))
+                foreach (Collider otherCollider in _physicsManager.GetManagedColliders())
                 {
-                    if (otherCollider == _collider)
+                    if (otherCollider == _collider || otherCollider._physicsLayer == _collider._physicsLayer)
                     {
                         //We can safely ignore this collider because it belongs to us.
                     }
@@ -166,9 +171,9 @@ namespace EpsilonEngine
             if (targetMove.Y > 0)
             {
                 //We are moving right along the x-axis.
-                foreach (Collider otherCollider in _physicsManager.GetPhysicsLayer(1))
+                foreach (Collider otherCollider in _physicsManager.GetManagedColliders())
                 {
-                    if (otherCollider == _collider)
+                    if (otherCollider == _collider || otherCollider._physicsLayer == _collider._physicsLayer)
                     {
                         //We can safely ignore this collider because it belongs to us.
                     }
@@ -221,9 +226,9 @@ namespace EpsilonEngine
             else if (targetMove.Y < 0)
             {
                 //By process of elimination We are moving left along the x-axis.
-                foreach (Collider otherCollider in _physicsManager.GetPhysicsLayer(1))
+                foreach (Collider otherCollider in _physicsManager.GetManagedColliders())
                 {
-                    if (otherCollider == _collider)
+                    if (otherCollider == _collider || otherCollider._physicsLayer == _collider._physicsLayer)
                     {
                         //We can safely ignore this collider because it belongs to us.
                     }

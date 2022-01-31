@@ -197,13 +197,38 @@ namespace EpsilonEngine
                 stageRender = _currentStage.InvokeRender();
             }
 
-            GraphicsDevice.Clear(BackgroundColor.ToXNA());
+            GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.Black);
 
             _mainSpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, null);
 
             if (stageRender is not null)
             {
-                _mainSpriteBatch.Draw(stageRender, new Microsoft.Xna.Framework.Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height), new Microsoft.Xna.Framework.Rectangle(0, 0, stageRender.Width, stageRender.Height), Microsoft.Xna.Framework.Color.White, 0, new Vector2(0, 0), SpriteEffects.None, 0);
+                double targetAspectRatio = _currentStage.AspectRatio;
+                Point viewPortSize = GetViewportSize();
+                int viewPortWidth = viewPortSize.X;
+                int viewPortHeight = viewPortSize.Y;
+                double viewPortAspectRatio = viewPortWidth / (double)viewPortHeight;
+                int RenderWidth;
+                int RenderHeight;
+                int RenderX;
+                int RenderY;
+
+                if(viewPortAspectRatio >= targetAspectRatio)
+                {
+                    RenderWidth = (int)(viewPortHeight * targetAspectRatio);
+                    RenderHeight = viewPortHeight;
+                    RenderX = (viewPortWidth - RenderWidth) / 2;
+                    RenderY = 0;
+                }
+                else
+                {
+                    RenderWidth = viewPortWidth;
+                    RenderHeight = (int)(viewPortWidth / targetAspectRatio);
+                    RenderX = 0;
+                    RenderY = (viewPortHeight - RenderHeight) / 2;
+                }
+
+                _mainSpriteBatch.Draw(stageRender, new Microsoft.Xna.Framework.Rectangle(RenderX, RenderY, RenderWidth, RenderHeight), new Microsoft.Xna.Framework.Rectangle(0, 0, stageRender.Width, stageRender.Height), Microsoft.Xna.Framework.Color.White, 0, new Vector2(0, 0), SpriteEffects.None, 0);
             }
 
             //Render Canvas Here

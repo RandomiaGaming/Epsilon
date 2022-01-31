@@ -1,49 +1,14 @@
 ﻿using System;
 namespace EpsilonEngine
 {
-    public sealed class Collision
+    public struct Collision
     {
-        #region Variables
-        private Collider _otherCollider = null;
-        private Collider _thisCollider = null;
-        private SideInfo _sideInfo = SideInfo.False;
-        #endregion
         #region Properties
-        public Collider ThisCollider
-        {
-            get
-            {
-                return _thisCollider;
-            }
-        }
-        public GameObject ThisGameObject
-        {
-            get
-            {
-                return _thisCollider.GameObject;
-            }
-        }
-        public Collider OtherCollider
-        {
-            get
-            {
-                return _otherCollider;
-            }
-        }
-        public GameObject OtherGameObject
-        {
-            get
-            {
-                return _otherCollider.GameObject;
-            }
-        }
-        public SideInfo SideInfo
-        {
-            get
-            {
-                return _sideInfo;
-            }
-        }
+        public Collider ThisCollider { get; private set; }
+        public GameObject ThisGameObject { get; private set; }
+        public Collider OtherCollider { get; private set; }
+        public GameObject OtherGameObject { get; private set; }
+        public SideInfo SideInfo { get; private set; }
         #endregion
         #region Contructors
         public Collision(Collider thisCollider, Collider otherCollider, SideInfo sideInfo)
@@ -52,25 +17,27 @@ namespace EpsilonEngine
             {
                 throw new Exception("thisCollider cannot be null.");
             }
-            _thisCollider = thisCollider;
+            ThisCollider = thisCollider;
+            ThisGameObject = thisCollider.GameObject;
 
             if (otherCollider is null)
             {
                 throw new Exception("otherCollider cannot be null.");
             }
-            _otherCollider = otherCollider;
+            OtherCollider = otherCollider;
+            OtherGameObject = otherCollider.GameObject;
 
-            if(sideInfo == SideInfo.False)
+            if (sideInfo == SideInfo.False)
             {
                 throw new Exception("sideInfo cannot be false.");
             }
-            _sideInfo = sideInfo;
+            SideInfo = sideInfo;
         }
         #endregion
         #region Overrides
         public override string ToString()
         {
-            return $"EpsilonEngine.Collision({_thisCollider}, {_otherCollider}, {_sideInfo})";
+            return $"EpsilonEngine.Collision({ThisCollider}, {OtherCollider}, {SideInfo})";
         }
         public override bool Equals(object obj)
         {
@@ -85,41 +52,21 @@ namespace EpsilonEngine
         }
         public static bool operator ==(Collision a, Collision b)
         {
-            if(a is null && b is null)
-            {
-                return true;
-            }
-            if(a is null || b is null)
-            {
-                return false;
-            }
-            return (a._thisCollider == b.ThisCollider) && (a._otherCollider == b._otherCollider) && (a._sideInfo == b._sideInfo);
+            return (a.ThisCollider == b.ThisCollider) && (a.OtherCollider == b.OtherCollider) && (a.SideInfo == b.SideInfo);
         }
         public static bool operator !=(Collision a, Collision b)
         {
-            if (a is null && b is null)
-            {
-                return false;
-            }
-            if (a is null || b is null)
-            {
-                return true;
-            }
-            return (a._thisCollider != b.ThisCollider) || (a._otherCollider != b._otherCollider) || (a._sideInfo != b._sideInfo);
+            return (a.ThisCollider != b.ThisCollider) || (a.OtherCollider != b.OtherCollider) || (a.SideInfo != b.SideInfo);
         }
         #endregion
         #region Methods
         public static Collision Invert(Collision source)
         {
-            if(source is null)
-            {
-                throw new Exception("source cannot be null.");
-            }
-            return new Collision(source._otherCollider, source.ThisCollider, source._sideInfo.Invert());
+            return new Collision(source.OtherCollider, source.ThisCollider, source.SideInfo.Invert());
         }
         public Collision Invert()
         {
-            return new Collision(_otherCollider, _thisCollider, _sideInfo.Invert());
+            return new Collision(OtherCollider, ThisCollider, SideInfo.Invert());
         }
         #endregion
     }

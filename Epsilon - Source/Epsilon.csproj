@@ -54,6 +54,7 @@
     <Compile Include="EpsilonEngine\Base Classes\SceneManager.cs" />
     <Compile Include="EpsilonEngine\DataTypes\Collision.cs" />
     <Compile Include="EpsilonEngine\DataTypes\Color.cs" />
+    <Compile Include="EpsilonEngine\DataTypes\EpsilonEvent.cs" />
     <Compile Include="EpsilonEngine\DataTypes\Overlap.cs" />
     <Compile Include="EpsilonEngine\DataTypes\Point.cs" />
     <Compile Include="EpsilonEngine\DataTypes\Rectangle.cs" />
@@ -71,7 +72,6 @@
     <Compile Include="EpsilonEngine\Helper Classes\RandomnessHelper.cs" />
     <Compile Include="EpsilonEngine\Default Components\ParticleSystem.cs" />
     <Compile Include="EpsilonEngine\Default Components\Physics\Collider.cs" />
-    <Compile Include="EpsilonEngine\Default Components\Physics\PhysicsLayer.cs" />
     <Compile Include="EpsilonEngine\Default Components\Physics\PhysicsManager.cs" />
     <Compile Include="EpsilonEngine\Default Components\Physics\Rigidbody.cs" />
     <Compile Include="Epsilon\Epsilon.cs" />

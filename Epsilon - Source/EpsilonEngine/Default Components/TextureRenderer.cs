@@ -24,7 +24,7 @@ namespace EpsilonEngine
                 _texture = value;
             }
         }
-        public TextureRenderer(GameObject stageObject, Texture texture) : base(stageObject)
+        public TextureRenderer(GameObject gameObject, Texture texture) : base(gameObject)
         {
             if (texture is null)
             {
@@ -32,10 +32,16 @@ namespace EpsilonEngine
             }
 
             _texture = texture;
+
+            gameObject.Scene.updatePump.Add(this.Update);
         }
         protected override void Render()
         {
             GameObject.DrawTexture(_texture, Offset, Color);
+        }
+        public override string ToString()
+        {
+            return $"EpsilonEngine.TextureRenderer()";
         }
     }
 }

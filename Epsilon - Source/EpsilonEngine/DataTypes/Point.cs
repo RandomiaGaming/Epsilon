@@ -17,42 +17,26 @@ namespace EpsilonEngine
         public static readonly Point DownRight = new Point(1, -1);
         public static readonly Point DownLeft = new Point(-1, -1);
         #endregion
-        #region Variables
-        private int _x;
-        private int _y;
-        #endregion
         #region Properties
-        public int X
-        {
-            get
-            {
-                return _x;
-            }
-        }
-        public int Y
-        {
-            get
-            {
-                return _y;
-            }
-        }
+        public int X;
+        public int Y;
         #endregion
         #region Constructors
         public Point(int x, int y)
         {
-            _x = x;
-            _y = y;
+            X = x;
+            Y = y;
         }
         public Point(Microsoft.Xna.Framework.Point source)
         {
-            _x = source.X;
-            _y = source.Y;
+            X = source.X;
+            Y = source.Y;
         }
         #endregion
         #region Overrides
         public override string ToString()
         {
-            return $"EpsilonEngine.Point({_x}, {_y})";
+            return $"EpsilonEngine.Point({X}, {Y})";
         }
         public override bool Equals(object obj)
         {
@@ -67,43 +51,59 @@ namespace EpsilonEngine
         }
         public static bool operator ==(Point a, Point b)
         {
-            return (a._x == b._x) && (a._y == b._y);
+            return (a.X == b.X) && (a.Y == b.Y);
         }
         public static bool operator !=(Point a, Point b)
         {
-            return (a._x != b._x) || (a._y != b._y);
+            return (a.X != b.X) || (a.Y != b.Y);
         }
         public static Point operator +(Point a, Point b)
         {
-            return new Point(a._x + b._x, a._y + b._y);
+            a.X += b.X;
+            a.Y += b.Y;
+            return a;
         }
         public static Point operator -(Point a, Point b)
         {
-            return new Point(a._x - b._x, a._y - b._y);
+            a.X -= b.X;
+            a.Y -= b.Y;
+            return a;
         }
         public static Point operator *(Point a, Point b)
         {
-            return new Point(a._x * b._x, a._y * b._y);
+            a.X *= b.X;
+            a.Y *= b.Y;
+            return a;
         }
         public static Point operator /(Point a, Point b)
         {
-            return new Point(a._x / b._x, a._y / b._y);
+            a.X /= b.X;
+            a.Y /= b.Y;
+            return a;
         }
         public static Point operator +(Point a, int b)
         {
-            return new Point(a._x + b, a._y + b);
+            a.X += b;
+            a.Y += b;
+            return a;
         }
         public static Point operator -(Point a, int b)
         {
-            return new Point(a._x - b, a._y - b);
+            a.X -= b;
+            a.Y -= b;
+            return a;
         }
         public static Point operator *(Point a, int b)
         {
-            return new Point(a._x * b, a._y * b);
+            a.X *= b;
+            a.Y *= b;
+            return a;
         }
         public static Point operator /(Point a, int b)
         {
-            return new Point(a._x / b, a._y / b);
+            a.X /= b;
+            a.Y /= b;
+            return a;
         }
         public static Point operator +(Point a)
         {
@@ -111,17 +111,19 @@ namespace EpsilonEngine
         }
         public static Point operator -(Point a)
         {
-            return new Point(a._x * -1, a._y * -1);
+            a.X *= -1;
+            a.Y *= -1;
+            return a;
         }
         #endregion
         #region Methods
         public static Microsoft.Xna.Framework.Point ToXNA(Point source)
         {
-            return new Microsoft.Xna.Framework.Point(source._x, source._y);
+            return new Microsoft.Xna.Framework.Point(source.X, source.Y);
         }
         public Microsoft.Xna.Framework.Point ToXNA()
         {
-            return Point.ToXNA(this);
+            return ToXNA(this);
         }
         public Point FromXNA(Microsoft.Xna.Framework.Point source)
         {
