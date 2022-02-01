@@ -52,13 +52,13 @@ namespace EpsilonEngine
 
             _particleTexture = particleTexture;
 
-            gameObject.Scene.updatePump.Add(this.Update);
+            gameObject.Engine.RegisterForUpdate(this);
         }
         public override string ToString()
         {
             return $"EpsilonEngine.ParticleSystem()";
         }
-        protected override void Update()
+        internal override void Update()
         {
             _timer += EmissionRate;
             while(_timer >= 1)
@@ -92,7 +92,7 @@ namespace EpsilonEngine
                 particle.lifetime--;
             }
         }
-        protected override void Render()
+        internal override void Render()
         {
             for (int i = 0; i < _particles.Count; i++)
             {

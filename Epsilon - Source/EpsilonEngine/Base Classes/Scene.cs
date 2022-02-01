@@ -17,6 +17,8 @@ namespace EpsilonEngine
         private Texture2D _pixelTexture = null;
         private Point _cameraPosition = new Point(0, 0);
 
+        private bool dirty = false;
+
         private List<GameObject> _gameObjects = new List<GameObject>();
         private List<GameObject> _gameObjectAddQue = new List<GameObject>();
         private List<GameObject> _gameObjectRemoveQue = new List<GameObject>();
@@ -24,8 +26,6 @@ namespace EpsilonEngine
         private List<SceneManager> _sceneManagers = new List<SceneManager>();
         private List<SceneManager> _sceneManagerAddQue = new List<SceneManager>();
         private List<SceneManager> _sceneManagerRemoveQue = new List<SceneManager>();
-
-        public List<EpsilonEvent> updatePump = new List<EpsilonEvent>();
         #endregion
         #region Properties
         public Engine Engine
@@ -170,7 +170,7 @@ namespace EpsilonEngine
                 gameObject.Destroy();
             }
 
-            _engine.ChangeStage(null);
+            _engine.ChangeScene(null);
 
             _markedForDestruction = true;
         }
@@ -243,7 +243,7 @@ namespace EpsilonEngine
 
             _spriteBatch.Draw(_pixelTexture, new Microsoft.Xna.Framework.Rectangle(worldSpacePosition.X, worldSpacePosition.Y, rectangle.Width, rectangle.Height), new Microsoft.Xna.Framework.Rectangle(0, 0, 1, 1), color.ToXNA(), 0, new Vector2(0, 0), SpriteEffects.None, 0);
         }
-        internal void InvokeInitialize()
+        internal void Initialize()
         {
             foreach (SceneManager sceneManagerToAdd in _sceneManagerAddQue)
             {
@@ -254,8 +254,6 @@ namespace EpsilonEngine
             {
                 _gameObjects.Add(gameObjectToAdd);
             }
-
-            Initialize();
 
             foreach (SceneManager addedSceneManager in _sceneManagerAddQue)
             {
@@ -271,62 +269,65 @@ namespace EpsilonEngine
 
             _gameObjectAddQue = new List<GameObject>();
         }
-        public void InvokeUpdate()
+        public void Update()
         {
             if (_destroyed)
             {
                 throw new Exception("Scene has been destroyed.");
             }
 
-            foreach (SceneManager sceneManagerToRemove in _sceneManagerRemoveQue)
+            if (dirty)
             {
-                sceneManagerToRemove.InvokeOnDestroy();
+                foreach (SceneManager sceneManagerToRemove in _sceneManagerRemoveQue)
+                {
+                    sceneManagerToRemove.InvokeOnDestroy();
+                }
+
+                foreach (GameObject gameObjectToRemove in _gameObjectRemoveQue)
+                {
+                    gameObjectToRemove.InvokeOnDestroy();
+                }
+
+                foreach (SceneManager removedSceneManager in _sceneManagerRemoveQue)
+                {
+                    _sceneManagers.Remove(removedSceneManager);
+                }
+
+                _sceneManagerRemoveQue = new List<SceneManager>();
+
+                foreach (GameObject removedGameObject in _gameObjectRemoveQue)
+                {
+                    _gameObjects.Remove(removedGameObject);
+                }
+
+                _gameObjectRemoveQue = new List<GameObject>();
+
+                foreach (SceneManager sceneManagerToAdd in _sceneManagerAddQue)
+                {
+                    _sceneManagers.Add(sceneManagerToAdd);
+                }
+
+                foreach (GameObject gameObjectToAdd in _gameObjectAddQue)
+                {
+                    _gameObjects.Add(gameObjectToAdd);
+                }
+
+                foreach (SceneManager addedSceneManager in _sceneManagerAddQue)
+                {
+                    addedSceneManager.InvokeInitialize();
+                }
+
+                _sceneManagerAddQue = new List<SceneManager>();
+
+                foreach (GameObject addedGameObject in _gameObjectAddQue)
+                {
+                    addedGameObject.InvokeInitialize();
+                }
+
+                _gameObjectAddQue = new List<GameObject>();
+
+                dirty = false;
             }
-
-            foreach (GameObject gameObjectToRemove in _gameObjectRemoveQue)
-            {
-                gameObjectToRemove.InvokeOnDestroy();
-            }
-
-            foreach (SceneManager removedSceneManager in _sceneManagerRemoveQue)
-            {
-                _sceneManagers.Remove(removedSceneManager);
-            }
-
-            _sceneManagerRemoveQue = new List<SceneManager>();
-
-            foreach (GameObject removedGameObject in _gameObjectRemoveQue)
-            {
-                _gameObjects.Remove(removedGameObject);
-            }
-
-            _gameObjectRemoveQue = new List<GameObject>();
-
-            foreach (SceneManager sceneManagerToAdd in _sceneManagerAddQue)
-            {
-                _sceneManagers.Add(sceneManagerToAdd);
-            }
-
-            foreach (GameObject gameObjectToAdd in _gameObjectAddQue)
-            {
-                _gameObjects.Add(gameObjectToAdd);
-            }
-
-            foreach (SceneManager addedSceneManager in _sceneManagerAddQue)
-            {
-                addedSceneManager.InvokeInitialize();
-            }
-
-            _sceneManagerAddQue = new List<SceneManager>();
-
-            foreach (GameObject addedGameObject in _gameObjectAddQue)
-            {
-                addedGameObject.InvokeInitialize();
-            }
-
-            _gameObjectAddQue = new List<GameObject>();
-
-            Update();
 
             foreach (SceneManager sceneManager in _sceneManagers)
             {
@@ -338,7 +339,7 @@ namespace EpsilonEngine
                 gameObject.InvokeUpdate();
             }
         }
-        public Texture2D InvokeRender()
+        public Texture2D Render()
         {
             if (_destroyed)
             {
@@ -352,8 +353,6 @@ namespace EpsilonEngine
             _engine.GraphicsDevice.Clear(Engine.BackgroundColor.ToXNA());
 
             _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, null);
-
-            Render();
 
             foreach (SceneManager sceneManager in _sceneManagers)
             {
@@ -373,7 +372,7 @@ namespace EpsilonEngine
 
             return _renderTarget;
         }
-        internal void InvokeOnDestroy()
+        internal void OnDestroy()
         {
             if (_destroyed)
             {
@@ -384,8 +383,6 @@ namespace EpsilonEngine
             {
                 gameObject.InvokeOnDestroy();
             }
-
-            OnDestroy();
 
             _gameObjects = null;
             _gameObjectAddQue = null;
@@ -522,6 +519,8 @@ namespace EpsilonEngine
         }
         internal void RemoveGameObject(GameObject gameObject)
         {
+            dirty = true;
+
             if (_destroyed)
             {
                 throw new Exception("Scene has been destroyed.");
@@ -563,6 +562,8 @@ namespace EpsilonEngine
         }
         internal void AddGameObject(GameObject gameObject)
         {
+            dirty = true;
+
             if (_destroyed)
             {
                 throw new Exception("Scene has been destroyed.");
@@ -724,6 +725,8 @@ namespace EpsilonEngine
         }
         internal void RemoveSceneManager(SceneManager sceneManager)
         {
+            dirty = true;
+
             if (_destroyed)
             {
                 throw new Exception("Scene has been destroyed.");
@@ -765,6 +768,8 @@ namespace EpsilonEngine
         }
         internal void AddSceneManager(SceneManager sceneManager)
         {
+            dirty = true;
+
             if (_destroyed)
             {
                 throw new Exception("Scene has been destroyed.");
@@ -797,24 +802,6 @@ namespace EpsilonEngine
             }
 
             _sceneManagerAddQue.Add(sceneManager);
-        }
-        #endregion
-        #region Overridables
-        protected virtual void Initialize()
-        {
-
-        }
-        protected virtual void Update()
-        {
-
-        }
-        protected virtual void Render()
-        {
-
-        }
-        protected virtual void OnDestroy()
-        {
-
         }
         #endregion
     }

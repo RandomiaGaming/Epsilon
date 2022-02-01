@@ -11,7 +11,7 @@ namespace Epsilon
     {
         public Epsilon()
         {
-            ChangeStage(new Stage(this));
+            ChangeScene(new Stage(this));
         }
     }
 }

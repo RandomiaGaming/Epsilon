@@ -40,7 +40,7 @@ namespace EpsilonEngine
         {
             return new Rectangle(shape.Min + GameObject.Position, shape.Max + GameObject.Position);
         }
-        protected override void Render()
+        internal override void Render()
         {
             //Scene.DrawRect(GetWorldShape(), Color.SoftGreen);
         }

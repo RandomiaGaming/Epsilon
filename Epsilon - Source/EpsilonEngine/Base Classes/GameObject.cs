@@ -19,6 +19,8 @@ namespace EpsilonEngine
         private List<Component> _components = new List<Component>();
         private List<Component> _componentAddQue = new List<Component>();
         private List<Component> _componentRemoveQue = new List<Component>();
+
+        private bool dirty = false;
         #endregion
         #region Properties
         public Engine Engine
@@ -115,7 +117,7 @@ namespace EpsilonEngine
 
             foreach (Component component in _components)
             {
-                component.Destroy();
+                component.OnDestroy();
             }
 
             _scene.RemoveGameObject(this);
@@ -157,7 +159,7 @@ namespace EpsilonEngine
 
             foreach (Component addedComponent in _componentAddQue)
             {
-                addedComponent.InvokeInitialize();
+                addedComponent.Initialize();
             }
 
             _componentAddQue = new List<Component>();
@@ -169,35 +171,40 @@ namespace EpsilonEngine
                 throw new Exception("GameObject has been destroyed.");
             }
 
-            foreach (Component componentToRemove in _componentRemoveQue)
+            if (dirty)
             {
-                componentToRemove.InvokeOnDestroy();
+                foreach (Component componentToRemove in _componentRemoveQue)
+                {
+                    componentToRemove.OnDestroy();
+                }
+
+                foreach (Component removedComponent in _componentRemoveQue)
+                {
+                    _components.Remove(removedComponent);
+                }
+
+                _componentRemoveQue = new List<Component>();
+
+                foreach (Component componentToAdd in _componentAddQue)
+                {
+                    _components.Add(componentToAdd);
+                }
+
+                foreach (Component addedComponent in _componentAddQue)
+                {
+                    addedComponent.Initialize();
+                }
+
+                _componentAddQue = new List<Component>();
+
+                dirty = false;
             }
-
-            foreach (Component removedComponent in _componentRemoveQue)
-            {
-                _components.Remove(removedComponent);
-            }
-
-            _componentRemoveQue = new List<Component>();
-
-            foreach (Component componentToAdd in _componentAddQue)
-            {
-                _components.Add(componentToAdd);
-            }
-
-            foreach (Component addedComponent in _componentAddQue)
-            {
-                addedComponent.InvokeInitialize();
-            }
-
-            _componentAddQue = new List<Component>();
 
             Update();
 
             foreach (Component component in _components)
             {
-                component.InvokeUpdate();
+                component.Update();
             }
         }
         internal void InvokeRender()
@@ -213,7 +220,7 @@ namespace EpsilonEngine
 
             foreach (Component component in _components)
             {
-                component.InvokeRender();
+                component.Render();
             }
 
             _renderring = false;
@@ -227,7 +234,7 @@ namespace EpsilonEngine
 
             foreach (Component componentToRemove in _componentRemoveQue)
             {
-                componentToRemove.InvokeOnDestroy();
+                componentToRemove.OnDestroy();
             }
 
             OnDestroy();
@@ -367,6 +374,8 @@ namespace EpsilonEngine
         }
         internal void RemoveComponent(Component component)
         {
+            dirty = true;
+
             if (_destroyed)
             {
                 throw new Exception("GameObject has been destroyed.");
@@ -408,6 +417,8 @@ namespace EpsilonEngine
         }
         internal void AddComponent(Component component)
         {
+            dirty = true;
+
             if (_destroyed)
             {
                 throw new Exception("GameObject has been destroyed.");

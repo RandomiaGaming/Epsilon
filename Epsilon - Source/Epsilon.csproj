@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="EpsilonEngine\Base Classes\SceneManager.cs" />
+    <Compile Include="EpsilonEngine\Base Classes\Updateable.cs" />
     <Compile Include="EpsilonEngine\DataTypes\Collision.cs" />
     <Compile Include="EpsilonEngine\DataTypes\Color.cs" />
     <Compile Include="EpsilonEngine\DataTypes\EpsilonEvent.cs" />
@@ -82,6 +83,49 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="packages\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Epsilon\Textures\Item Textures\Arrow.png" />
+    <EmbeddedResource Include="Epsilon\Textures\Item Textures\Ball.png" />
+    <EmbeddedResource Include="Epsilon\Textures\Item Textures\BounceBox.png" />
+    <EmbeddedResource Include="Epsilon\Textures\Item Textures\CheckPoint.png" />
+    <EmbeddedResource Include="Epsilon\Textures\Item Textures\GhostBlock.png" />
+    <EmbeddedResource Include="Epsilon\Textures\Item Textures\GoalGate.png" />
+    <EmbeddedResource Include="Epsilon\Textures\Item Textures\Ground.png" />
+    <EmbeddedResource Include="Epsilon\Textures\Item Textures\Lava.png" />
+    <EmbeddedResource Include="Epsilon\Textures\Item Textures\LavaBubble.png" />
+    <EmbeddedResource Include="Epsilon\Textures\Item Textures\LavaCannon.png" />
+    <EmbeddedResource Include="Epsilon\Textures\Item Textures\NoJump.png" />
+    <EmbeddedResource Include="Epsilon\Textures\Item Textures\OneWayGate.png" />
+    <EmbeddedResource Include="Epsilon\Textures\Item Textures\OnOffBlock.png" />
+    <EmbeddedResource Include="Epsilon\Textures\Item Textures\OnOffSpike.png" />
+    <EmbeddedResource Include="Epsilon\Textures\Item Textures\Player.png" />
+    <EmbeddedResource Include="Epsilon\Textures\Item Textures\PlayerCannon.png" />
+    <EmbeddedResource Include="Epsilon\Textures\Item Textures\Spiny.png" />
+    <EmbeddedResource Include="Epsilon\Textures\Item Textures\Spring.png" />
+    <EmbeddedResource Include="Epsilon\Textures\Item Textures\Switch.png" />
+    <EmbeddedResource Include="Epsilon\Textures\Item Textures\Test.png" />
+    <EmbeddedResource Include="Epsilon\Textures\Item Textures\Tether.png" />
+    <EmbeddedResource Include="Epsilon\Textures\Item Textures\Track.png" />
+    <EmbeddedResource Include="Epsilon\Textures\UI Textures\All.png" />
+    <EmbeddedResource Include="Epsilon\Textures\UI Textures\Arrow.png" />
+    <EmbeddedResource Include="Epsilon\Textures\UI Textures\Back.png" />
+    <EmbeddedResource Include="Epsilon\Textures\UI Textures\Brush.png" />
+    <EmbeddedResource Include="Epsilon\Textures\UI Textures\Bucket.png" />
+    <EmbeddedResource Include="Epsilon\Textures\UI Textures\Button.png" />
+    <EmbeddedResource Include="Epsilon\Textures\UI Textures\Dot.png" />
+    <EmbeddedResource Include="Epsilon\Textures\UI Textures\Eraser.png" />
+    <EmbeddedResource Include="Epsilon\Textures\UI Textures\menuicon.png" />
+    <EmbeddedResource Include="Epsilon\Textures\UI Textures\MoreItems.png" />
+    <EmbeddedResource Include="Epsilon\Textures\UI Textures\PauseButton.png" />
+    <EmbeddedResource Include="Epsilon\Textures\UI Textures\Play.png" />
+    <EmbeddedResource Include="Epsilon\Textures\UI Textures\Reset.png" />
+    <EmbeddedResource Include="Epsilon\Textures\UI Textures\Selection.png" />
+    <EmbeddedResource Include="Epsilon\Textures\UI Textures\SettingsGear.png" />
+    <EmbeddedResource Include="Epsilon\Textures\UI Textures\ToggleValue.png" />
+    <EmbeddedResource Include="Epsilon\Textures\UI Textures\Undo.png" />
+    <EmbeddedResource Include="Epsilon\Textures\UI Textures\White Square.png" />
+    <EmbeddedResource Include="Epsilon\Textures\UI Textures\WorldArrow.png" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\MonoGame.Framework.DesktopGL.3.8.0.1641\build\MonoGame.Framework.DesktopGL.targets" Condition="Exists('..\packages\MonoGame.Framework.DesktopGL.3.8.0.1641\build\MonoGame.Framework.DesktopGL.targets')" />

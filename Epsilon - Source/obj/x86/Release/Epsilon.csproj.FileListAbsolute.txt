@@ -1,0 +1,8 @@
+D:\C# Windows Apps\Epsilon\Epsilon - Source\bin\Release\Epsilon.exe.config
+D:\C# Windows Apps\Epsilon\Epsilon - Source\bin\Release\Epsilon.exe
+D:\C# Windows Apps\Epsilon\Epsilon - Source\bin\Release\MonoGame.Framework.dll
+D:\C# Windows Apps\Epsilon\Epsilon - Source\bin\Release\MonoGame.Framework.xml
+D:\C# Windows Apps\Epsilon\Epsilon - Source\obj\x86\Release\Epsilon.csproj.AssemblyReference.cache
+D:\C# Windows Apps\Epsilon\Epsilon - Source\obj\x86\Release\Epsilon.csproj.CoreCompileInputs.cache
+D:\C# Windows Apps\Epsilon\Epsilon - Source\obj\x86\Release\Epsilon.csproj.CopyComplete
+D:\C# Windows Apps\Epsilon\Epsilon - Source\obj\x86\Release\Epsilon.exe

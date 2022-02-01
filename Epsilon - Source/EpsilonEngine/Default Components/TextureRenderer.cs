@@ -32,10 +32,8 @@ namespace EpsilonEngine
             }
 
             _texture = texture;
-
-            gameObject.Scene.updatePump.Add(this.Update);
         }
-        protected override void Render()
+        internal override void Render()
         {
             GameObject.DrawTexture(_texture, Offset, Color);
         }

@@ -87,7 +87,7 @@ namespace EpsilonEngine
 
             _base.SetData(XNABuffer);
         }
-        public Texture(Engine engine, string filePath)
+        public Texture(Engine engine, string filePath, bool t)
         {
             if (engine is null)
             {
@@ -134,9 +134,97 @@ namespace EpsilonEngine
                 buffer[i] = new Color(XNABuffer[i]);
             }
         }
-        public Texture(Microsoft.Xna.Framework.Graphics.Texture2D source)
+        public Texture(Engine engine, Stream stream)
         {
+            if (engine is null)
+            {
+                throw new Exception("engine cannot be null.");
+            }
+            Engine = engine;
 
+            _base = Microsoft.Xna.Framework.Graphics.Texture2D.FromStream(engine.GraphicsDevice, stream);
+
+            if (_base.Width <= 0)
+            {
+                throw new Exception("width must be greater than 0.");
+            }
+            if (_base.Width > ushort.MaxValue)
+            {
+                throw new Exception("width was too large.");
+            }
+            Width = (ushort)_base.Width;
+
+            if (_base.Height <= 0)
+            {
+                throw new Exception("height must be greater than 0.");
+            }
+            if (_base.Height > ushort.MaxValue)
+            {
+                throw new Exception("height was too large.");
+            }
+            Height = (ushort)_base.Height;
+
+
+            Microsoft.Xna.Framework.Color[] XNABuffer = new Microsoft.Xna.Framework.Color[Width * Height];
+
+            _base.GetData(XNABuffer);
+
+            buffer = new Color[Width * Height];
+
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                buffer[i] = new Color(XNABuffer[i]);
+            }
+        }
+        public Texture(Engine engine, Microsoft.Xna.Framework.Graphics.Texture2D source)
+        {
+            if (engine is null)
+            {
+                throw new Exception("engine cannot be null.");
+            }
+            Engine = engine;
+
+            if(source is null)
+            {
+                throw new Exception("source cannot be null.");
+            }
+            if(source.GraphicsDevice != engine.GraphicsDevice)
+            {
+                throw new Exception("source belongs to a different Game.");
+            }
+            _base = source;
+
+            if (_base.Width <= 0)
+            {
+                throw new Exception("width must be greater than 0.");
+            }
+            if (_base.Width > ushort.MaxValue)
+            {
+                throw new Exception("width was too large.");
+            }
+            Width = (ushort)_base.Width;
+
+            if (_base.Height <= 0)
+            {
+                throw new Exception("height must be greater than 0.");
+            }
+            if (_base.Height > ushort.MaxValue)
+            {
+                throw new Exception("height was too large.");
+            }
+            Height = (ushort)_base.Height;
+
+
+            Microsoft.Xna.Framework.Color[] XNABuffer = new Microsoft.Xna.Framework.Color[Width * Height];
+
+            _base.GetData(XNABuffer);
+
+            buffer = new Color[Width * Height];
+
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                buffer[i] = new Color(XNABuffer[i]);
+            }
         }
         #endregion
         #region Overrides

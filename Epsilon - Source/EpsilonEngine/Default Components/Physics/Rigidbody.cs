@@ -12,9 +12,9 @@ namespace EpsilonEngine
         private PhysicsManager _physicsManager = null;
         public Rigidbody(GameObject gameObject) : base(gameObject)
         {
-            gameObject.Scene.updatePump.Add(this.Update);
+            gameObject.Engine.RegisterForUpdate(this);
         }
-        protected override void Initialize()
+        internal override void Initialize()
         {
             _physicsManager = Scene.GetSceneManager<PhysicsManager>();
 
@@ -29,7 +29,7 @@ namespace EpsilonEngine
         {
             return $"EpsilonEngine.Rigidbody()";
         }
-        protected override void Update()
+        internal override void Update()
         {
             subPixel += velocity;
             Point targetMove = new Point((int)subPixel.X, (int)subPixel.Y);

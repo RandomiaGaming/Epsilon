@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace EpsilonEngine
 {
-    public enum EpsilonState { Initialing, Updating, Drawing, Exiting, Exited };
     public class Engine : Game
     {
         #region Constants
@@ -12,82 +11,34 @@ namespace EpsilonEngine
         public const bool ProfilerEnabled = true;
         public const string Name = "Epsilon";
         public const string VersionString = "1.0.0";
-        public static string FullName
-        {
-            get
-            {
-                return Name + " - " + VersionString;
-            }
-        }
+        public static string FullName => Name + " - " + VersionString;
         public const ushort VersionCode = 1;
         #endregion
         #region Variables
-        private GraphicsDeviceManager _graphicsDeviceManager = null;
-        private SpriteBatch _mainSpriteBatch = null;
-        private Scene _currentStage = null;
-        private Scene _newStageQue = null;
-        private TimeSpan _timeSinceStart = new TimeSpan(0);
-        private TimeSpan _deltaTime = new TimeSpan(0);
-        private EpsilonState _currentState = EpsilonState.Initialing;
+        private Updateable[] updatePump = new Updateable[0];
+        private Updateable[] safeUpdatePump = new Updateable[0];
+        private bool updatePumpDirty = false;
+        private bool updatePumpInUse = false;
         #endregion
         #region Properties
-        public EpsilonState CurrentState
-        {
-            get
-            {
-                return _currentState;
-            }
-        }
-        public GraphicsDeviceManager GraphicsDeviceManager
-        {
-            get
-            {
-                return _graphicsDeviceManager;
-            }
-        }
-        public SpriteBatch MainSpriteBatch
-        {
-            get
-            {
-                return _mainSpriteBatch;
-            }
-        }
-        public Scene CurrentStage
-        {
-            get
-            {
-                return _currentStage;
-            }
-        }
-        public TimeSpan TimeSinceStart
-        {
-            get
-            {
-                return _timeSinceStart;
-            }
-        }
-        public TimeSpan DeltaTime
-        {
-            get
-            {
-                return _deltaTime;
-            }
-        }
+        public GraphicsDeviceManager GraphicsDeviceManager { get; private set; } = null;
+        public SpriteBatch MainSpriteBatch { get; private set; } = null;
+        public Scene CurrentScene { get; private set; } = null;
+        public TimeSpan TimeSinceStart { get; private set; } = new TimeSpan(0);
+        public TimeSpan DeltaTime { get; private set; } = new TimeSpan(0);
         #endregion
         #region Constructors
         public Engine()
         {
-            _currentState = EpsilonState.Initialing;
-
-            _graphicsDeviceManager = new GraphicsDeviceManager(this);
-            _graphicsDeviceManager.GraphicsProfile = GraphicsProfile.Reach;
-            _graphicsDeviceManager.SynchronizeWithVerticalRetrace = false;
-            _graphicsDeviceManager.HardwareModeSwitch = true;
-            _graphicsDeviceManager.IsFullScreen = false;
-            _graphicsDeviceManager.PreferHalfPixelOffset = false;
-            _graphicsDeviceManager.PreferredBackBufferFormat = SurfaceFormat.Color;
-            _graphicsDeviceManager.SupportedOrientations = DisplayOrientation.LandscapeLeft | DisplayOrientation.LandscapeRight | DisplayOrientation.Portrait | DisplayOrientation.PortraitDown | DisplayOrientation.Unknown | DisplayOrientation.Default;
-            _graphicsDeviceManager.ApplyChanges();
+            GraphicsDeviceManager = new GraphicsDeviceManager(this);
+            GraphicsDeviceManager.GraphicsProfile = GraphicsProfile.Reach;
+            GraphicsDeviceManager.SynchronizeWithVerticalRetrace = false;
+            GraphicsDeviceManager.HardwareModeSwitch = true;
+            GraphicsDeviceManager.IsFullScreen = false;
+            GraphicsDeviceManager.PreferHalfPixelOffset = false;
+            GraphicsDeviceManager.PreferredBackBufferFormat = SurfaceFormat.Color;
+            GraphicsDeviceManager.SupportedOrientations = DisplayOrientation.LandscapeLeft | DisplayOrientation.LandscapeRight | DisplayOrientation.Portrait | DisplayOrientation.PortraitDown | DisplayOrientation.Unknown | DisplayOrientation.Default;
+            GraphicsDeviceManager.ApplyChanges();
 
             base.GraphicsDevice.BlendState = BlendState.AlphaBlend;
             base.GraphicsDevice.DepthStencilState = DepthStencilState.None;
@@ -105,105 +56,55 @@ namespace EpsilonEngine
             base.IsFixedTimeStep = false;
             base.IsMouseVisible = true;
 
-            _mainSpriteBatch = new SpriteBatch(GraphicsDevice);
-            _mainSpriteBatch.Name = "Main SpriteBatch";
-            _mainSpriteBatch.Tag = null;
+            MainSpriteBatch = new SpriteBatch(GraphicsDevice);
+            MainSpriteBatch.Name = "Main SpriteBatch";
+            MainSpriteBatch.Tag = null;
 
             Window.ClientSizeChanged += WindowClientSizeChanged;
-        }
-        #endregion
-        #region Window Management
-        private void WindowClientSizeChanged(object sender, EventArgs e)
-        {
-            Point viewportSize = GetViewportSize();
-            if (_graphicsDeviceManager.PreferredBackBufferWidth != viewportSize.X || _graphicsDeviceManager.PreferredBackBufferHeight != viewportSize.Y)
-            {
-                _graphicsDeviceManager.PreferredBackBufferWidth = viewportSize.X;
-                _graphicsDeviceManager.PreferredBackBufferHeight = viewportSize.Y;
-                _graphicsDeviceManager.ApplyChanges();
-            }
-        }
-        public void SetWindowed()
-        {
-            _graphicsDeviceManager.IsFullScreen = false;
-            _graphicsDeviceManager.PreferredBackBufferWidth = base.GraphicsDevice.Adapter.CurrentDisplayMode.Width / 2;
-            _graphicsDeviceManager.PreferredBackBufferHeight = base.GraphicsDevice.Adapter.CurrentDisplayMode.Height / 2;
-            _graphicsDeviceManager.ApplyChanges();
-            Window.Position = new Point(base.GraphicsDevice.Adapter.CurrentDisplayMode.Width / 4, base.GraphicsDevice.Adapter.CurrentDisplayMode.Height / 4).ToXNA();
-        }
-        public void SetFullscreen()
-        {
-            _graphicsDeviceManager.IsFullScreen = true;
-            _graphicsDeviceManager.PreferredBackBufferWidth = base.GraphicsDevice.Adapter.CurrentDisplayMode.Width;
-            _graphicsDeviceManager.PreferredBackBufferHeight = base.GraphicsDevice.Adapter.CurrentDisplayMode.Height;
-            _graphicsDeviceManager.ApplyChanges();
-        }
-        public void ToggleFullscreen()
-        {
-            if (_graphicsDeviceManager.IsFullScreen)
-            {
-                SetWindowed();
-            }
-            else
-            {
-                SetFullscreen();
-            }
-        }
-        public Point GetViewportSize()
-        {
-            if (_graphicsDeviceManager.IsFullScreen)
-            {
-                return new Point(base.GraphicsDevice.Adapter.CurrentDisplayMode.Width, base.GraphicsDevice.Adapter.CurrentDisplayMode.Height);
-            }
-            else
-            {
-                return new Point(base.GraphicsDevice.Viewport.Width, base.GraphicsDevice.Viewport.Height);
-            }
         }
         #endregion
         #region Overrides
         protected override void Initialize()
         {
-            _currentState = EpsilonState.Initialing;
-
             SetWindowed();
         }
         protected sealed override void Update(GameTime gameTime)
         {
             DebugProfiler.UpdateStart();
 
-            _currentState = EpsilonState.Updating;
+            TimeSinceStart = gameTime.TotalGameTime;
+            DeltaTime = gameTime.ElapsedGameTime;
 
-            _timeSinceStart = gameTime.TotalGameTime;
-            _deltaTime = gameTime.ElapsedGameTime;
-
-            SquashStageQue();
-
-            if (_currentStage is not null)
+            int safeUpdatePumpLength = safeUpdatePump.Length;
+            for (int i = 0; i < safeUpdatePumpLength; i++)
             {
-                _currentStage.InvokeUpdate();
+                safeUpdatePump[i].Update();
+            }
+
+            if (updatePumpDirty)
+            {
+                safeUpdatePump = updatePump;
+                updatePumpDirty = false;
             }
 
             DebugProfiler.UpdateEnd();
 
             DebugProfiler.RenderStart();
 
-            _currentState = EpsilonState.Drawing;
-
             Texture2D stageRender = null;
 
-            if (_currentStage is not null)
+            if (CurrentScene is not null)
             {
-                stageRender = _currentStage.InvokeRender();
+                stageRender = CurrentScene.Render();
             }
 
             GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.Black);
 
-            _mainSpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, null);
+            MainSpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, null);
 
             if (stageRender is not null)
             {
-                double targetAspectRatio = _currentStage.AspectRatio;
+                double targetAspectRatio = CurrentScene.AspectRatio;
                 Point viewPortSize = GetViewportSize();
                 int viewPortWidth = viewPortSize.X;
                 int viewPortHeight = viewPortSize.Y;
@@ -213,7 +114,7 @@ namespace EpsilonEngine
                 int RenderX;
                 int RenderY;
 
-                if(viewPortAspectRatio >= targetAspectRatio)
+                if (viewPortAspectRatio >= targetAspectRatio)
                 {
                     RenderWidth = (int)(viewPortHeight * targetAspectRatio);
                     RenderHeight = viewPortHeight;
@@ -228,12 +129,12 @@ namespace EpsilonEngine
                     RenderY = (viewPortHeight - RenderHeight) / 2;
                 }
 
-                _mainSpriteBatch.Draw(stageRender, new Microsoft.Xna.Framework.Rectangle(RenderX, RenderY, RenderWidth, RenderHeight), new Microsoft.Xna.Framework.Rectangle(0, 0, stageRender.Width, stageRender.Height), Microsoft.Xna.Framework.Color.White, 0, new Vector2(0, 0), SpriteEffects.None, 0);
+                MainSpriteBatch.Draw(stageRender, new Microsoft.Xna.Framework.Rectangle(RenderX, RenderY, RenderWidth, RenderHeight), new Microsoft.Xna.Framework.Rectangle(0, 0, stageRender.Width, stageRender.Height), Microsoft.Xna.Framework.Color.White, 0, new Vector2(0, 0), SpriteEffects.None, 0);
             }
 
             //Render Canvas Here
 
-            _mainSpriteBatch.End();
+            MainSpriteBatch.End();
 
             DebugProfiler.RenderEnd();
 
@@ -245,63 +146,90 @@ namespace EpsilonEngine
         }
         public override string ToString()
         {
-            return $"Epsilon.Epsilon({FullName})";
-        }
-        protected override void EndRun()
-        {
-            _currentState = EpsilonState.Exiting;
-        }
-        protected override void OnExiting(object sender, EventArgs args)
-        {
-            this.Dispose();
-            _currentState = EpsilonState.Exited;
+            return $"EpsilonEngine.Engine({FullName})";
         }
         #endregion
         #region Methods
-        private void SquashStageQue()
+        public void ChangeScene(Scene scene)
         {
-            if (_newStageQue != _currentStage)
+            if (CurrentScene is not null)
             {
-                if (_currentStage is not null)
-                {
-                    _currentStage.InvokeOnDestroy();
-                }
-                if (_newStageQue is not null)
-                {
-                    _newStageQue.InvokeInitialize();
-                }
-                _currentStage = _newStageQue;
+                CurrentScene.OnDestroy();
+            }
+            CurrentScene = scene;
+            if (CurrentScene is not null)
+            {
+                CurrentScene.Initialize();
             }
         }
-        public void ChangeStage(Scene newStage)
+        public void RegisterForUpdate(Updateable updateable)
         {
-            if (_currentState == EpsilonState.Initialing)
+            if (updateable is null)
             {
-                _newStageQue = newStage;
-                _currentStage = _newStageQue;
+                throw new Exception("updateable cannot be null.");
             }
-            else if (_currentState == EpsilonState.Updating)
+
+            Updateable[] newUpdatePump = new Updateable[updatePump.Length + 1];
+            Array.Copy(updatePump, 0, newUpdatePump, 0, updatePump.Length);
+            newUpdatePump[updatePump.Length] = updateable;
+            updatePump = newUpdatePump;
+
+            if (!updatePumpInUse)
             {
-                if (newStage is null)
-                {
-                    _newStageQue = null;
-                }
-                else if (newStage.Engine == this)
-                {
-                    _newStageQue = newStage;
-                }
-                else
-                {
-                    throw new Exception("newStage belongs to a different Epsilon.");
-                }
+                safeUpdatePump = newUpdatePump;
             }
-            else if (_currentState == EpsilonState.Drawing)
+            else
             {
-                throw new Exception("Cannot set stage during drawing.");
+                updatePumpDirty = true;
             }
-            else if (_currentState == (EpsilonState.Exited | EpsilonState.Exited))
+        }
+        #endregion
+        #region Window Management
+        private void WindowClientSizeChanged(object sender, EventArgs e)
+        {
+            Point viewportSize = GetViewportSize();
+            if (GraphicsDeviceManager.PreferredBackBufferWidth != viewportSize.X || GraphicsDeviceManager.PreferredBackBufferHeight != viewportSize.Y)
             {
-                throw new Exception("Cannot set stage because game has exited.");
+                GraphicsDeviceManager.PreferredBackBufferWidth = viewportSize.X;
+                GraphicsDeviceManager.PreferredBackBufferHeight = viewportSize.Y;
+                GraphicsDeviceManager.ApplyChanges();
+            }
+        }
+        public void SetWindowed()
+        {
+            GraphicsDeviceManager.IsFullScreen = false;
+            GraphicsDeviceManager.PreferredBackBufferWidth = base.GraphicsDevice.Adapter.CurrentDisplayMode.Width / 2;
+            GraphicsDeviceManager.PreferredBackBufferHeight = base.GraphicsDevice.Adapter.CurrentDisplayMode.Height / 2;
+            GraphicsDeviceManager.ApplyChanges();
+            Window.Position = new Point(base.GraphicsDevice.Adapter.CurrentDisplayMode.Width / 4, base.GraphicsDevice.Adapter.CurrentDisplayMode.Height / 4).ToXNA();
+        }
+        public void SetFullscreen()
+        {
+            GraphicsDeviceManager.IsFullScreen = true;
+            GraphicsDeviceManager.PreferredBackBufferWidth = base.GraphicsDevice.Adapter.CurrentDisplayMode.Width;
+            GraphicsDeviceManager.PreferredBackBufferHeight = base.GraphicsDevice.Adapter.CurrentDisplayMode.Height;
+            GraphicsDeviceManager.ApplyChanges();
+        }
+        public void ToggleFullscreen()
+        {
+            if (GraphicsDeviceManager.IsFullScreen)
+            {
+                SetWindowed();
+            }
+            else
+            {
+                SetFullscreen();
+            }
+        }
+        public Point GetViewportSize()
+        {
+            if (GraphicsDeviceManager.IsFullScreen)
+            {
+                return new Point(base.GraphicsDevice.Adapter.CurrentDisplayMode.Width, base.GraphicsDevice.Adapter.CurrentDisplayMode.Height);
+            }
+            else
+            {
+                return new Point(base.GraphicsDevice.Viewport.Width, base.GraphicsDevice.Viewport.Height);
             }
         }
         #endregion

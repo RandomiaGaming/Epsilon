@@ -14,13 +14,13 @@ namespace EpsilonEngine
         public int PaddingDown = 0;
         public CameraFollower(GameObject gameObject) : base(gameObject)
         {
-            gameObject.Scene.updatePump.Add(this.Update);
+            gameObject.Engine.RegisterForUpdate(this);
         }
         public override string ToString()
         {
             return $"EpsilonEngine.CameraFollower()";
         }
-        protected override void Update()
+        internal override void Update()
         {
             if (GameObject.Position.X + Width >= GameObject.Scene.CameraPosition.X + GameObject.Scene.ViewPortSize.X - PaddingRight)
             {

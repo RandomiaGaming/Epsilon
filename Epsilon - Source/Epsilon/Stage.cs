@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Reflection;
 using EpsilonEngine;
 namespace Epsilon
 {
@@ -29,9 +29,9 @@ namespace Epsilon
                 upperGround.Position = new Point(ViewPortWidth - 16, i * 16);
             }
 
-            Texture ballTexture = new Texture(Engine, @"D:\C# Windows Apps\Epsilon\Epsilon - Source\Old Code\Default\Assets\Textures\Item Textures\Ball.png");
+            Texture ballTexture = new Texture(Engine, Assembly.GetCallingAssembly().GetManifestResourceStream("Epsilon.Epsilon.Textures.Item_Textures.Ball.png"));
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 BouncyBall bouncyBall = new BouncyBall(this, ballTexture, physicsManager);
             }
