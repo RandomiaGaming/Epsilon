@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 namespace EpsilonEngine
 {
     public sealed class CameraFollower : Component
@@ -14,34 +12,35 @@ namespace EpsilonEngine
         public int PaddingDown = 0;
         public CameraFollower(GameObject gameObject) : base(gameObject)
         {
-            gameObject.Engine.RegisterForUpdate(this);
+
         }
         public override string ToString()
         {
             return $"EpsilonEngine.CameraFollower()";
         }
-        internal override void Update()
+        protected override void Update()
         {
-            if (GameObject.Position.X + Width >= GameObject.Scene.CameraPosition.X + GameObject.Scene.ViewPortSize.X - PaddingRight)
+            Point goPos = GameObject.LocalPosition;
+            if (goPos.X + Width >= GameObject.Scene.CameraPosition.X + GameObject.Scene.ViewPortSize.X - PaddingRight)
             {
-                GameObject.Scene.CameraPosition = new Point(GameObject.Position.X + Width + PaddingRight - GameObject.Scene.ViewPortSize.X, GameObject.Scene.CameraPosition.Y);
+                GameObject.Scene.CameraPosition = new Point(goPos.X + Width + PaddingRight - GameObject.Scene.ViewPortSize.X, GameObject.Scene.CameraPosition.Y);
             }
 
-            if (GameObject.Position.X <= GameObject.Scene.CameraPosition.X + PaddingLeft)
+            if (goPos.X <= GameObject.Scene.CameraPosition.X + PaddingLeft)
             {
-                GameObject.Scene.CameraPosition = new Point(GameObject.Position.X - PaddingLeft, GameObject.Scene.CameraPosition.Y);
+                GameObject.Scene.CameraPosition = new Point(goPos.X - PaddingLeft, GameObject.Scene.CameraPosition.Y);
             }
 
 
 
-            if (GameObject.Position.Y + Height >= GameObject.Scene.CameraPosition.Y + GameObject.Scene.ViewPortSize.Y - PaddingUp)
+            if (goPos.Y + Height >= GameObject.Scene.CameraPosition.Y + GameObject.Scene.ViewPortSize.Y - PaddingUp)
             {
-                GameObject.Scene.CameraPosition = new Point(GameObject.Scene.CameraPosition.X, GameObject.Position.Y + Height + PaddingUp - GameObject.Scene.ViewPortSize.Y);
+                GameObject.Scene.CameraPosition = new Point(GameObject.Scene.CameraPosition.X, goPos.Y + Height + PaddingUp - GameObject.Scene.ViewPortSize.Y);
             }
 
-            if (GameObject.Position.Y <= GameObject.Scene.CameraPosition.Y + PaddingDown)
+            if (goPos.Y <= GameObject.Scene.CameraPosition.Y + PaddingDown)
             {
-                GameObject.Scene.CameraPosition = new Point(GameObject.Scene.CameraPosition.X, GameObject.Position.Y - PaddingDown);
+                GameObject.Scene.CameraPosition = new Point(GameObject.Scene.CameraPosition.X, goPos.Y - PaddingDown);
             }
         }
     }

@@ -7,7 +7,7 @@ using EpsilonEngine;
 
 namespace Epsilon
 {
-    public sealed class Epsilon : Engine
+    public sealed class Epsilon : Game
     {
         public Epsilon()
         {

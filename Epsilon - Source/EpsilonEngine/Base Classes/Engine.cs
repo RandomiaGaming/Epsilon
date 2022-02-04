@@ -1,54 +1,46 @@
 ﻿using System;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-
 namespace EpsilonEngine
 {
-    public class Engine : Game
+    public class Game : Microsoft.Xna.Framework.Game
     {
-        #region Constants
-        public static readonly Color BackgroundColor = new Color(byte.MaxValue, byte.MaxValue, (byte)150, byte.MaxValue);
-        public const bool ProfilerEnabled = true;
-        public const string Name = "Epsilon";
-        public const string VersionString = "1.0.0";
-        public static string FullName => Name + " - " + VersionString;
-        public const ushort VersionCode = 1;
-        #endregion
         #region Variables
-        private Updateable[] updatePump = new Updateable[0];
-        private Updateable[] safeUpdatePump = new Updateable[0];
+        private Microsoft.Xna.Framework.GraphicsDeviceManager GraphicsDeviceManager = null;
+        private Microsoft.Xna.Framework.Graphics.SpriteBatch MainSpriteBatch = null;
+
+        private PumpEvent[] updatePump = new PumpEvent[0];
+        private PumpEvent[] safeUpdatePump = new PumpEvent[0];
         private bool updatePumpDirty = false;
         private bool updatePumpInUse = false;
         #endregion
         #region Properties
-        public GraphicsDeviceManager GraphicsDeviceManager { get; private set; } = null;
-        public SpriteBatch MainSpriteBatch { get; private set; } = null;
+        public Color BackgroundColor { get; private set; } = Color.White;
         public Scene CurrentScene { get; private set; } = null;
+        public float CurrentFPS { get; private set; } = 0f;
         public TimeSpan TimeSinceStart { get; private set; } = new TimeSpan(0);
         public TimeSpan DeltaTime { get; private set; } = new TimeSpan(0);
         #endregion
         #region Constructors
-        public Engine()
+        public Game()
         {
-            GraphicsDeviceManager = new GraphicsDeviceManager(this);
-            GraphicsDeviceManager.GraphicsProfile = GraphicsProfile.Reach;
+            GraphicsDeviceManager = new Microsoft.Xna.Framework.GraphicsDeviceManager(this);
+            GraphicsDeviceManager.GraphicsProfile = Microsoft.Xna.Framework.Graphics.GraphicsProfile.Reach;
             GraphicsDeviceManager.SynchronizeWithVerticalRetrace = false;
             GraphicsDeviceManager.HardwareModeSwitch = true;
             GraphicsDeviceManager.IsFullScreen = false;
             GraphicsDeviceManager.PreferHalfPixelOffset = false;
-            GraphicsDeviceManager.PreferredBackBufferFormat = SurfaceFormat.Color;
-            GraphicsDeviceManager.SupportedOrientations = DisplayOrientation.LandscapeLeft | DisplayOrientation.LandscapeRight | DisplayOrientation.Portrait | DisplayOrientation.PortraitDown | DisplayOrientation.Unknown | DisplayOrientation.Default;
+            GraphicsDeviceManager.PreferredBackBufferFormat = Microsoft.Xna.Framework.Graphics.SurfaceFormat.Color;
+            GraphicsDeviceManager.SupportedOrientations = Microsoft.Xna.Framework.DisplayOrientation.LandscapeLeft | Microsoft.Xna.Framework.DisplayOrientation.LandscapeRight | Microsoft.Xna.Framework.DisplayOrientation.Portrait | Microsoft.Xna.Framework.DisplayOrientation.PortraitDown | Microsoft.Xna.Framework.DisplayOrientation.Unknown | Microsoft.Xna.Framework.DisplayOrientation.Default;
             GraphicsDeviceManager.ApplyChanges();
 
-            base.GraphicsDevice.BlendState = BlendState.AlphaBlend;
-            base.GraphicsDevice.DepthStencilState = DepthStencilState.None;
-            base.GraphicsDevice.RasterizerState = RasterizerState.CullNone;
+            base.GraphicsDevice.BlendState = Microsoft.Xna.Framework.Graphics.BlendState.AlphaBlend;
+            base.GraphicsDevice.DepthStencilState = Microsoft.Xna.Framework.Graphics.DepthStencilState.None;
+            base.GraphicsDevice.RasterizerState = Microsoft.Xna.Framework.Graphics.RasterizerState.CullNone;
 
             base.Window.AllowAltF4 = true;
             base.Window.AllowUserResizing = true;
             base.Window.IsBorderless = false;
             base.Window.Position = new Point(GraphicsDevice.Adapter.CurrentDisplayMode.Width / 4, GraphicsDevice.Adapter.CurrentDisplayMode.Height / 4).ToXNA();
-            base.Window.Title = FullName;
+            base.Window.Title = "Game";
 
             base.InactiveSleepTime = new TimeSpan(0);
             base.TargetElapsedTime = new TimeSpan(10000000 / 60);
@@ -56,7 +48,7 @@ namespace EpsilonEngine
             base.IsFixedTimeStep = false;
             base.IsMouseVisible = true;
 
-            MainSpriteBatch = new SpriteBatch(GraphicsDevice);
+            MainSpriteBatch = new Microsoft.Xna.Framework.Graphics.SpriteBatch(GraphicsDevice);
             MainSpriteBatch.Name = "Main SpriteBatch";
             MainSpriteBatch.Tag = null;
 
@@ -68,17 +60,23 @@ namespace EpsilonEngine
         {
             SetWindowed();
         }
-        protected sealed override void Update(GameTime gameTime)
+        protected sealed override void Update(Microsoft.Xna.Framework.GameTime gameTime)
         {
             DebugProfiler.UpdateStart();
 
             TimeSinceStart = gameTime.TotalGameTime;
             DeltaTime = gameTime.ElapsedGameTime;
+            CurrentFPS = 10000000f / DeltaTime.Ticks;
 
-            int safeUpdatePumpLength = safeUpdatePump.Length;
-            for (int i = 0; i < safeUpdatePumpLength; i++)
+            if (CurrentScene is not null && !CurrentScene.GameObjectsInitialized)
             {
-                safeUpdatePump[i].Update();
+                CurrentScene.Initialize();
+            }
+
+            int updatePumpLength = safeUpdatePump.Length;
+            for (int i = 0; i < updatePumpLength; i++)
+            {
+                safeUpdatePump[i].Invoke();
             }
 
             if (updatePumpDirty)
@@ -91,7 +89,7 @@ namespace EpsilonEngine
 
             DebugProfiler.RenderStart();
 
-            Texture2D stageRender = null;
+            Microsoft.Xna.Framework.Graphics.Texture2D stageRender = null;
 
             if (CurrentScene is not null)
             {
@@ -100,7 +98,7 @@ namespace EpsilonEngine
 
             GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.Black);
 
-            MainSpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, null);
+            MainSpriteBatch.Begin(Microsoft.Xna.Framework.Graphics.SpriteSortMode.Deferred, Microsoft.Xna.Framework.Graphics.BlendState.AlphaBlend, Microsoft.Xna.Framework.Graphics.SamplerState.PointClamp, null, null, null, null);
 
             if (stageRender is not null)
             {
@@ -129,7 +127,7 @@ namespace EpsilonEngine
                     RenderY = (viewPortHeight - RenderHeight) / 2;
                 }
 
-                MainSpriteBatch.Draw(stageRender, new Microsoft.Xna.Framework.Rectangle(RenderX, RenderY, RenderWidth, RenderHeight), new Microsoft.Xna.Framework.Rectangle(0, 0, stageRender.Width, stageRender.Height), Microsoft.Xna.Framework.Color.White, 0, new Vector2(0, 0), SpriteEffects.None, 0);
+                MainSpriteBatch.Draw(stageRender, new Microsoft.Xna.Framework.Rectangle(RenderX, RenderY, RenderWidth, RenderHeight), new Microsoft.Xna.Framework.Rectangle(0, 0, stageRender.Width, stageRender.Height), Microsoft.Xna.Framework.Color.White, 0, new Microsoft.Xna.Framework.Vector2(0, 0), Microsoft.Xna.Framework.Graphics.SpriteEffects.None, 0);
             }
 
             //Render Canvas Here
@@ -146,7 +144,7 @@ namespace EpsilonEngine
         }
         public override string ToString()
         {
-            return $"EpsilonEngine.Engine({FullName})";
+            return $"EpsilonEngine.Engine(Game)";
         }
         #endregion
         #region Methods
@@ -154,7 +152,7 @@ namespace EpsilonEngine
         {
             if (CurrentScene is not null)
             {
-                CurrentScene.OnDestroy();
+                CurrentScene.OnRemove();
             }
             CurrentScene = scene;
             if (CurrentScene is not null)
@@ -162,16 +160,16 @@ namespace EpsilonEngine
                 CurrentScene.Initialize();
             }
         }
-        public void RegisterForUpdate(Updateable updateable)
+        public void RegisterForUpdate(PumpEvent pumpEvent)
         {
-            if (updateable is null)
+            if (pumpEvent is null)
             {
                 throw new Exception("updateable cannot be null.");
             }
 
-            Updateable[] newUpdatePump = new Updateable[updatePump.Length + 1];
+            PumpEvent[] newUpdatePump = new PumpEvent[updatePump.Length + 1];
             Array.Copy(updatePump, 0, newUpdatePump, 0, updatePump.Length);
-            newUpdatePump[updatePump.Length] = updateable;
+            newUpdatePump[updatePump.Length] = pumpEvent;
             updatePump = newUpdatePump;
 
             if (!updatePumpInUse)

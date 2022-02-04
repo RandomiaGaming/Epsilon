@@ -1,6 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System;
+﻿using System;
 namespace EpsilonEngine
 {
     public sealed class TextureRenderer : Component
@@ -33,9 +31,9 @@ namespace EpsilonEngine
 
             _texture = texture;
         }
-        internal override void Render()
+        protected override void Render()
         {
-            GameObject.DrawTexture(_texture, Offset, Color);
+            GameObject.DrawTextureLocalSpace(_texture, Offset.X, Offset.Y, Color.R, Color.G, Color.B, Color.A);
         }
         public override string ToString()
         {

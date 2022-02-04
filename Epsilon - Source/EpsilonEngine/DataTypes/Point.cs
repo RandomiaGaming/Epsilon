@@ -27,6 +27,11 @@ namespace EpsilonEngine
             X = x;
             Y = y;
         }
+        public Point(Vector source)
+        {
+            X = (int)source.X;
+            Y = (int)source.Y;
+        }
         public Point(Microsoft.Xna.Framework.Point source)
         {
             X = source.X;
@@ -114,6 +119,10 @@ namespace EpsilonEngine
             a.X *= -1;
             a.Y *= -1;
             return a;
+        }
+        public static explicit operator Point(Vector source)
+        {
+            return new Point(source);
         }
         #endregion
         #region Methods

@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 namespace EpsilonEngine
 {
     public sealed class ParticleSystem : Component
@@ -51,14 +48,12 @@ namespace EpsilonEngine
             }
 
             _particleTexture = particleTexture;
-
-            gameObject.Engine.RegisterForUpdate(this);
         }
         public override string ToString()
         {
             return $"EpsilonEngine.ParticleSystem()";
         }
-        internal override void Update()
+        protected override void Update()
         {
             _timer += EmissionRate;
             while(_timer >= 1)
@@ -92,18 +87,18 @@ namespace EpsilonEngine
                 particle.lifetime--;
             }
         }
-        internal override void Render()
+        protected override void Render()
         {
             for (int i = 0; i < _particles.Count; i++)
             {
                 Particle particle = _particles[i];
                 if (UseWorldSpace)
                 {
-                    Scene.DrawTexture(_particleTexture, new Point(particle.positionX, particle.positionY), particle.color);
+                    Scene.DrawTextureWorldSpace(_particleTexture, particle.positionX, particle.positionY, particle.color.R, particle.color.G, particle.color.B, particle.color.A);
                 }
                 else
                 {
-                    GameObject.DrawTexture(_particleTexture, new Point(particle.positionX, particle.positionY), particle.color);
+                    GameObject.DrawTextureLocalSpace(_particleTexture, particle.positionX, particle.positionY, particle.color.R, particle.color.G, particle.color.B, particle.color.A);
                 }
             }
         }

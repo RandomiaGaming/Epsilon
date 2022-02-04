@@ -1,21 +1,13 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System;
+﻿using System;
 namespace EpsilonEngine
 {
     public sealed class Collider : Component
     {
-        public Rectangle shape = new Rectangle(Point.Zero, new Point(16, 16));
-        private PhysicsManager _physicsManager = null;
-        public int _physicsLayer = 0;
-        public PhysicsManager PhysicsManager
-        {
-            get
-            {
-                return _physicsManager;
-            }
-        }
-        public Collider(GameObject gameObject, PhysicsManager physicsManager, int physicsLayer) : base(gameObject)
+        public Rectangle Rect { get; set; } = new Rectangle(Point.Zero, new Point(15, 15));
+        public PhysicsManager PhysicsManager { get; private set; } = null;
+        public int PhysicsLayerIndex { get; private set; } = 0;
+        public SideInfo SideCollision { get; set; } = SideInfo.True;
+        public Collider(GameObject gameObject, PhysicsManager physicsManager, int physicsLayerIndex) : base(gameObject)
         {
             if (physicsManager is null)
             {
@@ -27,22 +19,19 @@ namespace EpsilonEngine
                 throw new Exception("physicsManager belongs to a different Scene.");
             }
 
-            _physicsManager = physicsManager;
+            PhysicsManager = physicsManager;
 
-            _physicsManager.ManageCollider(this);
-            _physicsLayer = physicsLayer;
+            PhysicsLayerIndex = physicsLayerIndex;
+
+            PhysicsManager.ManageCollider(this);
         }
         public override string ToString()
         {
-            return $"EpsilonEngine.Collider()";
+            return $"EpsilonEngine.Collider({PhysicsManager}, {PhysicsLayerIndex})";
         }
         public Rectangle GetWorldShape()
         {
-            return new Rectangle(shape.Min + GameObject.Position, shape.Max + GameObject.Position);
-        }
-        internal override void Render()
-        {
-            //Scene.DrawRect(GetWorldShape(), Color.SoftGreen);
+            return new Rectangle(Rect.Min + GameObject.Position, Rect.Max + GameObject.Position);
         }
     }
 }

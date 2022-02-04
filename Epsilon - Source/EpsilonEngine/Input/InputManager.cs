@@ -6,18 +6,18 @@ namespace EpsilonEngine
     //public enum VirtualInput { Jump, Right, Left, MenuUp, MenuDown, MenuRight, MenuLeft, MenuEnter, MenuBack };
     public sealed class InputManager
     {
-        private Engine _epsilon = null;
+        private Game _epsilon = null;
         private List<HardwareInput> _hardwareInputs = new List<HardwareInput>();
         private List<VirtualInput> _virtualInputs = new List<VirtualInput>();
         private List<InputBinding> _inputBindings = new List<InputBinding>();
-        public Engine Epsilon
+        public Game Epsilon
         {
             get
             {
                 return _epsilon;
             }
         }
-        public InputManager(Engine epsilon)
+        public InputManager(Game epsilon)
         {
             if (epsilon is null)
             {

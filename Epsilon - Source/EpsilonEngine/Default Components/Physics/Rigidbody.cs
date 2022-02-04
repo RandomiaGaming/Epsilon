@@ -1,20 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework;
 namespace EpsilonEngine
 {
     public sealed class Rigidbody : Component
     {
-        private Vector2 subPixel = Vector2.Zero;
-        public Vector2 velocity = Vector2.Zero;
-        public Vector2 bouncyness = Vector2.Zero;
+        private Vector subPixel = Vector.Zero;
+        public Vector velocity = Vector.Zero;
+        public Vector bouncyness = Vector.Zero;
+        public int CollisionPhysicsLayerIndex { get; private set; } = 0;
+        private PhysicsLayer _physicsLayer = null;
         private Collider _collider = null;
         private PhysicsManager _physicsManager = null;
-        public Rigidbody(GameObject gameObject) : base(gameObject)
+        public Rigidbody(GameObject gameObject, int collisionPhysicsLayerIndex) : base(gameObject)
         {
-            gameObject.Engine.RegisterForUpdate(this);
+            CollisionPhysicsLayerIndex = collisionPhysicsLayerIndex;
         }
-        internal override void Initialize()
+        protected override void Initialize()
         {
             _physicsManager = Scene.GetSceneManager<PhysicsManager>();
 
@@ -24,12 +24,14 @@ namespace EpsilonEngine
             }
 
             _collider = GameObject.GetComponent<Collider>();
+
+            _physicsLayer = _physicsManager.GetPhysicsLayer(CollisionPhysicsLayerIndex);
         }
         public override string ToString()
         {
             return $"EpsilonEngine.Rigidbody()";
         }
-        internal override void Update()
+        protected override void Update()
         {
             subPixel += velocity;
             Point targetMove = new Point((int)subPixel.X, (int)subPixel.Y);
@@ -40,12 +42,12 @@ namespace EpsilonEngine
                 return;
             }
 
-            subPixel -= new Vector2((int)subPixel.X, (int)subPixel.Y);
+            subPixel -= new Vector((int)subPixel.X, (int)subPixel.Y);
 
             if (_collider is null)
             {
                 //The object has no hitbox and can therefore move freely without fear of collisions and then return.
-                GameObject.Position += targetMove;
+                GameObject.LocalPosition += targetMove;
                 return;
             }
 
@@ -54,13 +56,9 @@ namespace EpsilonEngine
             if (targetMove.X > 0)
             {
                 //We are moving right along the x-axis.
-                foreach (Collider otherCollider in _physicsManager.GetManagedColliders())
+                foreach (Collider otherCollider in _physicsLayer.ManagedColliders)
                 {
-                    if (otherCollider == _collider || otherCollider._physicsLayer == _collider._physicsLayer)
-                    {
-                        //We can safely ignore this collider because it belongs to us.
-                    }
-                    else
+                    if (otherCollider != _collider && otherCollider.SideCollision.Left)
                     {
                         Rectangle otherColliderShape = otherCollider.GetWorldShape();
 
@@ -104,20 +102,16 @@ namespace EpsilonEngine
                     }
                 }
                 //Move the GameObject. 
-                GameObject.Position = new Point(GameObject.Position.X + targetMove.X, GameObject.Position.Y);
+                GameObject.LocalPosition = new Point(GameObject.LocalPosition.X + targetMove.X, GameObject.LocalPosition.Y);
                 //Remember to update the collider shape because the object moved.
                 thisColliderShape = _collider.GetWorldShape();
             }
-            else if(targetMove.X < 0)
+            else if (targetMove.X < 0)
             {
                 //By process of elimination We are moving left along the x-axis.
-                foreach (Collider otherCollider in _physicsManager.GetManagedColliders())
+                foreach (Collider otherCollider in _physicsLayer.ManagedColliders)
                 {
-                    if (otherCollider == _collider || otherCollider._physicsLayer == _collider._physicsLayer)
-                    {
-                        //We can safely ignore this collider because it belongs to us.
-                    }
-                    else
+                    if (otherCollider != _collider && otherCollider.SideCollision.Right)
                     {
                         Rectangle otherColliderShape = otherCollider.GetWorldShape();
 
@@ -161,7 +155,7 @@ namespace EpsilonEngine
                     }
                 }
                 //Move the GameObject. 
-                GameObject.Position = new Point(GameObject.Position.X + targetMove.X, GameObject.Position.Y);
+                GameObject.LocalPosition = new Point(GameObject.LocalPosition.X + targetMove.X, GameObject.LocalPosition.Y);
                 //Remember to update the collider shape because the object moved.
                 thisColliderShape = _collider.GetWorldShape();
             }
@@ -171,13 +165,9 @@ namespace EpsilonEngine
             if (targetMove.Y > 0)
             {
                 //We are moving right along the x-axis.
-                foreach (Collider otherCollider in _physicsManager.GetManagedColliders())
+                foreach (Collider otherCollider in _physicsLayer.ManagedColliders)
                 {
-                    if (otherCollider == _collider || otherCollider._physicsLayer == _collider._physicsLayer)
-                    {
-                        //We can safely ignore this collider because it belongs to us.
-                    }
-                    else
+                    if (otherCollider != _collider && otherCollider.SideCollision.Bottom)
                     {
                         Rectangle otherColliderShape = otherCollider.GetWorldShape();
 
@@ -221,18 +211,14 @@ namespace EpsilonEngine
                     }
                 }
                 //Move the GameObject. 
-                GameObject.Position = new Point(GameObject.Position.X, GameObject.Position.Y + targetMove.Y);
+                GameObject.LocalPosition = new Point(GameObject.LocalPosition.X, GameObject.LocalPosition.Y + targetMove.Y);
             }
             else if (targetMove.Y < 0)
             {
                 //By process of elimination We are moving left along the x-axis.
-                foreach (Collider otherCollider in _physicsManager.GetManagedColliders())
+                foreach (Collider otherCollider in _physicsLayer.ManagedColliders)
                 {
-                    if (otherCollider == _collider || otherCollider._physicsLayer == _collider._physicsLayer)
-                    {
-                        //We can safely ignore this collider because it belongs to us.
-                    }
-                    else
+                    if (otherCollider != _collider && otherCollider.SideCollision.Top)
                     {
                         Rectangle otherColliderShape = otherCollider.GetWorldShape();
 
@@ -276,7 +262,7 @@ namespace EpsilonEngine
                     }
                 }
                 //Move the GameObject. 
-                GameObject.Position = new Point(GameObject.Position.X, GameObject.Position.Y + targetMove.Y);
+                GameObject.LocalPosition = new Point(GameObject.LocalPosition.X, GameObject.LocalPosition.Y + targetMove.Y);
             }
         }
     }

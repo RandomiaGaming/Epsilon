@@ -10,12 +10,13 @@ namespace EpsilonEngine
         private Color[] buffer = new Color[0];
         #endregion
         #region Properties
+        public Microsoft.Xna.Framework.Rectangle Rect { get; private set; }
         public ushort Width { get; private set; }
         public ushort Height { get; private set; }
-        public Engine Engine { get; private set; }
+        public Game Engine { get; private set; }
         #endregion
         #region Constructors
-        public Texture(Engine engine, ushort width, ushort height)
+        public Texture(Game engine, ushort width, ushort height)
         {
             if (engine is null)
             {
@@ -43,8 +44,10 @@ namespace EpsilonEngine
             }
 
             _base = new Microsoft.Xna.Framework.Graphics.Texture2D(engine.GraphicsDevice, width, height);
+
+            Rect = new Microsoft.Xna.Framework.Rectangle(0, 0, Width, Height);
         }
-        public Texture(Engine engine, ushort width, ushort height, Color[] data)
+        public Texture(Game engine, ushort width, ushort height, Color[] data)
         {
             if (engine is null)
             {
@@ -86,8 +89,10 @@ namespace EpsilonEngine
             }
 
             _base.SetData(XNABuffer);
+
+            Rect = new Microsoft.Xna.Framework.Rectangle(0, 0, Width, Height);
         }
-        public Texture(Engine engine, string filePath, bool t)
+        public Texture(Game engine, string filePath)
         {
             if (engine is null)
             {
@@ -133,8 +138,10 @@ namespace EpsilonEngine
             {
                 buffer[i] = new Color(XNABuffer[i]);
             }
+
+            Rect = new Microsoft.Xna.Framework.Rectangle(0, 0, Width, Height);
         }
-        public Texture(Engine engine, Stream stream)
+        public Texture(Game engine, Stream stream)
         {
             if (engine is null)
             {
@@ -175,8 +182,10 @@ namespace EpsilonEngine
             {
                 buffer[i] = new Color(XNABuffer[i]);
             }
+
+            Rect = new Microsoft.Xna.Framework.Rectangle(0, 0, Width, Height);
         }
-        public Texture(Engine engine, Microsoft.Xna.Framework.Graphics.Texture2D source)
+        public Texture(Game engine, Microsoft.Xna.Framework.Graphics.Texture2D source)
         {
             if (engine is null)
             {
@@ -225,6 +234,8 @@ namespace EpsilonEngine
             {
                 buffer[i] = new Color(XNABuffer[i]);
             }
+
+            Rect = new Microsoft.Xna.Framework.Rectangle(0, 0, Width, Height);
         }
         #endregion
         #region Overrides

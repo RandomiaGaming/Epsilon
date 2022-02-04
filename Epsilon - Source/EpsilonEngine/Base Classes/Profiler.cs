@@ -1,5 +1,4 @@
 ﻿using System;
-
 namespace EpsilonEngine
 {
     public static class DebugProfiler
@@ -47,7 +46,7 @@ namespace EpsilonEngine
             long renderTime = renderEnd - renderStart;
             long frameTime = frameEnd - frameStart;
 
-            if (frameTime == 0)
+            if (frameTime <= 0)
             {
                 Console.WriteLine($"Debug Profiler - Infinity FPS - {frameTime} Tick Frame - {frameTime - updateTime - renderTime} Tick MonoGame Update - {updateTime} Tick Update - {renderTime} Tick Render.");
             }
