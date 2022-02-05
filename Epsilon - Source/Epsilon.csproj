@@ -66,12 +66,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="EpsilonEngine\Base Classes\GameInterface.cs" />
     <Compile Include="EpsilonEngine\Base Classes\World Space\Component.cs" />
-    <Compile Include="EpsilonEngine\Base Classes\Engine.cs" />
+    <Compile Include="EpsilonEngine\Base Classes\Game.cs" />
     <Compile Include="EpsilonEngine\Base Classes\World Space\GameObject.cs" />
     <Compile Include="EpsilonEngine\Base Classes\Profiler.cs" />
-    <Compile Include="EpsilonEngine\Base Classes\PumpEvent.cs" />
     <Compile Include="EpsilonEngine\Base Classes\World Space\Scene.cs" />
+    <Compile Include="EpsilonEngine\Base Classes\GameManager.cs" />
     <Compile Include="EpsilonEngine\Base Classes\World Space\SceneManager.cs" />
     <Compile Include="EpsilonEngine\DataTypes\Collision.cs" />
     <Compile Include="EpsilonEngine\DataTypes\Color.cs" />

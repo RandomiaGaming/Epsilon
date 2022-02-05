@@ -14,27 +14,29 @@ namespace Epsilon
             for (int i = 0; i < (ViewPortWidth / 16); i++)
             {
                 Ground ground = new Ground(this, physicsManager);
-                ground.LocalPosition = new Point(i * 16, 0);
-
+                ground.LocalPositionX = i * 16;
+                ground.LocalPositionY = 0;
                 Ground upperGround = new Ground(this, physicsManager);
-                upperGround.LocalPosition = new Point(i * 16, ViewPortHeight - 16);
+                upperGround.LocalPositionX = i * 16;
+                upperGround.LocalPositionY = ViewPortHeight - 16;
             }
 
             for (int i = 1; i < (ViewPortHeight / 16) - 1; i++)
             {
-                    Ground ground = new Ground(this, physicsManager);
-                    ground.LocalPosition = new Point(0, i * 16);
+                Ground ground = new Ground(this, physicsManager);
+                ground.LocalPositionX = 0;
+                ground.LocalPositionY = i * 16;
 
-                    Ground upperGround = new Ground(this, physicsManager);
-                    upperGround.LocalPosition = new Point(ViewPortWidth - 16, i * 16);
+                Ground rightGround = new Ground(this, physicsManager);
+                rightGround.LocalPositionX = ViewPortWidth - 16;
+                rightGround.LocalPositionY = i * 16;
             }
 
-            Texture ballTexture = new Texture(Engine, Assembly.GetCallingAssembly().GetManifestResourceStream("Epsilon.Epsilon.Textures.Item_Textures.Ball.png"));
+            Texture ballTexture = new Texture(Game, Assembly.GetCallingAssembly().GetManifestResourceStream("Epsilon.Epsilon.Textures.Item_Textures.Ball.png"));
 
             for (int i = 0; i < 1000; i++)
             {
                 new BouncyBall(this, ballTexture, physicsManager);
-                Console.WriteLine(i);
             }
         }
     }

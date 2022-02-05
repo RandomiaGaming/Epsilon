@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-namespace EpsilonEngine
+﻿namespace EpsilonEngine
 {
     public sealed class CameraFollower : Component
     {
@@ -20,27 +18,25 @@ namespace EpsilonEngine
         }
         protected override void Update()
         {
-            Point goPos = GameObject.LocalPosition;
-            if (goPos.X + Width >= GameObject.Scene.CameraPosition.X + GameObject.Scene.ViewPortSize.X - PaddingRight)
+            int positionX = GameObject.WorldPositionX;
+            int positionY = GameObject.WorldPositionY;
+
+            if (positionX + Width >= GameObject.Scene.CameraPositionX + GameObject.Scene.Width - PaddingRight)
             {
-                GameObject.Scene.CameraPosition = new Point(goPos.X + Width + PaddingRight - GameObject.Scene.ViewPortSize.X, GameObject.Scene.CameraPosition.Y);
+                GameObject.Scene.CameraPositionX = positionX + Width + PaddingRight - GameObject.Scene.Width;
+            }
+            else if (positionX <= GameObject.Scene.CameraPositionX + PaddingLeft)
+            {
+                GameObject.Scene.CameraPositionX = positionX - PaddingLeft;
             }
 
-            if (goPos.X <= GameObject.Scene.CameraPosition.X + PaddingLeft)
+            if (positionY + Height >= GameObject.Scene.CameraPositionY + GameObject.Scene.Height - PaddingUp)
             {
-                GameObject.Scene.CameraPosition = new Point(goPos.X - PaddingLeft, GameObject.Scene.CameraPosition.Y);
+                GameObject.Scene.CameraPositionY = positionY + Height + PaddingUp - GameObject.Scene.Height;
             }
-
-
-
-            if (goPos.Y + Height >= GameObject.Scene.CameraPosition.Y + GameObject.Scene.ViewPortSize.Y - PaddingUp)
+            else if (positionY <= GameObject.Scene.CameraPositionY + PaddingDown)
             {
-                GameObject.Scene.CameraPosition = new Point(GameObject.Scene.CameraPosition.X, goPos.Y + Height + PaddingUp - GameObject.Scene.ViewPortSize.Y);
-            }
-
-            if (goPos.Y <= GameObject.Scene.CameraPosition.Y + PaddingDown)
-            {
-                GameObject.Scene.CameraPosition = new Point(GameObject.Scene.CameraPosition.X, goPos.Y - PaddingDown);
+                GameObject.Scene.CameraPositionY = positionY - PaddingDown;
             }
         }
     }

@@ -4,73 +4,79 @@ namespace EpsilonEngine
 {
     public class Scene
     {
+        #region Constants
+        public const ushort DefaultWidth = 256;
+        public const ushort DefaultHeight = 144;
+        #endregion
         #region Variables
-        private Microsoft.Xna.Framework.Graphics.RenderTarget2D _renderTarget = null;
-        private Microsoft.Xna.Framework.Graphics.SpriteBatch _spriteBatch = null;
-
         private List<GameObject> _gameObjects = new List<GameObject>();
-        private List<SceneManager> _sceneManagers = new List<SceneManager>();
+        private GameObject[] _gameObjectCache = new GameObject[0];
+        private bool _gameObjectCacheValid = true;
 
-        private PumpEvent[] renderPump = new PumpEvent[0];
-        private PumpEvent[] safeRenderPump = new PumpEvent[0];
-        private bool renderPumpDirty = false;
-        private bool renderPumpInUse = false;
+        private List<SceneManager> _sceneManagers = new List<SceneManager>();
+        private SceneManager[] _sceneManagerCache = new SceneManager[0];
+        private bool _sceneManagerCacheValid = true;
         #endregion
         #region Properties
-        public bool GameObjectsInitialized { get; private set; } = true;
-        public Game Engine { get; private set; } = null;
-        public Point CameraPosition { get; set; } = Point.Zero;
-        public ushort ViewPortWidth { get; set; } = 1;
-        public ushort ViewPortHeight { get; set; } = 1;
-        public Point ViewPortSize
+        public bool IsDestroyed { get; private set; } = false;
+
+        public Game Game { get; private set; } = null;
+
+        public int CameraPositionX { get; set; } = 0;
+        public int CameraPositionY { get; set; } = 0;
+        public Point CameraPosition
         {
             get
             {
-                return new Point(ViewPortWidth, ViewPortHeight);
+                return new Point(CameraPositionX, CameraPositionY);
             }
-        }
-        public Rectangle ViewPortRect
-        {
-            get
+            set
             {
-                return new Rectangle(CameraPosition, CameraPosition + ViewPortSize);
+                CameraPositionX = value.X;
+                CameraPositionY = value.Y;
             }
         }
-        public double AspectRatio
-        {
-            get
-            {
-                return ViewPortWidth / (double)ViewPortHeight;
-            }
-        }
+
+        public ushort Width { get; private set; } = 1;
+        public ushort Height { get; private set; } = 1;
         #endregion
         #region Constructors
-        public Scene(Game engine, ushort viewPortWidth, ushort viewPortHeight)
+        public Scene(Game game)
         {
-            if (engine is null)
+            if (game is null)
             {
-                throw new Exception("engine cannot be null.");
+                throw new Exception("game cannot be null.");
             }
 
-            Engine = engine;
+            Game = game;
 
-            if (viewPortWidth <= 0)
+            Width = DefaultWidth;
+            Height = DefaultHeight;
+
+            Game.AddScene(this);
+        }
+        public Scene(Game game, ushort width, ushort height)
+        {
+            if (game is null)
             {
-                throw new Exception("viewPortWidth must be greater than 0.");
+                throw new Exception("game cannot be null.");
             }
-            ViewPortWidth = viewPortWidth;
 
-            if (viewPortHeight <= 0)
+            Game = game;
+
+            if (width <= 0)
             {
-                throw new Exception("viewPortHeight must be greater than 0.");
+                throw new Exception("width must be greater than 0.");
             }
-            ViewPortHeight = viewPortHeight;
+            Width = width;
 
-            _renderTarget = new Microsoft.Xna.Framework.Graphics.RenderTarget2D(Engine.GraphicsDevice, ViewPortWidth, ViewPortHeight, false, Microsoft.Xna.Framework.Graphics.SurfaceFormat.Color, Microsoft.Xna.Framework.Graphics.DepthFormat.None);
+            if (height <= 0)
+            {
+                throw new Exception("height must be greater than 0.");
+            }
+            Height = height;
 
-            _spriteBatch = new Microsoft.Xna.Framework.Graphics.SpriteBatch(Engine.GraphicsDevice);
-            _spriteBatch.Name = "Scene SpriteBatch";
-            _spriteBatch.Tag = null;
+            Game.AddScene(this);
         }
         #endregion
         #region Overrides
@@ -80,254 +86,77 @@ namespace EpsilonEngine
         }
         #endregion
         #region Methods
+        public void DrawTextureWorldSpace(Texture texture, Point position, Color color)
+        {
+            if (texture is null)
+            {
+                throw new Exception("texture cannot be null.");
+            }
+            DrawTextureWorldSpaceUnsafe(texture, position.X, position.Y, color.R, color.B, color.B, color.A);
+        }
         public void DrawTextureWorldSpace(Texture texture, int x, int y, byte r, byte g, byte b, byte a)
         {
-            DrawTextureScreenSpace(texture, x - CameraPosition.X, y - CameraPosition.Y, r, g, b, a);
+            if (texture is null)
+            {
+                throw new Exception("texture cannot be null.");
+            }
+            DrawTextureWorldSpaceUnsafe(texture, x, y, r, g, b, a);
+        }
+        public void DrawTextureWorldSpaceUnsafe(Texture texture, int x, int y, byte r, byte g, byte b, byte a)
+        {
+            DrawTextureScreenSpaceUnsafe(texture, x - CameraPositionX, y - CameraPositionY, r, g, b, a);
+        }
+        public void DrawTextureScreenSpace(Texture texture, Point position, Color color)
+        {
+            if (texture is null)
+            {
+                throw new Exception("texture cannot be null.");
+            }
+            DrawTextureScreenSpaceUnsafe(texture, position.X, position.Y, color.R, color.B, color.B, color.A);
         }
         public void DrawTextureScreenSpace(Texture texture, int x, int y, byte r, byte g, byte b, byte a)
         {
-            y = ViewPortSize.Y - y;
-            y = y - texture.Height;
-
-            if (x + texture.Width < 0 || y + texture.Height < 0 || x > ViewPortSize.X || y > ViewPortSize.Y)
+            if (texture is null)
             {
-                return;
+                throw new Exception("texture cannot be null.");
             }
-
-            _spriteBatch.Draw(texture.ToXNA(), new Microsoft.Xna.Framework.Rectangle(x,y, texture.Width, texture.Height), texture.Rect, new Microsoft.Xna.Framework.Color(r, g, b, a), 0, new Microsoft.Xna.Framework.Vector2(0, 0), Microsoft.Xna.Framework.Graphics.SpriteEffects.None, 0);
+            DrawTextureScreenSpaceUnsafe(texture, x, y, r, g, b, a);
         }
-        public void OnRemove()
+        public void DrawTextureScreenSpaceUnsafe(Texture texture, int x, int y, byte r, byte g, byte b, byte a)
         {
-            foreach (SceneManager sceneManager in _sceneManagers)
+            //Still have to calculate screenrect from world rect.
+            Game.DrawTextureUnsafe(texture, x - CameraPositionX, y - CameraPositionY, r, g, b, a);
+        }
+        public void Destroy()
+        {
+            foreach(SceneManager sceneManager in _sceneManagerCache)
             {
-                sceneManager.OnRemove();
+                sceneManager.Destroy();
             }
+
+            foreach (GameObject gameObject in _gameObjectCache)
+            {
+                gameObject.Destroy();
+            }
+
+            Game.RemoveScene(this);
+
             _sceneManagers = null;
-            foreach (GameObject gameObject in _gameObjects)
-            {
-                gameObject.OnRemove();
-            }
+            _sceneManagerCache = null;
             _gameObjects = null;
+            _gameObjectCache = null;
+            Game = null;
+
+            IsDestroyed = true;
         }
-        public void Initialize()
-        {
-            foreach (SceneManager sceneManager in _sceneManagers)
-            {
-                if (!sceneManager.Initialized)
-                {
-                    sceneManager.Initialize();
-                }
-            }
-            foreach (GameObject gameObject in _gameObjects)
-            {
-                if (!gameObject.ChildrenInitialized)
-                {
-                    gameObject.Initialize();
-                }
-            }
-            GameObjectsInitialized = true;
-        }
-        public Microsoft.Xna.Framework.Graphics.RenderTarget2D Render()
-        {
-            Engine.GraphicsDevice.SetRenderTarget(_renderTarget);
-
-            Engine.GraphicsDevice.Clear(Engine.BackgroundColor.ToXNA());
-
-            _spriteBatch.Begin(Microsoft.Xna.Framework.Graphics.SpriteSortMode.Deferred, Microsoft.Xna.Framework.Graphics.BlendState.AlphaBlend, Microsoft.Xna.Framework.Graphics.SamplerState.PointClamp, null, null, null, null);
-
-            int renderPumpLength = safeRenderPump.Length;
-            for (int i = 0; i < renderPumpLength; i++)
-            {
-                safeRenderPump[i].Invoke();
-            }
-
-            if (renderPumpDirty)
-            {
-                safeRenderPump = renderPump;
-                renderPumpDirty = false;
-            }
-
-            _spriteBatch.End();
-
-            Engine.GraphicsDevice.SetRenderTarget(null);
-
-            return _renderTarget;
-        }
-        public void RegisterForRender(PumpEvent pumpEvent)
-        {
-            if (pumpEvent is null)
-            {
-                throw new Exception("updateable cannot be null.");
-            }
-
-            PumpEvent[] newRenderPump = new PumpEvent[renderPump.Length + 1];
-            Array.Copy(renderPump, 0, newRenderPump, 0, renderPump.Length);
-            newRenderPump[renderPump.Length] = pumpEvent;
-            renderPump = newRenderPump;
-
-            if (!renderPumpInUse)
-            {
-                safeRenderPump = newRenderPump;
-            }
-            else
-            {
-                renderPumpDirty = true;
-            }
-        }
-        #endregion
-        #region GameObject Management
-        public GameObject GetGameObject(int index)
-        {
-            if (index < 0 || index >= _gameObjects.Count)
-            {
-                throw new Exception("index was out of range.");
-            }
-
-            return _gameObjects[index];
-        }
-        public GameObject GetGameObject(Type type)
-        {
-            if (type is null)
-            {
-                throw new Exception("type cannot be null.");
-            }
-
-            if (!type.IsAssignableFrom(typeof(GameObject)))
-            {
-                throw new Exception("type must be equal to GameObject or be assignable from GameObject.");
-            }
-
-            foreach (GameObject gameObject in _gameObjects)
-            {
-                if (gameObject.GetType().IsAssignableFrom(type))
-                {
-                    return gameObject;
-                }
-            }
-
-            return null;
-        }
-        public T GetGameObject<T>() where T : GameObject
-        {
-            foreach (GameObject gameObject in _gameObjects)
-            {
-                if (gameObject.GetType().IsAssignableFrom(typeof(T)))
-                {
-                    return (T)gameObject;
-                }
-            }
-
-            return null;
-        }
-        public List<GameObject> GetGameObjects()
-        {
-            return new List<GameObject>(_gameObjects);
-        }
-        public List<GameObject> GetGameObjects(Type type)
-        {
-            if (type is null)
-            {
-                throw new Exception("type cannot be null.");
-            }
-
-            if (!type.IsAssignableFrom(typeof(GameObject)))
-            {
-                throw new Exception("type must be equal to GameObject or be assignable from GameObject.");
-            }
-
-            List<GameObject> output = new List<GameObject>();
-
-            foreach (GameObject gameObject in _gameObjects)
-            {
-                if (gameObject.GetType().IsAssignableFrom(type))
-                {
-                    output.Add(gameObject);
-                }
-            }
-
-            return output;
-        }
-        public List<T> GetGameObjects<T>() where T : GameObject
-        {
-            List<T> output = new List<T>();
-
-            foreach (GameObject gameObject in _gameObjects)
-            {
-                if (gameObject.GetType().IsAssignableFrom(typeof(T)))
-                {
-                    output.Add((T)gameObject);
-                }
-            }
-
-            return output;
-        }
-        public int GetGameObjectCount()
-        {
-            return _gameObjects.Count;
-        }
-        public void RemoveGameObject(GameObject gameObject)
-        {
-            if (gameObject is null)
-            {
-                throw new Exception("gameObject cannot be null.");
-            }
-
-            if (gameObject.Scene != this)
-            {
-                throw new Exception("gameObject belongs to a different Scene.");
-            }
-
-            bool gameObjectPresent = false;
-            foreach (GameObject potentialMatch in _gameObjects)
-            {
-                if (gameObject == potentialMatch)
-                {
-                    gameObjectPresent = true;
-                }
-            }
-            if (!gameObjectPresent)
-            {
-                throw new Exception("gameObject has already been removed.");
-            }
-
-            gameObject.OnRemove();
-
-            _gameObjects.Remove(gameObject);
-        }
-        public void AddGameObject(GameObject gameObject)
-        {
-            if (gameObject is null)
-            {
-                throw new Exception("gameObject cannot be null.");
-            }
-
-            if (gameObject.Scene != this)
-            {
-                throw new Exception("gameObject belongs to a different Scene.");
-            }
-
-            /*foreach (GameObject potentialMatch in _gameObjects)
-            {
-                if (gameObject == potentialMatch)
-                {
-                    throw new Exception("gameObject has already been added.");
-                }
-            }*/
-
-            _gameObjects.Add(gameObject);
-
-            GameObjectsInitialized = false;
-        }
-        #endregion
-        #region SceneManager Management
         public SceneManager GetSceneManager(int index)
         {
-            if (index < 0 || index >= _sceneManagers.Count)
+            if (index < 0 || index >= _sceneManagerCache.Length)
             {
                 throw new Exception("index was out of range.");
             }
 
-            return _sceneManagers[index];
+            return _sceneManagerCache[index];
         }
         public SceneManager GetSceneManager(Type type)
         {
@@ -341,7 +170,7 @@ namespace EpsilonEngine
                 throw new Exception("type must be equal to SceneManager or be assignable from SceneManager.");
             }
 
-            foreach (SceneManager sceneManager in _sceneManagers)
+            foreach (SceneManager sceneManager in _sceneManagerCache)
             {
                 if (sceneManager.GetType().IsAssignableFrom(type))
                 {
@@ -353,7 +182,7 @@ namespace EpsilonEngine
         }
         public T GetSceneManager<T>() where T : SceneManager
         {
-            foreach (SceneManager sceneManager in _sceneManagers)
+            foreach (SceneManager sceneManager in _sceneManagerCache)
             {
                 if (sceneManager.GetType().IsAssignableFrom(typeof(T)))
                 {
@@ -365,7 +194,7 @@ namespace EpsilonEngine
         }
         public List<SceneManager> GetSceneManagers()
         {
-            return new List<SceneManager>(_sceneManagers);
+            return new List<SceneManager>(_sceneManagerCache);
         }
         public List<SceneManager> GetSceneManagers(Type type)
         {
@@ -381,7 +210,7 @@ namespace EpsilonEngine
 
             List<SceneManager> output = new List<SceneManager>();
 
-            foreach (SceneManager sceneManager in _sceneManagers)
+            foreach (SceneManager sceneManager in _sceneManagerCache)
             {
                 if (sceneManager.GetType().IsAssignableFrom(type))
                 {
@@ -395,7 +224,7 @@ namespace EpsilonEngine
         {
             List<T> output = new List<T>();
 
-            foreach (SceneManager sceneManager in _sceneManagers)
+            foreach (SceneManager sceneManager in _sceneManagerCache)
             {
                 if (sceneManager.GetType().IsAssignableFrom(typeof(T)))
                 {
@@ -407,60 +236,232 @@ namespace EpsilonEngine
         }
         public int GetSceneManagerCount()
         {
-            return _sceneManagers.Count;
+            return _sceneManagerCache.Length;
         }
-        public void RemoveSceneManager(SceneManager sceneManager)
+        public SceneManager GetSceneManagerUnsafe(int index)
         {
-            if (sceneManager is null)
+            return _sceneManagerCache[index];
+        }
+        public SceneManager GetSceneManagerUnsafe(Type type)
+        {
+            foreach (SceneManager sceneManager in _sceneManagerCache)
             {
-                throw new Exception("sceneManager cannot be null.");
-            }
-
-            if (sceneManager.Scene != this)
-            {
-                throw new Exception("sceneManager belongs to a different Scene.");
-            }
-
-            bool sceneManagerPresent = false;
-            foreach (SceneManager potentialMatch in _sceneManagers)
-            {
-                if (sceneManager == potentialMatch)
+                if (sceneManager.GetType().IsAssignableFrom(type))
                 {
-                    sceneManagerPresent = true;
+                    return sceneManager;
                 }
             }
-            if (!sceneManagerPresent)
+
+            return null;
+        }
+        public List<SceneManager> GetSceneManagersUnsafe(Type type)
+        {
+            List<SceneManager> output = new List<SceneManager>();
+
+            foreach (SceneManager sceneManager in _sceneManagerCache)
             {
-                throw new Exception("sceneManager has already been removed.");
+                if (sceneManager.GetType().IsAssignableFrom(type))
+                {
+                    output.Add(sceneManager);
+                }
             }
 
-            sceneManager.OnRemove();
+            return output;
+        }
+        public GameObject GetGameObject(int index)
+        {
+            if (index < 0 || index >= _gameObjectCache.Length)
+            {
+                throw new Exception("index was out of range.");
+            }
 
+            return _gameObjectCache[index];
+        }
+        public GameObject GetGameObject(Type type)
+        {
+            if (type is null)
+            {
+                throw new Exception("type cannot be null.");
+            }
+
+            if (!type.IsAssignableFrom(typeof(GameObject)))
+            {
+                throw new Exception("type must be equal to GameObject or be assignable from GameObject.");
+            }
+
+            foreach (GameObject gameObject in _gameObjectCache)
+            {
+                if (gameObject.GetType().IsAssignableFrom(type))
+                {
+                    return gameObject;
+                }
+            }
+
+            return null;
+        }
+        public T GetGameObject<T>() where T : GameObject
+        {
+            foreach (GameObject gameObject in _gameObjectCache)
+            {
+                if (gameObject.GetType().IsAssignableFrom(typeof(T)))
+                {
+                    return (T)gameObject;
+                }
+            }
+
+            return null;
+        }
+        public List<GameObject> GetGameObjects()
+        {
+            return new List<GameObject>(_gameObjectCache);
+        }
+        public List<GameObject> GetGameObjects(Type type)
+        {
+            if (type is null)
+            {
+                throw new Exception("type cannot be null.");
+            }
+
+            if (!type.IsAssignableFrom(typeof(GameObject)))
+            {
+                throw new Exception("type must be equal to GameObject or be assignable from GameObject.");
+            }
+
+            List<GameObject> output = new List<GameObject>();
+
+            foreach (GameObject gameObject in _gameObjectCache)
+            {
+                if (gameObject.GetType().IsAssignableFrom(type))
+                {
+                    output.Add(gameObject);
+                }
+            }
+
+            return output;
+        }
+        public List<T> GetGameObjects<T>() where T : GameObject
+        {
+            List<T> output = new List<T>();
+
+            foreach (GameObject gameObject in _gameObjectCache)
+            {
+                if (gameObject.GetType().IsAssignableFrom(typeof(T)))
+                {
+                    output.Add((T)gameObject);
+                }
+            }
+
+            return output;
+        }
+        public int GetGameObjectCount()
+        {
+            return _gameObjectCache.Length;
+        }
+        public GameObject GetGameObjectUnsafe(int index)
+        {
+            return _gameObjectCache[index];
+        }
+        public GameObject GetGameObjectUnsafe(Type type)
+        {
+            foreach (GameObject gameObject in _gameObjectCache)
+            {
+                if (gameObject.GetType().IsAssignableFrom(type))
+                {
+                    return gameObject;
+                }
+            }
+
+            return null;
+        }
+        public List<GameObject> GetGameObjectsUnsafe(Type type)
+        {
+            List<GameObject> output = new List<GameObject>();
+
+            foreach (GameObject gameObject in _gameObjectCache)
+            {
+                if (gameObject.GetType().IsAssignableFrom(type))
+                {
+                    output.Add(gameObject);
+                }
+            }
+
+            return output;
+        }
+        #endregion
+        #region Internals
+        internal void InvokeUpdate()
+        {
+            if (!_sceneManagerCacheValid)
+            {
+                _sceneManagerCache = _sceneManagers.ToArray();
+                _sceneManagerCacheValid = true;
+            }
+
+            if (!_gameObjectCacheValid)
+            {
+                _gameObjectCache = _gameObjects.ToArray();
+                _gameObjectCacheValid = true;
+            }
+
+            Update();
+
+            foreach (SceneManager sceneManager in _sceneManagerCache)
+            {
+                sceneManager.InvokeUpdate();
+            }
+
+            foreach(GameObject gameObject in _gameObjectCache)
+            {
+                gameObject.InvokeUpdate();
+            }
+        }
+        internal void InvokeRender()
+        {
+            Render();
+
+            foreach (SceneManager sceneManager in _sceneManagerCache)
+            {
+                sceneManager.InvokeRender();
+            }
+
+            foreach (GameObject gameObject in _gameObjectCache)
+            {
+                gameObject.InvokeRender();
+            }
+        }
+        internal void RemoveSceneManager(SceneManager sceneManager)
+        {
             _sceneManagers.Remove(sceneManager);
+
+            _sceneManagerCacheValid = false;
         }
-        public void AddSceneManager(SceneManager sceneManager)
+        internal void AddSceneManager(SceneManager sceneManager)
         {
-            if (sceneManager is null)
-            {
-                throw new Exception("sceneManager cannot be null.");
-            }
-
-            if (sceneManager.Scene != this)
-            {
-                throw new Exception("sceneManager belongs to a different Scene.");
-            }
-
-            foreach (SceneManager potentialMatch in _sceneManagers)
-            {
-                if (sceneManager == potentialMatch)
-                {
-                    throw new Exception("sceneManager has already been added.");
-                }
-            }
-
             _sceneManagers.Add(sceneManager);
 
-            GameObjectsInitialized = false;
+            _sceneManagerCacheValid = false;
+        }
+        internal void RemoveGameObject(GameObject gameObject)
+        {
+            _gameObjects.Remove(gameObject);
+
+            _gameObjectCacheValid = false;
+        }
+        internal void AddGameObject(GameObject gameObject)
+        {
+            _gameObjects.Add(gameObject);
+
+            _gameObjectCacheValid = false;
+        }
+        #endregion
+        #region Overridables
+        protected virtual void Update()
+        {
+
+        }
+        protected virtual void Render()
+        {
+
         }
         #endregion
     }

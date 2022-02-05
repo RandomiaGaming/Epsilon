@@ -98,7 +98,7 @@ namespace EpsilonEngine
                 }
                 else
                 {
-                    GameObject.DrawTextureLocalSpace(_particleTexture, particle.positionX, particle.positionY, particle.color.R, particle.color.G, particle.color.B, particle.color.A);
+                    GameObject.DrawTextureLocalSpaceUnsafe(_particleTexture, particle.positionX, particle.positionY, particle.color.R, particle.color.G, particle.color.B, particle.color.A);
                 }
             }
         }

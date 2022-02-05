@@ -4,8 +4,9 @@ namespace EpsilonEngine
     public abstract class SceneManager
     {
         #region Properties
-        public bool Initialized { get; private set; } = false;
-        public Game Engine { get; private set; } = null;
+        public bool IsDestroyed { get; private set; } = false;
+
+        public Game Game { get; private set; } = null;
         public Scene Scene { get; private set; } = null;
         #endregion
         #region Constructors
@@ -17,7 +18,7 @@ namespace EpsilonEngine
             }
 
             Scene = scene;
-            Engine = Scene.Engine;
+            Game = Scene.Game;
 
             Scene.AddSceneManager(this);
         }
@@ -28,21 +29,35 @@ namespace EpsilonEngine
             return $"EpsilonEngine.SceneManager()";
         }
         #endregion
-        #region Overridables
-        public virtual void OnInitialize()
+        #region Methods
+        public void Destroy()
         {
+            Scene.RemoveSceneManager(this);
 
-        }
-        public virtual void OnRemove()
-        {
+            Game = null;
+            Scene = null;
 
+            IsDestroyed = true;
         }
         #endregion
-        #region Methods
-        public void Initialize()
+        #region Overridables
+        internal void InvokeUpdate()
         {
-            OnInitialize();
-            Initialized = true;
+            Update();
+        }
+        internal void InvokeRender()
+        {
+            Render();
+        }
+        #endregion
+        #region Overridables
+        protected virtual void Update()
+        {
+
+        }
+        protected virtual void Render()
+        {
+
         }
         #endregion
     }

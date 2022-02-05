@@ -1,49 +1,43 @@
 ﻿using System;
 namespace EpsilonEngine
 {
-    public abstract class Component
+    public abstract class GameManager
     {
         #region Properties
         public bool IsDestroyed { get; private set; } = false;
 
         public Game Game { get; private set; } = null;
-        public Scene Scene { get; private set; } = null;
-        public GameObject GameObject { get; private set; } = null;
         #endregion
         #region Constructors
-        public Component(GameObject gameObject)
+        public GameManager(Game game)
         {
-            if (gameObject is null)
+            if (game is null)
             {
-                throw new Exception("gameObject cannot be null.");
+                throw new Exception("game cannot be null.");
             }
 
-            GameObject = gameObject;
-            Scene = GameObject.Scene;
-            Game = Scene.Game;
+            Game = game;
 
-            GameObject.AddComponent(this);
+            Game.AddGameManager(this);
         }
         #endregion
         #region Overrides
         public override string ToString()
         {
-            return $"EpsilonEngine.Component()";
+            return $"EpsilonEngine.GameManager()";
         }
         #endregion
         #region Methods
         public void Destroy()
         {
-            GameObject.RemoveComponent(this);
+            Game.RemoveGameManager(this);
 
             Game = null;
-            Scene = null;
-            GameObject = null;
 
             IsDestroyed = true;
         }
         #endregion
-        #region Internals
+        #region Overridables
         internal void InvokeUpdate()
         {
             Update();

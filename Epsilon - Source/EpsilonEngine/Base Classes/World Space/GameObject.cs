@@ -6,51 +6,107 @@ namespace EpsilonEngine
     {
         #region Variables
         private List<Component> _components = new List<Component>();
-        private bool isOrphan = true;
+        private Component[] _componentCache = new Component[0];
+        private bool _componentCacheValid = true;
         #endregion
         #region Properties
-        public bool ChildrenInitialized { get; private set; } = true;
-        public Game Engine { get; private set; } = null;
+        public bool IsOrphan { get; private set; } = true;
+        public bool IsDestroyed { get; private set; } = false;
+        
+        public Game Game { get; private set; } = null;
         public Scene Scene { get; private set; } = null;
-        public Point LocalPosition { get; set; } = Point.Zero;
-        public Point Position
+        public GameObject Parent { get; private set; } = null;
+
+        public int LocalPositionX { get; set; } = 0;
+        public int LocalPositionY { get; set; } = 0;
+        public Point LocalPosition
         {
             get
             {
-                if (isOrphan)
-                {
-                    return LocalPosition;
-                }
-                int x = LocalPosition.X;
-                int y = LocalPosition.Y;
-                GameObject parent = Parent;
-                while (parent is not null)
-                {
-                    x += parent.LocalPosition.X;
-                    y += parent.LocalPosition.Y;
-                    parent = parent.Parent;
-                }
-                return new Point(x, y);
+                return new Point(LocalPositionX, LocalPositionY);
             }
             set
             {
-                if (isOrphan)
+                LocalPositionX = value.X;
+                LocalPositionY = value.Y;
+            }
+        }
+
+        public int WorldPositionX
+        {
+            get
+            {
+                if (IsOrphan)
+                {
+                    return LocalPositionX;
+                }
+                else
+                {
+                    return LocalPositionX + Parent.WorldPositionX;
+                }
+            }
+            set
+            {
+                if (IsOrphan)
+                {
+                    LocalPositionX = value;
+                }
+                else
+                {
+                    LocalPositionX = value - Parent.WorldPositionX;
+                }
+            }
+        }
+        public int WorldPositionY
+        {
+            get
+            {
+                if (IsOrphan)
+                {
+                    return LocalPositionY;
+                }
+                else
+                {
+                    return LocalPositionY + Parent.WorldPositionY;
+                }
+            }
+            set
+            {
+                if (IsOrphan)
+                {
+                    LocalPositionY = value;
+                }
+                else
+                {
+                    LocalPositionY = value - Parent.WorldPositionY;
+                }
+            }
+        }
+        public Point WorldPosition
+        {
+            get
+            {
+                if (IsOrphan)
+                {
+                    return LocalPosition;
+                }
+                else
+                {
+                    return LocalPosition + Parent.WorldPosition;
+                }
+            }
+            set
+            {
+                if (IsOrphan)
                 {
                     LocalPosition = value;
                 }
-                int x = value.X;
-                int y = value.Y;
-                GameObject parent = Parent;
-                while (parent is not null)
+                else
                 {
-                    x -= parent.LocalPosition.X;
-                    y -= parent.LocalPosition.Y;
-                    parent = parent.Parent;
+                    LocalPosition = LocalPosition - Parent.WorldPosition;
                 }
-                LocalPosition = new Point(x, y);
             }
         }
-        public GameObject Parent = null;
         #endregion
         #region Constructors
         public GameObject(Scene scene)
@@ -61,7 +117,10 @@ namespace EpsilonEngine
             }
 
             Scene = scene;
-            Engine = scene.Engine;
+            Game = scene.Game;
+
+            Parent = null;
+            IsOrphan = true;
 
             scene.AddGameObject(this);
         }
@@ -73,14 +132,24 @@ namespace EpsilonEngine
             }
 
             Scene = scene;
-            Engine = scene.Engine;
+            Game = scene.Game;
 
-            if (parent is not null && parent.Scene != scene)
+
+            if(parent is null)
             {
-                throw new Exception("parent must belong to the same scene.");
+                Parent = null;
+                IsOrphan = true;
             }
+            else
+            {
+                if (parent.Scene != scene)
+                {
+                    throw new Exception("parent must belong to the same scene.");
+                }
 
-            Parent = parent;
+                Parent = parent;
+                IsOrphan = false;
+            }
 
             scene.AddGameObject(this);
         }
@@ -92,40 +161,52 @@ namespace EpsilonEngine
         }
         #endregion
         #region Methods
+        public void DrawTextureLocalSpace(Texture texture, Point position, Color color)
+        {
+            if(texture is null)
+            {
+                throw new Exception("texture cannot be null.");
+            }
+            DrawTextureLocalSpaceUnsafe(texture, position.X, position.Y, color.R, color.B, color.B, color.A);
+        }
         public void DrawTextureLocalSpace(Texture texture, int x, int y, byte r, byte g, byte b, byte a)
         {
-            Scene.DrawTextureWorldSpace(texture, Position.X + x, Position.Y + y, r, g, b, a);
-        }
-        public void OnRemove()
-        {
-            foreach (Component component in _components)
+            if (texture is null)
             {
-                component.InvokeOnRemove();
+                throw new Exception("texture cannot be null.");
+            }
+            DrawTextureLocalSpaceUnsafe(texture, x, y, r, g, b, a);
+        }
+        public void DrawTextureLocalSpaceUnsafe(Texture texture, int x, int y, byte r, byte g, byte b, byte a)
+        {
+            Point worldPosition = WorldPosition;
+            Scene.DrawTextureWorldSpaceUnsafe(texture, worldPosition.X + x, worldPosition.Y + y, r, g, b, a);
+        }
+        public void Destroy()
+        {
+            foreach (Component component in _componentCache)
+            {
+                component.Destroy();
             }
 
+            Scene.RemoveGameObject(this);
+
+            _componentCache = null;
             _components = null;
+            Parent = null;
+            Scene = null;
+            Game = null;
+
+            IsDestroyed = true;
         }
-        public void Initialize()
-        {
-            foreach (Component component in _components)
-            {
-                if (!component.Initialized)
-                {
-                    component.InvokeInitialize();
-                }
-            }
-            ChildrenInitialized = true;
-        }
-        #endregion
-        #region Component Management
         public Component GetComponent(int index)
         {
-            if (index < 0 || index >= _components.Count)
+            if (index < 0 || index >= _componentCache.Length)
             {
                 throw new Exception("index was out of range.");
             }
 
-            return _components[index];
+            return _componentCache[index];
         }
         public Component GetComponent(Type type)
         {
@@ -139,7 +220,7 @@ namespace EpsilonEngine
                 throw new Exception("type must be equal to Component or be assignable from Component.");
             }
 
-            foreach (Component component in _components)
+            foreach (Component component in _componentCache)
             {
                 if (component.GetType().IsAssignableFrom(type))
                 {
@@ -151,7 +232,7 @@ namespace EpsilonEngine
         }
         public T GetComponent<T>() where T : Component
         {
-            foreach (Component component in _components)
+            foreach (Component component in _componentCache)
             {
                 if (component.GetType().IsAssignableFrom(typeof(T)))
                 {
@@ -163,7 +244,7 @@ namespace EpsilonEngine
         }
         public List<Component> GetComponents()
         {
-            return new List<Component>(_components);
+            return new List<Component>(_componentCache);
         }
         public List<Component> GetComponents(Type type)
         {
@@ -179,7 +260,7 @@ namespace EpsilonEngine
 
             List<Component> output = new List<Component>();
 
-            foreach (Component component in _components)
+            foreach (Component component in _componentCache)
             {
                 if (component.GetType().IsAssignableFrom(type))
                 {
@@ -193,7 +274,7 @@ namespace EpsilonEngine
         {
             List<T> output = new List<T>();
 
-            foreach (Component component in _components)
+            foreach (Component component in _componentCache)
             {
                 if (component.GetType().IsAssignableFrom(typeof(T)))
                 {
@@ -205,60 +286,85 @@ namespace EpsilonEngine
         }
         public int GetComponentCount()
         {
-            return _components.Count;
+            return _componentCache.Length;
         }
-        public void RemoveComponent(Component component)
+        public Component GetComponentUnsafe(int index)
         {
-            if (component is null)
+            return _componentCache[index];
+        }
+        public Component GetComponentUnsafe(Type type)
+        {
+            foreach (Component component in _componentCache)
             {
-                throw new Exception("gameObject cannot be null.");
-            }
-
-            if (component.GameObject != this)
-            {
-                throw new Exception("component belongs to a different GameObject.");
-            }
-
-            bool componentPresent = false;
-            foreach (Component potentialMatch in _components)
-            {
-                if (potentialMatch == component)
+                if (component.GetType().IsAssignableFrom(type))
                 {
-                    componentPresent = true;
+                    return component;
                 }
             }
-            if (!componentPresent)
+
+            return null;
+        }
+        public List<Component> GetComponentsUnsafe(Type type)
+        {
+            List<Component> output = new List<Component>();
+
+            foreach (Component component in _componentCache)
             {
-                throw new Exception("component has already been removed.");
+                if (component.GetType().IsAssignableFrom(type))
+                {
+                    output.Add(component);
+                }
             }
 
-            component.InvokeOnRemove();
+            return output;
+        }
+        #endregion
+        #region Internals
+        internal void InvokeUpdate()
+        {
+            if (!_componentCacheValid)
+            {
+                _componentCache = _components.ToArray();
+                _componentCacheValid = true;
+            }
 
+            Update();
+
+            foreach (Component component in _componentCache)
+            {
+                component.InvokeUpdate();
+            }
+        }
+        internal void InvokeRender()
+        {
+            Render();
+
+            foreach (Component component in _componentCache)
+            {
+                component.InvokeRender();
+            }
+        }
+        internal void RemoveComponent(Component component)
+        {
             _components.Remove(component);
+
+            _componentCacheValid = false;
         }
-        public void AddComponent(Component component)
+        internal void AddComponent(Component component)
         {
-            if (component is null)
-            {
-                throw new Exception("component cannot be null.");
-            }
-
-            if (component.GameObject != this)
-            {
-                throw new Exception("component belongs to a different GameObject.");
-            }
-
-            foreach (Component potentialMatch in _components)
-            {
-                if (component == potentialMatch)
-                {
-                    throw new Exception("component has already been added.");
-                }
-            }
-
             _components.Add(component);
 
-            ChildrenInitialized = false;
+            _componentCacheValid = false;
+        }
+        #endregion
+        #region Overridables
+        protected virtual void Update()
+        {
+
+        }
+        protected virtual void Render()
+        {
+
         }
         #endregion
     }

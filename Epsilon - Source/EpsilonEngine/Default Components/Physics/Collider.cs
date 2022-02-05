@@ -31,7 +31,10 @@ namespace EpsilonEngine
         }
         public Rectangle GetWorldShape()
         {
-            return new Rectangle(Rect.Min + GameObject.Position, Rect.Max + GameObject.Position);
+            int gameObjectWorldPositionX = GameObject.WorldPositionX;
+            int gameObjectWorldPositionY = GameObject.WorldPositionY;
+
+            return new Rectangle(Rect.MinX + gameObjectWorldPositionX, Rect.MinY + gameObjectWorldPositionY, Rect.MaxX + gameObjectWorldPositionX, Rect.MaxY + gameObjectWorldPositionY);
         }
     }
 }
