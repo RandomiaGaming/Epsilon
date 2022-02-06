@@ -328,7 +328,7 @@ namespace EpsilonEngine
                 _componentCacheValid = true;
             }
 
-            Update();
+           Update();
 
             foreach (Component component in _componentCache)
             {

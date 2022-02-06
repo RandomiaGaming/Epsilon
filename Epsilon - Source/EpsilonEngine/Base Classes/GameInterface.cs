@@ -49,14 +49,25 @@ namespace EpsilonEngine
             SpriteBatch.Tag = null;
         }
         #endregion
+        public Point GetViewportSize()
+        {
+            if (GraphicsDeviceManager.IsFullScreen)
+            {
+                return new Point(base.GraphicsDevice.Adapter.CurrentDisplayMode.Width, base.GraphicsDevice.Adapter.CurrentDisplayMode.Height);
+            }
+            else
+            {
+                return new Point(base.GraphicsDevice.Viewport.Width, base.GraphicsDevice.Viewport.Height);
+            }
+        }
+        public void Destroy()
+        {
+
+        }
         #region Overrides
         protected sealed override void Update(Microsoft.Xna.Framework.GameTime gameTime)
         {
             Game.InvokeUpdate();
-        }
-        protected sealed override void Draw(Microsoft.Xna.Framework.GameTime gameTime)
-        {
-            Game.InvokeRender();
         }
         public sealed override string ToString()
         {

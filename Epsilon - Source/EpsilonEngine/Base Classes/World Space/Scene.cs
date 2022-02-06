@@ -124,8 +124,12 @@ namespace EpsilonEngine
         }
         public void DrawTextureScreenSpaceUnsafe(Texture texture, int x, int y, byte r, byte g, byte b, byte a)
         {
-            //Still have to calculate screenrect from world rect.
-            Game.DrawTextureUnsafe(texture, x - CameraPositionX, y - CameraPositionY, r, g, b, a);
+            int minXi = (int)(x * (float)Game.Width / Width);
+            int minYi = (int)(y * (float)Game.Height / Height);
+            int maxXi = (int)((x + texture.Width) * (float)Game.Width / Width);
+            int maxYi = (int)((y + texture.Height) * (float)Game.Height / Height);
+
+            Game.DrawTextureUnsafe(texture, minXi, minYi, maxXi, maxYi, r, g, b, a);
         }
         public void Destroy()
         {
@@ -403,7 +407,7 @@ namespace EpsilonEngine
                 _gameObjectCacheValid = true;
             }
 
-            Update();
+           Update();
 
             foreach (SceneManager sceneManager in _sceneManagerCache)
             {

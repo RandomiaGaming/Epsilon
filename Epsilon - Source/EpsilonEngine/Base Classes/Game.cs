@@ -8,9 +8,6 @@ namespace EpsilonEngine
         public static readonly Color DefaultBackgroundColor = new Color(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
         #endregion
         #region Variables
-        private Microsoft.Xna.Framework.GraphicsDeviceManager _graphicsDeviceManager = null;
-        private Microsoft.Xna.Framework.Graphics.SpriteBatch _spriteBatch = null;
-
         private GameInterface _gameInterface = null;
 
         private List<Scene> _scenes = new List<Scene>();
@@ -25,18 +22,19 @@ namespace EpsilonEngine
         public bool IsDestroyed { get; private set; } = false;
 
         public Color BackgroundColor { get; set; } = DefaultBackgroundColor;
+        public ushort Width { get; private set; } = 1920/2;
+        public ushort Height { get; private set; } = 1080/2;
 
         public float CurrentFPS { get; private set; } = 0f;
         public TimeSpan TimeSinceStart { get; private set; } = new TimeSpan(0);
         public TimeSpan DeltaTime { get; private set; } = new TimeSpan(0);
+
+        public Microsoft.Xna.Framework.Graphics.GraphicsDevice GraphicsDevice { get { return _gameInterface.GraphicsDevice; } }
         #endregion
         #region Constructors
         public Game()
         {
             _gameInterface = new GameInterface(this);
-
-            _graphicsDeviceManager = new Microsoft.Xna.Framework.GraphicsDeviceManager(_gameInterface);
-            _spriteBatch = new Microsoft.Xna.Framework.Graphics.SpriteBatch(_gameInterface.GraphicsDevice);
         }
         #endregion
         #region Methods
@@ -54,7 +52,7 @@ namespace EpsilonEngine
             {
                 throw new Exception("texture cannot be null.");
             }
-            if(minX > maxX)
+            if (minX > maxX)
             {
                 throw new Exception("minX must be less than or equal to maxX.");
             }
@@ -66,8 +64,13 @@ namespace EpsilonEngine
         }
         public void DrawTextureUnsafe(Texture texture, int minX, int minY, int maxX, int maxY, byte r, byte g, byte b, byte a)
         {
-            //Still have to invert y axis.
-            _spriteBatch.Draw(texture.ToXNA(), new Microsoft.Xna.Framework.Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1), new Microsoft.Xna.Framework.Rectangle(0, 0, texture.Width, texture.Height), new Microsoft.Xna.Framework.Color(), 0, Microsoft.Xna.Framework.Vector2.Zero, Microsoft.Xna.Framework.Graphics.SpriteEffects.None, 0);
+            int width = maxX - minX;
+            int height = maxY - minY;
+            _gameInterface.SpriteBatch.Draw(texture.ToXNA(), new Microsoft.Xna.Framework.Rectangle(minX, minY, width, height), new Microsoft.Xna.Framework.Rectangle(0, 0, texture.Width, texture.Height), new Microsoft.Xna.Framework.Color(r, g, b, a), 0, Microsoft.Xna.Framework.Vector2.Zero, Microsoft.Xna.Framework.Graphics.SpriteEffects.None, 0);
+        }
+        public void Run()
+        {
+            _gameInterface.Run();
         }
         public void Destroy()
         {
@@ -81,15 +84,12 @@ namespace EpsilonEngine
                 scene.Destroy();
             }
 
-            GameInterface.Destroy();
+            _gameInterface.Destroy();
 
             _gameManagers = null;
             _gameManagerCache = null;
             _scenes = null;
             _sceneCache = null;
-
-            _graphicsDeviceManager = null;
-            _spriteBatch = null;
 
             IsDestroyed = true;
         }
@@ -335,6 +335,12 @@ namespace EpsilonEngine
         #region Internals
         internal void InvokeUpdate()
         {
+            DebugProfiler.UpdateStart();
+
+           Point viewPortSize = _gameInterface.GetViewportSize();
+            Width = (ushort)viewPortSize.X;
+            Height = (ushort)viewPortSize.Y;
+
             if (!_gameManagerCacheValid)
             {
                 _gameManagerCache = _gameManagers.ToArray();
@@ -358,12 +364,14 @@ namespace EpsilonEngine
             {
                 scene.InvokeUpdate();
             }
-        }
-        internal void InvokeRender()
-        {
+
+            DebugProfiler.UpdateEnd();
+
+            DebugProfiler.RenderStart();
+
             _gameInterface.GraphicsDevice.Clear(BackgroundColor.ToXNA());
 
-            _spriteBatch.Begin(Microsoft.Xna.Framework.Graphics.SpriteSortMode.Deferred, Microsoft.Xna.Framework.Graphics.BlendState.AlphaBlend, Microsoft.Xna.Framework.Graphics.SamplerState.PointClamp, null, null, null, null);
+            _gameInterface.SpriteBatch.Begin(Microsoft.Xna.Framework.Graphics.SpriteSortMode.Deferred, Microsoft.Xna.Framework.Graphics.BlendState.AlphaBlend, Microsoft.Xna.Framework.Graphics.SamplerState.PointClamp, null, null, null, null);
 
             Render();
 
@@ -377,7 +385,15 @@ namespace EpsilonEngine
                 scene.InvokeRender();
             }
 
-            _spriteBatch.End();
+            _gameInterface.SpriteBatch.End();
+
+            DebugProfiler.RenderEnd();
+
+            DebugProfiler.FrameEnd();
+
+            DebugProfiler.Print();
+
+            DebugProfiler.FrameStart();
         }
         internal void RemoveGameManager(GameManager gameManager)
         {

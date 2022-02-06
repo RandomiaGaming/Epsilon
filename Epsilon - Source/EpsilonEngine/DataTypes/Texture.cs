@@ -16,13 +16,13 @@ namespace EpsilonEngine
         public Game Engine { get; private set; }
         #endregion
         #region Constructors
-        public Texture(Game engine, ushort width, ushort height)
+        public Texture(Game game, ushort width, ushort height)
         {
-            if (engine is null)
+            if (game is null)
             {
                 throw new Exception("engine cannot be null.");
             }
-            Engine = engine;
+            Engine = game;
 
             if (width <= 0)
             {
@@ -43,7 +43,7 @@ namespace EpsilonEngine
                 buffer[i] = Color.Black;
             }
 
-            _base = new Microsoft.Xna.Framework.Graphics.Texture2D(engine.GraphicsDevice, width, height);
+            _base = new Microsoft.Xna.Framework.Graphics.Texture2D(game.GraphicsDevice, width, height);
 
             Rect = new Microsoft.Xna.Framework.Rectangle(0, 0, Width, Height);
         }

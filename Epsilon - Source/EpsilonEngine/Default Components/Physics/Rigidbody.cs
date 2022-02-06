@@ -9,6 +9,7 @@ namespace EpsilonEngine
         private PhysicsLayer _physicsLayer = null;
         private Collider _collider = null;
         private PhysicsManager _physicsManager = null;
+        private bool initialized = false;
         #endregion
         #region Properties
         public float VelocityX { get; set; } = 0f;
@@ -44,17 +45,6 @@ namespace EpsilonEngine
         public Rigidbody(GameObject gameObject, int collisionPhysicsLayerIndex) : base(gameObject)
         {
             CollisionPhysicsLayerIndex = collisionPhysicsLayerIndex;
-
-            _physicsManager = Scene.GetSceneManager<PhysicsManager>();
-
-            if (_physicsManager is null)
-            {
-                throw new Exception("Cannot use physics components in a scene without a physics manager.");
-            }
-
-            _collider = GameObject.GetComponent<Collider>();
-
-            _physicsLayer = _physicsManager.GetPhysicsLayer(CollisionPhysicsLayerIndex);
         }
         public override string ToString()
         {
@@ -62,6 +52,17 @@ namespace EpsilonEngine
         }
         protected override void Update()
         {
+            if (!initialized)
+            {
+                _physicsManager = Scene.GetSceneManager<PhysicsManager>();
+
+                _collider = GameObject.GetComponent<Collider>();
+
+                _physicsLayer = _physicsManager.GetPhysicsLayer(CollisionPhysicsLayerIndex);
+
+                initialized = true;
+            }
+
             _subPixelX += VelocityX;
             _subPixelY += VelocityY;
             int targetMoveX = (int)_subPixelX;

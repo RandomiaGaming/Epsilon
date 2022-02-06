@@ -11,7 +11,8 @@ namespace Epsilon
     {
         public Epsilon()
         {
-            ChangeScene(new Stage(this));
+            this.BackgroundColor = new Color(255, 150, 255, 255);
+            new Stage(this);
         }
     }
 }
