@@ -211,11 +211,11 @@ namespace EpsilonEngine
         }
         #endregion
         #region Lerp
-        public static double Lerp(float sample, int a, int b)
+        public static int Lerp(float sample, int a, int b)
         {
-            return a + ((b - a) * sample);
+            return a + (int)((b - a) * sample);
         }
-        public static double Lerp(float sample, float a, float b)
+        public static float Lerp(float sample, float a, float b)
         {
             return a + ((b - a) * sample);
         }
@@ -223,13 +223,13 @@ namespace EpsilonEngine
         {
             return a + ((b - a) * sample);
         }
-        public static double Lerp(double sample, int a, int b)
+        public static int Lerp(double sample, int a, int b)
         {
-            return a + ((b - a) * sample);
+            return a + (int)((b - a) * sample);
         }
-        public static double Lerp(double sample, float a, float b)
+        public static float Lerp(double sample, float a, float b)
         {
-            return a + ((b - a) * sample);
+            return a + (float)((b - a) * sample);
         }
         public static double Lerp(double sample, double a, double b)
         {

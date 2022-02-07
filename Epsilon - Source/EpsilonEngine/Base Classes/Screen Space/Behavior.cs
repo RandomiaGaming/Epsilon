@@ -5,82 +5,67 @@ namespace EpsilonEngine
     public abstract class Behavior
     {
         #region Properties
-        public bool Initialized { get; private set; } = false;
-        public bool Destroyed { get; private set; } = false;
-        public bool Updateable { get; private set; } = false;
-        public bool Renderaable { get; private set; } = false;
-        public Engine Engine { get; private set; } = null;
-        public Scene Scene { get; private set; } = null;
-        public GameObject GameObject { get; private set; } = null;
+        public bool IsDestroyed { get; private set; } = false;
+
+        public Game Game { get; private set; } = null;
+        public Canvas Canvas { get; private set; } = null;
+        public Element Element { get; private set; } = null;
         #endregion
         #region Constructors
-        public Component(GameObject gameObject)
+        public Behavior(Element element)
         {
-            if (gameObject is null)
+            if (element is null)
             {
-                throw new Exception("gameObject cannot be null.");
+                throw new Exception("element cannot be null.");
             }
 
-            GameObject = gameObject;
-            Scene = GameObject.Scene;
-            Engine = Scene.Engine;
+            Element = element;
+            Canvas = Element.Canvas;
+            Game = Canvas.Game;
+
+            Element.AddBehavior(this);
 
             Type thisType = GetType();
-            var updateMethod = thisType.GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Instance);
-            if (updateMethod.DeclaringType != typeof(Component))
+
+            MethodInfo updateMethod = thisType.GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (updateMethod.DeclaringType != typeof(Behavior))
             {
-                Updateable = true;
-                Engine.RegisterForUpdate((PumpEvent)Delegate.CreateDelegate(typeof(PumpEvent), this, "Update", false, true));
+                Game.RegisterForUpdate(Update);
             }
 
-            var renderMethod = thisType.GetMethod("Render", BindingFlags.NonPublic | BindingFlags.Instance);
-            if (renderMethod.DeclaringType != typeof(Component))
+            MethodInfo renderMethod = thisType.GetMethod("Render", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (renderMethod.DeclaringType != typeof(Behavior))
             {
-                Renderaable = true;
-                Scene.RegisterForRender((PumpEvent)Delegate.CreateDelegate(typeof(PumpEvent), this, "Render", false, true));
+                Game.RegisterForRender(Render);
             }
-
-            GameObject.AddComponent(this);
         }
         #endregion
         #region Overrides
         public override string ToString()
         {
-            return $"EpsilonEngine.Component()";
+            return $"EpsilonEngine.Behavior()";
+        }
+        #endregion
+        #region Methods
+        public void Destroy()
+        {
+            Element.RemoveBehavior(this);
+
+            Game = null;
+            Canvas = null;
+            Element = null;
+
+            IsDestroyed = true;
         }
         #endregion
         #region Overridables
-        //Called on the first frame after the component is created before update.
-        protected virtual void Initialize()
-        {
-
-        }
-        //Called every frame, before render.
         protected virtual void Update()
         {
 
         }
-        //Called every frame after render.
         protected virtual void Render()
         {
 
-        }
-        //Called right before the component is destroyed.
-        protected virtual void OnRemove()
-        {
-
-        }
-        #endregion
-        #region Methods
-        internal void InvokeInitialize()
-        {
-            Initialize();
-            Initialized = true;
-        }
-        internal void InvokeOnRemove()
-        {
-            OnRemove();
-            Destroyed = true;
         }
         #endregion
     }

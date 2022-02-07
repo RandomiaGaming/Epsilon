@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Collections.Generic;
 namespace EpsilonEngine
 {
@@ -54,6 +55,20 @@ namespace EpsilonEngine
             Height = DefaultHeight;
 
             Game.AddScene(this);
+
+            Type thisType = GetType();
+
+            MethodInfo updateMethod = thisType.GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (updateMethod.DeclaringType != typeof(Scene))
+            {
+                Game.RegisterForUpdate(Update);
+            }
+
+            MethodInfo renderMethod = thisType.GetMethod("Render", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (renderMethod.DeclaringType != typeof(Scene))
+            {
+                Game.RegisterForRender(Render);
+            }
         }
         public Scene(Game game, ushort width, ushort height)
         {
@@ -77,6 +92,20 @@ namespace EpsilonEngine
             Height = height;
 
             Game.AddScene(this);
+
+            Type thisType = GetType();
+
+            MethodInfo updateMethod = thisType.GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (updateMethod.DeclaringType != typeof(Scene))
+            {
+                Game.RegisterForUpdate(Update);
+            }
+
+            MethodInfo renderMethod = thisType.GetMethod("Render", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (renderMethod.DeclaringType != typeof(Scene))
+            {
+                Game.RegisterForRender(Render);
+            }
         }
         #endregion
         #region Overrides
@@ -124,12 +153,12 @@ namespace EpsilonEngine
         }
         public void DrawTextureScreenSpaceUnsafe(Texture texture, int x, int y, byte r, byte g, byte b, byte a)
         {
-            int minXi = (int)(x * (float)Game.Width / Width);
-            int minYi = (int)(y * (float)Game.Height / Height);
-            int maxXi = (int)((x + texture.Width) * (float)Game.Width / Width);
-            int maxYi = (int)((y + texture.Height) * (float)Game.Height / Height);
+            int minX = (int)(x * (float)Game.Width / Width);
+            int minY = (int)(y * (float)Game.Height / Height);
+            int maxX = (int)((x + texture.Width) * (float)Game.Width / Width);
+            int maxY = (int)((y + texture.Height) * (float)Game.Height / Height);
 
-            Game.DrawTextureUnsafe(texture, minXi, minYi, maxXi, maxYi, r, g, b, a);
+            Game.DrawTextureUnsafe(texture, minX, minY, maxX, maxY, r, g, b, a);
         }
         public void Destroy()
         {
@@ -393,7 +422,7 @@ namespace EpsilonEngine
         }
         #endregion
         #region Internals
-        internal void InvokeUpdate()
+        internal void ClearCache()
         {
             if (!_sceneManagerCacheValid)
             {
@@ -406,53 +435,35 @@ namespace EpsilonEngine
                 _gameObjectCache = _gameObjects.ToArray();
                 _gameObjectCacheValid = true;
             }
-
-           Update();
-
-            foreach (SceneManager sceneManager in _sceneManagerCache)
-            {
-                sceneManager.InvokeUpdate();
-            }
-
-            foreach(GameObject gameObject in _gameObjectCache)
-            {
-                gameObject.InvokeUpdate();
-            }
-        }
-        internal void InvokeRender()
-        {
-            Render();
-
-            foreach (SceneManager sceneManager in _sceneManagerCache)
-            {
-                sceneManager.InvokeRender();
-            }
-
-            foreach (GameObject gameObject in _gameObjectCache)
-            {
-                gameObject.InvokeRender();
-            }
         }
         internal void RemoveSceneManager(SceneManager sceneManager)
         {
+            Game.RegisterForSingleRun(ClearCache);
+
             _sceneManagers.Remove(sceneManager);
 
             _sceneManagerCacheValid = false;
         }
         internal void AddSceneManager(SceneManager sceneManager)
         {
+            Game.RegisterForSingleRun(ClearCache);
+
             _sceneManagers.Add(sceneManager);
 
             _sceneManagerCacheValid = false;
         }
         internal void RemoveGameObject(GameObject gameObject)
         {
+            Game.RegisterForSingleRun(ClearCache);
+
             _gameObjects.Remove(gameObject);
 
             _gameObjectCacheValid = false;
         }
         internal void AddGameObject(GameObject gameObject)
         {
+            Game.RegisterForSingleRun(ClearCache);
+
             _gameObjects.Add(gameObject);
 
             _gameObjectCacheValid = false;

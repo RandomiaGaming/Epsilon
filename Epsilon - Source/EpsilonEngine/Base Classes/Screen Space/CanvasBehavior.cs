@@ -1,48 +1,68 @@
 ﻿using System;
+using System.Reflection;
 namespace EpsilonEngine
 {
     public abstract class CanvasBehavior
     {
         #region Properties
-        public bool Initialized { get; private set; } = false;
-        public Engine Engine { get; private set; } = null;
-        public Scene Scene { get; private set; } = null;
+        public bool IsDestroyed { get; private set; } = false;
+
+        public Game Game { get; private set; } = null;
+        public Canvas Canvas { get; private set; } = null;
         #endregion
         #region Constructors
-        public SceneManager(Scene scene)
+        public CanvasBehavior(Canvas canvas)
         {
-            if (scene is null)
+            if (canvas is null)
             {
-                throw new Exception("scene cannot be null.");
+                throw new Exception("canvas cannot be null.");
             }
 
-            Scene = scene;
-            Engine = Scene.Engine;
+            Canvas = canvas;
+            Game = Canvas.Game;
 
-            Scene.AddSceneManager(this);
+            Canvas.AddCanvasBehavior(this);
+
+            Type thisType = GetType();
+
+            MethodInfo updateMethod = thisType.GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (updateMethod.DeclaringType != typeof(SceneManager))
+            {
+                Game.RegisterForUpdate(Update);
+            }
+
+            MethodInfo renderMethod = thisType.GetMethod("Render", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (renderMethod.DeclaringType != typeof(SceneManager))
+            {
+                Game.RegisterForRender(Render);
+            }
         }
         #endregion
         #region Overrides
         public override string ToString()
         {
-            return $"EpsilonEngine.SceneManager()";
-        }
-        #endregion
-        #region Overridables
-        public virtual void OnInitialize()
-        {
-
-        }
-        public virtual void OnRemove()
-        {
-
+            return $"EpsilonEngine.CanvasBehavior()";
         }
         #endregion
         #region Methods
-        public void Initialize()
+        public void Destroy()
         {
-            OnInitialize();
-            Initialized = true;
+            Canvas.RemoveCanvasBehavior(this);
+
+            Game = null;
+            Canvas = null;
+
+            IsDestroyed = true;
+        }
+        #endregion
+        #region Overridables
+        protected virtual void Update()
+        {
+
+        }
+        protected virtual void Render()
+        {
+
         }
         #endregion
     }

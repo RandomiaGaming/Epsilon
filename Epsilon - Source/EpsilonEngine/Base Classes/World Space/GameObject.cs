@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Collections.Generic;
 namespace EpsilonEngine
 {
@@ -10,101 +11,23 @@ namespace EpsilonEngine
         private bool _componentCacheValid = true;
         #endregion
         #region Properties
-        public bool IsOrphan { get; private set; } = true;
         public bool IsDestroyed { get; private set; } = false;
         
         public Game Game { get; private set; } = null;
         public Scene Scene { get; private set; } = null;
-        public GameObject Parent { get; private set; } = null;
 
-        public int LocalPositionX { get; set; } = 0;
-        public int LocalPositionY { get; set; } = 0;
-        public Point LocalPosition
+        public int PositionX { get; set; } = 0;
+        public int PositionY { get; set; } = 0;
+        public Point Position
         {
             get
             {
-                return new Point(LocalPositionX, LocalPositionY);
+                return new Point(PositionX, PositionY);
             }
             set
             {
-                LocalPositionX = value.X;
-                LocalPositionY = value.Y;
-            }
-        }
-
-        public int WorldPositionX
-        {
-            get
-            {
-                if (IsOrphan)
-                {
-                    return LocalPositionX;
-                }
-                else
-                {
-                    return LocalPositionX + Parent.WorldPositionX;
-                }
-            }
-            set
-            {
-                if (IsOrphan)
-                {
-                    LocalPositionX = value;
-                }
-                else
-                {
-                    LocalPositionX = value - Parent.WorldPositionX;
-                }
-            }
-        }
-        public int WorldPositionY
-        {
-            get
-            {
-                if (IsOrphan)
-                {
-                    return LocalPositionY;
-                }
-                else
-                {
-                    return LocalPositionY + Parent.WorldPositionY;
-                }
-            }
-            set
-            {
-                if (IsOrphan)
-                {
-                    LocalPositionY = value;
-                }
-                else
-                {
-                    LocalPositionY = value - Parent.WorldPositionY;
-                }
-            }
-        }
-        public Point WorldPosition
-        {
-            get
-            {
-                if (IsOrphan)
-                {
-                    return LocalPosition;
-                }
-                else
-                {
-                    return LocalPosition + Parent.WorldPosition;
-                }
-            }
-            set
-            {
-                if (IsOrphan)
-                {
-                    LocalPosition = value;
-                }
-                else
-                {
-                    LocalPosition = LocalPosition - Parent.WorldPosition;
-                }
+                PositionX = value.X;
+                PositionY = value.Y;
             }
         }
         #endregion
@@ -119,39 +42,21 @@ namespace EpsilonEngine
             Scene = scene;
             Game = scene.Game;
 
-            Parent = null;
-            IsOrphan = true;
-
             scene.AddGameObject(this);
-        }
-        public GameObject(Scene scene, GameObject parent)
-        {
-            if (scene is null)
+
+            Type thisType = GetType();
+
+            MethodInfo updateMethod = thisType.GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (updateMethod.DeclaringType != typeof(GameObject))
             {
-                throw new Exception("scene cannot be null.");
+                Game.RegisterForUpdate(Update);
             }
 
-            Scene = scene;
-            Game = scene.Game;
-
-
-            if(parent is null)
+            MethodInfo renderMethod = thisType.GetMethod("Render", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (renderMethod.DeclaringType != typeof(GameObject))
             {
-                Parent = null;
-                IsOrphan = true;
+                Game.RegisterForRender(Render);
             }
-            else
-            {
-                if (parent.Scene != scene)
-                {
-                    throw new Exception("parent must belong to the same scene.");
-                }
-
-                Parent = parent;
-                IsOrphan = false;
-            }
-
-            scene.AddGameObject(this);
         }
         #endregion
         #region Overrides
@@ -179,8 +84,7 @@ namespace EpsilonEngine
         }
         public void DrawTextureLocalSpaceUnsafe(Texture texture, int x, int y, byte r, byte g, byte b, byte a)
         {
-            Point worldPosition = WorldPosition;
-            Scene.DrawTextureWorldSpaceUnsafe(texture, worldPosition.X + x, worldPosition.Y + y, r, g, b, a);
+            Scene.DrawTextureWorldSpaceUnsafe(texture, PositionX + x, PositionY + y, r, g, b, a);
         }
         public void Destroy()
         {
@@ -193,7 +97,6 @@ namespace EpsilonEngine
 
             _componentCache = null;
             _components = null;
-            Parent = null;
             Scene = null;
             Game = null;
 
@@ -320,38 +223,26 @@ namespace EpsilonEngine
         }
         #endregion
         #region Internals
-        internal void InvokeUpdate()
+        internal void ClearCache()
         {
             if (!_componentCacheValid)
             {
                 _componentCache = _components.ToArray();
                 _componentCacheValid = true;
             }
-
-           Update();
-
-            foreach (Component component in _componentCache)
-            {
-                component.InvokeUpdate();
-            }
-        }
-        internal void InvokeRender()
-        {
-            Render();
-
-            foreach (Component component in _componentCache)
-            {
-                component.InvokeRender();
-            }
         }
         internal void RemoveComponent(Component component)
         {
+            Game.RegisterForSingleRun(ClearCache);
+
             _components.Remove(component);
 
             _componentCacheValid = false;
         }
         internal void AddComponent(Component component)
         {
+            Game.RegisterForSingleRun(ClearCache);
+
             _components.Add(component);
 
             _componentCacheValid = false;

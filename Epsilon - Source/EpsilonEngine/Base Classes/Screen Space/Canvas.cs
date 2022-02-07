@@ -1,37 +1,49 @@
 ﻿using System;
+using System.Reflection;
 using System.Collections.Generic;
 namespace EpsilonEngine
 {
     public class Canvas
     {
         #region Variables
-        private Microsoft.Xna.Framework.Graphics.SpriteBatch _spriteBatch = null;
+        private List<Element> _elements = new List<Element>();
+        private Element[] _elementCache = new Element[0];
+        private bool _elementCacheValid = true;
 
-        private List<GameObject> _gameObjects = new List<GameObject>();
-        private List<SceneManager> _sceneManagers = new List<SceneManager>();
-
-        private PumpEvent[] renderPump = new PumpEvent[0];
-        private PumpEvent[] safeRenderPump = new PumpEvent[0];
-        private bool renderPumpDirty = false;
-        private bool renderPumpInUse = false;
+        private List<CanvasBehavior> _canvasBehaviors = new List<CanvasBehavior>();
+        private CanvasBehavior[] _canvasBehaviorCache = new CanvasBehavior[0];
+        private bool _canvasBehaviorCacheValid = true;
         #endregion
         #region Properties
-        public bool ChildrenInitialized { get; private set; } = true;
-        public Engine Engine { get; private set; } = null;
+        public bool IsDestroyed { get; private set; } = false;
+
+        public Game Game { get; private set; } = null;
         #endregion
         #region Constructors
-        public Canvas(Engine engine)
+        public Canvas(Game game)
         {
-            if (engine is null)
+            if (game is null)
             {
-                throw new Exception("engine cannot be null.");
+                throw new Exception("game cannot be null.");
             }
 
-            Engine = engine;
+            Game = game;
 
-            _spriteBatch = new Microsoft.Xna.Framework.Graphics.SpriteBatch(Engine.GraphicsDevice);
-            _spriteBatch.Name = "Scene SpriteBatch";
-            _spriteBatch.Tag = null;
+            Game.AddCanvas(this);
+
+            Type thisType = GetType();
+
+            MethodInfo updateMethod = thisType.GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (updateMethod.DeclaringType != typeof(Scene))
+            {
+                Game.RegisterForUpdate(Update);
+            }
+
+            MethodInfo renderMethod = thisType.GetMethod("Render", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (renderMethod.DeclaringType != typeof(Scene))
+            {
+                Game.RegisterForRender(Render);
+            }
         }
         #endregion
         #region Overrides
@@ -41,383 +53,356 @@ namespace EpsilonEngine
         }
         #endregion
         #region Methods
+        public void DrawTextureScreenSpace(Texture texture, Bounds bounds, Color color)
+        {
+            if (texture is null)
+            {
+                throw new Exception("texture cannot be null.");
+            }
+            DrawTextureScreenSpaceUnsafe(texture, bounds.MinX, bounds.MinY, bounds.MaxX, bounds.MaxY, color.R, color.B, color.B, color.A);
+        }
         public void DrawTextureScreenSpace(Texture texture, float minX, float minY, float maxX, float maxY, byte r, byte g, byte b, byte a)
         {
-            y = ViewPortSize.Y - y;
-            y = y - texture.Height;
-
-            if (x + texture.Width < 0 || y + texture.Height < 0 || x > ViewPortSize.X || y > ViewPortSize.Y)
+            if (texture is null)
             {
-                return;
+                throw new Exception("texture cannot be null.");
             }
-
-            _spriteBatch.Draw(texture.ToXNA(), new Microsoft.Xna.Framework.Rectangle(x,y, texture.Width, texture.Height), texture.Rect, new Microsoft.Xna.Framework.Color(r, g, b, a), 0, new Microsoft.Xna.Framework.Vector2(0, 0), Microsoft.Xna.Framework.Graphics.SpriteEffects.None, 0);
+            if(maxX < minX)
+            {
+                throw new Exception("maxX must be greater than minX.");
+            }
+            if (maxY < minY)
+            {
+                throw new Exception("maxY must be greater than minY.");
+            }
+            DrawTextureScreenSpaceUnsafe(texture, minX, minY, maxX, maxY, r, g, b, a);
         }
-        public void OnRemove()
+        public void DrawTextureScreenSpaceUnsafe(Texture texture, float minX, float minY, float maxX, float maxY, byte r, byte g, byte b, byte a)
         {
-            foreach (SceneManager sceneManager in _sceneManagers)
-            {
-                sceneManager.OnRemove();
-            }
-            _sceneManagers = null;
-            foreach (GameObject gameObject in _gameObjects)
-            {
-                gameObject.OnRemove();
-            }
-            _gameObjects = null;
+            int minXInt = (int)(minX * Game.Width);
+            int minYInt = (int)(minY * Game.Height);
+            int maxXInt = (int)(maxX * Game.Width);
+            int maxYInt = (int)(maxY * Game.Height);
+
+            Game.DrawTextureUnsafe(texture, minXInt, minYInt, maxXInt, maxYInt, r, g, b, a);
         }
-        public void Initialize()
+        public void Destroy()
         {
-            foreach (SceneManager sceneManager in _sceneManagers)
+            foreach(CanvasBehavior canvasBehavior in _canvasBehaviorCache)
             {
-                if (!sceneManager.Initialized)
-                {
-                    sceneManager.Initialize();
-                }
+                canvasBehavior.Destroy();
             }
-            foreach (GameObject gameObject in _gameObjects)
+
+            foreach (Element element in _elementCache)
             {
-                if (!gameObject.ChildrenInitialized)
-                {
-                    gameObject.Initialize();
-                }
+                element.Destroy();
             }
-            ChildrenInitialized = true;
+
+            Game.RemoveCanvas(this);
+
+            _canvasBehaviors = null;
+            _canvasBehaviorCache = null;
+            _elements = null;
+            _elementCache = null;
+            Game = null;
+
+            IsDestroyed = true;
         }
-        public Microsoft.Xna.Framework.Graphics.RenderTarget2D Render()
+        public CanvasBehavior GetCanvasBehavior(int index)
         {
-            Engine.GraphicsDevice.SetRenderTarget(_renderTarget);
-
-            Engine.GraphicsDevice.Clear(Engine.BackgroundColor.ToXNA());
-
-            _spriteBatch.Begin(Microsoft.Xna.Framework.Graphics.SpriteSortMode.Deferred, Microsoft.Xna.Framework.Graphics.BlendState.AlphaBlend, Microsoft.Xna.Framework.Graphics.SamplerState.PointClamp, null, null, null, null);
-
-            int renderPumpLength = safeRenderPump.Length;
-            for (int i = 0; i < renderPumpLength; i++)
-            {
-                safeRenderPump[i].Invoke();
-            }
-
-            if (renderPumpDirty)
-            {
-                safeRenderPump = renderPump;
-                renderPumpDirty = false;
-            }
-
-            _spriteBatch.End();
-
-            Engine.GraphicsDevice.SetRenderTarget(null);
-
-            return _renderTarget;
-        }
-        public void RegisterForRender(PumpEvent pumpEvent)
-        {
-            if (pumpEvent is null)
-            {
-                throw new Exception("updateable cannot be null.");
-            }
-
-            PumpEvent[] newRenderPump = new PumpEvent[renderPump.Length + 1];
-            Array.Copy(renderPump, 0, newRenderPump, 0, renderPump.Length);
-            newRenderPump[renderPump.Length] = pumpEvent;
-            renderPump = newRenderPump;
-
-            if (!renderPumpInUse)
-            {
-                safeRenderPump = newRenderPump;
-            }
-            else
-            {
-                renderPumpDirty = true;
-            }
-        }
-        #endregion
-        #region GameObject Management
-        public GameObject GetGameObject(int index)
-        {
-            if (index < 0 || index >= _gameObjects.Count)
+            if (index < 0 || index >= _canvasBehaviorCache.Length)
             {
                 throw new Exception("index was out of range.");
             }
 
-            return _gameObjects[index];
+            return _canvasBehaviorCache[index];
         }
-        public GameObject GetGameObject(Type type)
+        public CanvasBehavior GetCanvasBehavior(Type type)
         {
             if (type is null)
             {
                 throw new Exception("type cannot be null.");
             }
 
-            if (!type.IsAssignableFrom(typeof(GameObject)))
+            if (!type.IsAssignableFrom(typeof(CanvasBehavior)))
             {
-                throw new Exception("type must be equal to GameObject or be assignable from GameObject.");
+                throw new Exception("type must be equal to CanvasBehavior or be assignable from CanvasBehavior.");
             }
 
-            foreach (GameObject gameObject in _gameObjects)
+            foreach (CanvasBehavior canvasBehavior in _canvasBehaviorCache)
             {
-                if (gameObject.GetType().IsAssignableFrom(type))
+                if (canvasBehavior.GetType().IsAssignableFrom(type))
                 {
-                    return gameObject;
+                    return canvasBehavior;
                 }
             }
 
             return null;
         }
-        public T GetGameObject<T>() where T : GameObject
+        public T GetCanvasBehavior<T>() where T : CanvasBehavior
         {
-            foreach (GameObject gameObject in _gameObjects)
+            foreach (CanvasBehavior canvasBehavior in _canvasBehaviorCache)
             {
-                if (gameObject.GetType().IsAssignableFrom(typeof(T)))
+                if (canvasBehavior.GetType().IsAssignableFrom(typeof(T)))
                 {
-                    return (T)gameObject;
+                    return (T)canvasBehavior;
                 }
             }
 
             return null;
         }
-        public List<GameObject> GetGameObjects()
+        public List<CanvasBehavior> GetCanvasBehaviors()
         {
-            return new List<GameObject>(_gameObjects);
+            return new List<CanvasBehavior>(_canvasBehaviorCache);
         }
-        public List<GameObject> GetGameObjects(Type type)
+        public List<CanvasBehavior> GetCanvasBehaviors(Type type)
         {
             if (type is null)
             {
                 throw new Exception("type cannot be null.");
             }
 
-            if (!type.IsAssignableFrom(typeof(GameObject)))
+            if (!type.IsAssignableFrom(typeof(CanvasBehavior)))
             {
-                throw new Exception("type must be equal to GameObject or be assignable from GameObject.");
+                throw new Exception("type must be equal to CanvasBehavior or be assignable from CanvasBehavior.");
             }
 
-            List<GameObject> output = new List<GameObject>();
+            List<CanvasBehavior> output = new List<CanvasBehavior>();
 
-            foreach (GameObject gameObject in _gameObjects)
+            foreach (CanvasBehavior canvasBehavior in _canvasBehaviorCache)
             {
-                if (gameObject.GetType().IsAssignableFrom(type))
+                if (canvasBehavior.GetType().IsAssignableFrom(type))
                 {
-                    output.Add(gameObject);
+                    output.Add(canvasBehavior);
                 }
             }
 
             return output;
         }
-        public List<T> GetGameObjects<T>() where T : GameObject
+        public List<T> GetCanvasBehaviors<T>() where T : CanvasBehavior
         {
             List<T> output = new List<T>();
 
-            foreach (GameObject gameObject in _gameObjects)
+            foreach (CanvasBehavior canvasBehavior in _canvasBehaviorCache)
             {
-                if (gameObject.GetType().IsAssignableFrom(typeof(T)))
+                if (canvasBehavior.GetType().IsAssignableFrom(typeof(T)))
                 {
-                    output.Add((T)gameObject);
+                    output.Add((T)canvasBehavior);
                 }
             }
 
             return output;
         }
-        public int GetGameObjectCount()
+        public int GetCanvasBehaviorCount()
         {
-            return _gameObjects.Count;
+            return _canvasBehaviorCache.Length;
         }
-        public void RemoveGameObject(GameObject gameObject)
+        public CanvasBehavior GetCanvasBehaviorUnsafe(int index)
         {
-            if (gameObject is null)
+            return _canvasBehaviorCache[index];
+        }
+        public CanvasBehavior GetCanvasBehaviorUnsafe(Type type)
+        {
+            foreach (CanvasBehavior canvasBehavior in _canvasBehaviorCache)
             {
-                throw new Exception("gameObject cannot be null.");
-            }
-
-            if (gameObject.Scene != this)
-            {
-                throw new Exception("gameObject belongs to a different Scene.");
-            }
-
-            bool gameObjectPresent = false;
-            foreach (GameObject potentialMatch in _gameObjects)
-            {
-                if (gameObject == potentialMatch)
+                if (canvasBehavior.GetType().IsAssignableFrom(type))
                 {
-                    gameObjectPresent = true;
+                    return canvasBehavior;
                 }
             }
-            if (!gameObjectPresent)
-            {
-                throw new Exception("gameObject has already been removed.");
-            }
 
-            gameObject.OnRemove();
-
-            _gameObjects.Remove(gameObject);
+            return null;
         }
-        public void AddGameObject(GameObject gameObject)
+        public List<CanvasBehavior> GetCanvasBehaviorsUnsafe(Type type)
         {
-            if (gameObject is null)
-            {
-                throw new Exception("gameObject cannot be null.");
-            }
+            List<CanvasBehavior> output = new List<CanvasBehavior>();
 
-            if (gameObject.Scene != this)
+            foreach (CanvasBehavior canvasBehavior in _canvasBehaviorCache)
             {
-                throw new Exception("gameObject belongs to a different Scene.");
-            }
-
-            /*foreach (GameObject potentialMatch in _gameObjects)
-            {
-                if (gameObject == potentialMatch)
+                if (canvasBehavior.GetType().IsAssignableFrom(type))
                 {
-                    throw new Exception("gameObject has already been added.");
+                    output.Add(canvasBehavior);
                 }
-            }*/
+            }
 
-            _gameObjects.Add(gameObject);
-
-            ChildrenInitialized = false;
+            return output;
         }
-        #endregion
-        #region SceneManager Management
-        public SceneManager GetSceneManager(int index)
+        public Element GetElement(int index)
         {
-            if (index < 0 || index >= _sceneManagers.Count)
+            if (index < 0 || index >= _elementCache.Length)
             {
                 throw new Exception("index was out of range.");
             }
 
-            return _sceneManagers[index];
+            return _elementCache[index];
         }
-        public SceneManager GetSceneManager(Type type)
+        public Element GetElement(Type type)
         {
             if (type is null)
             {
                 throw new Exception("type cannot be null.");
             }
 
-            if (!type.IsAssignableFrom(typeof(SceneManager)))
+            if (!type.IsAssignableFrom(typeof(Element)))
             {
-                throw new Exception("type must be equal to SceneManager or be assignable from SceneManager.");
+                throw new Exception("type must be equal to Element or be assignable from Element.");
             }
 
-            foreach (SceneManager sceneManager in _sceneManagers)
+            foreach (Element element in _elementCache)
             {
-                if (sceneManager.GetType().IsAssignableFrom(type))
+                if (element.GetType().IsAssignableFrom(type))
                 {
-                    return sceneManager;
+                    return element;
                 }
             }
 
             return null;
         }
-        public T GetSceneManager<T>() where T : SceneManager
+        public T GetElement<T>() where T : Element
         {
-            foreach (SceneManager sceneManager in _sceneManagers)
+            foreach (Element element in _elementCache)
             {
-                if (sceneManager.GetType().IsAssignableFrom(typeof(T)))
+                if (element.GetType().IsAssignableFrom(typeof(T)))
                 {
-                    return (T)sceneManager;
+                    return (T)element;
                 }
             }
 
             return null;
         }
-        public List<SceneManager> GetSceneManagers()
+        public List<Element> GetElements()
         {
-            return new List<SceneManager>(_sceneManagers);
+            return new List<Element>(_elementCache);
         }
-        public List<SceneManager> GetSceneManagers(Type type)
+        public List<Element> GetElements(Type type)
         {
             if (type is null)
             {
                 throw new Exception("type cannot be null.");
             }
 
-            if (!type.IsAssignableFrom(typeof(SceneManager)))
+            if (!type.IsAssignableFrom(typeof(Element)))
             {
-                throw new Exception("type must be equal to SceneManager or be assignable from SceneManager.");
+                throw new Exception("type must be equal to Element or be assignable from Element.");
             }
 
-            List<SceneManager> output = new List<SceneManager>();
+            List<Element> output = new List<Element>();
 
-            foreach (SceneManager sceneManager in _sceneManagers)
+            foreach (Element element in _elementCache)
             {
-                if (sceneManager.GetType().IsAssignableFrom(type))
+                if (element.GetType().IsAssignableFrom(type))
                 {
-                    output.Add(sceneManager);
+                    output.Add(element);
                 }
             }
 
             return output;
         }
-        public List<T> GetSceneManagers<T>() where T : SceneManager
+        public List<T> GetElements<T>() where T : Element
         {
             List<T> output = new List<T>();
 
-            foreach (SceneManager sceneManager in _sceneManagers)
+            foreach (Element element in _elementCache)
             {
-                if (sceneManager.GetType().IsAssignableFrom(typeof(T)))
+                if (element.GetType().IsAssignableFrom(typeof(T)))
                 {
-                    output.Add((T)sceneManager);
+                    output.Add((T)element);
                 }
             }
 
             return output;
         }
-        public int GetSceneManagerCount()
+        public int GetElementCount()
         {
-            return _sceneManagers.Count;
+            return _elementCache.Length;
         }
-        public void RemoveSceneManager(SceneManager sceneManager)
+        public Element GetElementUnsafe(int index)
         {
-            if (sceneManager is null)
-            {
-                throw new Exception("sceneManager cannot be null.");
-            }
-
-            if (sceneManager.Scene != this)
-            {
-                throw new Exception("sceneManager belongs to a different Scene.");
-            }
-
-            bool sceneManagerPresent = false;
-            foreach (SceneManager potentialMatch in _sceneManagers)
-            {
-                if (sceneManager == potentialMatch)
-                {
-                    sceneManagerPresent = true;
-                }
-            }
-            if (!sceneManagerPresent)
-            {
-                throw new Exception("sceneManager has already been removed.");
-            }
-
-            sceneManager.OnRemove();
-
-            _sceneManagers.Remove(sceneManager);
+            return _elementCache[index];
         }
-        public void AddSceneManager(SceneManager sceneManager)
+        public Element GetElementUnsafe(Type type)
         {
-            if (sceneManager is null)
+            foreach (Element element in _elementCache)
             {
-                throw new Exception("sceneManager cannot be null.");
-            }
-
-            if (sceneManager.Scene != this)
-            {
-                throw new Exception("sceneManager belongs to a different Scene.");
-            }
-
-            foreach (SceneManager potentialMatch in _sceneManagers)
-            {
-                if (sceneManager == potentialMatch)
+                if (element.GetType().IsAssignableFrom(type))
                 {
-                    throw new Exception("sceneManager has already been added.");
+                    return element;
                 }
             }
 
-            _sceneManagers.Add(sceneManager);
+            return null;
+        }
+        public List<Element> GetElementsUnsafe(Type type)
+        {
+            List<Element> output = new List<Element>();
 
-            ChildrenInitialized = false;
+            foreach (Element element in _elementCache)
+            {
+                if (element.GetType().IsAssignableFrom(type))
+                {
+                    output.Add(element);
+                }
+            }
+
+            return output;
+        }
+        #endregion
+        #region Internals
+        internal void ClearCache()
+        {
+            if (!_canvasBehaviorCacheValid)
+            {
+                _canvasBehaviorCache = _canvasBehaviors.ToArray();
+                _canvasBehaviorCacheValid = true;
+            }
+
+            if (!_elementCacheValid)
+            {
+                _elementCache = _elements.ToArray();
+                _elementCacheValid = true;
+            }
+        }
+        internal void RemoveCanvasBehavior(CanvasBehavior canvasBehavior)
+        {
+            Game.RegisterForSingleRun(ClearCache);
+
+            _canvasBehaviors.Remove(canvasBehavior);
+
+            _canvasBehaviorCacheValid = false;
+        }
+        internal void AddCanvasBehavior(CanvasBehavior canvasBehavior)
+        {
+            Game.RegisterForSingleRun(ClearCache);
+
+            _canvasBehaviors.Add(canvasBehavior);
+
+            _canvasBehaviorCacheValid = false;
+        }
+        internal void RemoveElement(Element element)
+        {
+            Game.RegisterForSingleRun(ClearCache);
+
+            _elements.Remove(element);
+
+            _elementCacheValid = false;
+        }
+        internal void AddElement(Element element)
+        {
+            Game.RegisterForSingleRun(ClearCache);
+
+            _elements.Add(element);
+
+            _elementCacheValid = false;
+        }
+        #endregion
+        #region Overridables
+        protected virtual void Update()
+        {
+
+        }
+        protected virtual void Render()
+        {
+
         }
         #endregion
     }

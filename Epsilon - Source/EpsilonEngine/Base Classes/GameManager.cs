@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 namespace EpsilonEngine
 {
     public abstract class GameManager
@@ -19,6 +20,20 @@ namespace EpsilonEngine
             Game = game;
 
             Game.AddGameManager(this);
+
+            Type thisType = GetType();
+
+            MethodInfo updateMethod = thisType.GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (updateMethod.DeclaringType != typeof(GameManager))
+            {
+                Game.RegisterForUpdate(Update);
+            }
+
+            MethodInfo renderMethod = thisType.GetMethod("Render", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (renderMethod.DeclaringType != typeof(GameManager))
+            {
+                Game.RegisterForRender(Render);
+            }
         }
         #endregion
         #region Overrides
@@ -35,16 +50,6 @@ namespace EpsilonEngine
             Game = null;
 
             IsDestroyed = true;
-        }
-        #endregion
-        #region Overridables
-        internal void InvokeUpdate()
-        {
-            Update();
-        }
-        internal void InvokeRender()
-        {
-            Render();
         }
         #endregion
         #region Overridables

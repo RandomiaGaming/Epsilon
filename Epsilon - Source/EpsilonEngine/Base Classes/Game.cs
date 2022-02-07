@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Collections.Generic;
 namespace EpsilonEngine
 {
@@ -8,33 +9,98 @@ namespace EpsilonEngine
         public static readonly Color DefaultBackgroundColor = new Color(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
         #endregion
         #region Variables
-        private GameInterface _gameInterface = null;
+        private List<GameManager> _gameManagers = new List<GameManager>();
+        private GameManager[] _gameManagerCache = new GameManager[0];
+        private bool _gameManagerCacheValid = true;
+
+        private List<Canvas> _canvases = new List<Canvas>();
+        private Canvas[] _canvasCache = new Canvas[0];
+        private bool _canvasCacheValid = true;
 
         private List<Scene> _scenes = new List<Scene>();
         private Scene[] _sceneCache = new Scene[0];
         private bool _sceneCacheValid = true;
 
-        private List<GameManager> _gameManagers = new List<GameManager>();
-        private GameManager[] _gameManagerCache = new GameManager[0];
-        private bool _gameManagerCacheValid = true;
+        private List<PumpEvent> _updatePump = new List<PumpEvent>();
+        private PumpEvent[] _updatePumpCache = new PumpEvent[0];
+        private bool _updatePumpCacheValid = true;
+
+        private List<PumpEvent> _renderPump = new List<PumpEvent>();
+        private PumpEvent[] _renderPumpCache = new PumpEvent[0];
+        private bool _renderPumpCacheValid = true;
+
+        private List<PumpEvent> _singleRunPump = new List<PumpEvent>();
+        private bool _singleRunPumpClear = true;
         #endregion
         #region Properties
         public bool IsDestroyed { get; private set; } = false;
 
         public Color BackgroundColor { get; set; } = DefaultBackgroundColor;
-        public ushort Width { get; private set; } = 1920/2;
-        public ushort Height { get; private set; } = 1080/2;
+        public ushort Width { get; private set; } = 1920;
+        public ushort Height { get; private set; } = 1080;
 
         public float CurrentFPS { get; private set; } = 0f;
         public TimeSpan TimeSinceStart { get; private set; } = new TimeSpan(0);
         public TimeSpan DeltaTime { get; private set; } = new TimeSpan(0);
 
-        public Microsoft.Xna.Framework.Graphics.GraphicsDevice GraphicsDevice { get { return _gameInterface.GraphicsDevice; } }
+        public GameInterface GameInterface { get; private set; } = null;
+        public Microsoft.Xna.Framework.GraphicsDeviceManager GraphicsDeviceManager { get; private set; } = null;
+        public Microsoft.Xna.Framework.Graphics.GraphicsDevice GraphicsDevice { get; private set; } = null;
+        public Microsoft.Xna.Framework.GameWindow GameWindow { get; private set; } = null;
+        public Microsoft.Xna.Framework.Graphics.SpriteBatch SpriteBatch { get; private set; } = null;
         #endregion
         #region Constructors
         public Game()
         {
-            _gameInterface = new GameInterface(this);
+            GameInterface = new GameInterface(this);
+
+            GraphicsDeviceManager = new Microsoft.Xna.Framework.GraphicsDeviceManager(GameInterface);
+            GraphicsDeviceManager.GraphicsProfile = Microsoft.Xna.Framework.Graphics.GraphicsProfile.Reach;
+            GraphicsDeviceManager.SynchronizeWithVerticalRetrace = false;
+            GraphicsDeviceManager.HardwareModeSwitch = true;
+            GraphicsDeviceManager.IsFullScreen = false;
+            GraphicsDeviceManager.PreferHalfPixelOffset = false;
+            GraphicsDeviceManager.PreferredBackBufferFormat = Microsoft.Xna.Framework.Graphics.SurfaceFormat.Color;
+            GraphicsDeviceManager.SupportedOrientations = Microsoft.Xna.Framework.DisplayOrientation.LandscapeLeft | Microsoft.Xna.Framework.DisplayOrientation.LandscapeRight | Microsoft.Xna.Framework.DisplayOrientation.Portrait | Microsoft.Xna.Framework.DisplayOrientation.PortraitDown | Microsoft.Xna.Framework.DisplayOrientation.Unknown | Microsoft.Xna.Framework.DisplayOrientation.Default;
+            GraphicsDeviceManager.ApplyChanges();
+
+            GraphicsDevice = GameInterface.GraphicsDevice;
+
+            GraphicsDevice.BlendState = Microsoft.Xna.Framework.Graphics.BlendState.AlphaBlend;
+            GraphicsDevice.DepthStencilState = Microsoft.Xna.Framework.Graphics.DepthStencilState.None;
+            GraphicsDevice.RasterizerState = Microsoft.Xna.Framework.Graphics.RasterizerState.CullNone;
+
+            GameWindow = GameInterface.Window;
+
+            GameWindow.AllowAltF4 = true;
+            GameWindow.AllowUserResizing = true;
+            GameWindow.IsBorderless = false;
+            GameWindow.Position = new Point(GraphicsDevice.Adapter.CurrentDisplayMode.Width / 4, GraphicsDevice.Adapter.CurrentDisplayMode.Height / 4).ToXNA();
+            GameWindow.Title = "Game";
+
+            GameInterface.InactiveSleepTime = new TimeSpan(0);
+            GameInterface.TargetElapsedTime = new TimeSpan(10000000 / 60);
+            GameInterface.MaxElapsedTime = new TimeSpan(10000000 / 60);
+            GameInterface.IsFixedTimeStep = false;
+            GameInterface.IsMouseVisible = true;
+
+            SpriteBatch = new Microsoft.Xna.Framework.Graphics.SpriteBatch(GraphicsDevice);
+            SpriteBatch.Name = "Main SpriteBatch";
+            SpriteBatch.Tag = null;
+
+            Type thisType = GetType();
+
+            MethodInfo updateMethod = thisType.GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Instance);
+            if(updateMethod.DeclaringType != typeof(Game))
+            {
+                RegisterForUpdate(Update);
+            }
+
+            MethodInfo renderMethod = thisType.GetMethod("Render", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (renderMethod.DeclaringType != typeof(Game))
+            {
+                RegisterForRender(Render);
+            }
         }
         #endregion
         #region Methods
@@ -52,13 +118,13 @@ namespace EpsilonEngine
             {
                 throw new Exception("texture cannot be null.");
             }
-            if (minX > maxX)
+            if (maxX < minX)
             {
-                throw new Exception("minX must be less than or equal to maxX.");
+                throw new Exception("maxX must be greater than minX.");
             }
-            if (minY > maxY)
+            if (maxY < minY)
             {
-                throw new Exception("minX must be less than or equal to maxX.");
+                throw new Exception("maxY must be greater than minY.");
             }
             DrawTextureUnsafe(texture, minX, minY, maxX, maxY, r, g, b, a);
         }
@@ -66,11 +132,11 @@ namespace EpsilonEngine
         {
             int width = maxX - minX;
             int height = maxY - minY;
-            _gameInterface.SpriteBatch.Draw(texture.ToXNA(), new Microsoft.Xna.Framework.Rectangle(minX, minY, width, height), new Microsoft.Xna.Framework.Rectangle(0, 0, texture.Width, texture.Height), new Microsoft.Xna.Framework.Color(r, g, b, a), 0, Microsoft.Xna.Framework.Vector2.Zero, Microsoft.Xna.Framework.Graphics.SpriteEffects.None, 0);
+            SpriteBatch.Draw(texture.ToXNA(), new Microsoft.Xna.Framework.Rectangle(minX, (Height - minY) - height, width, height), new Microsoft.Xna.Framework.Rectangle(0, 0, texture.Width, texture.Height), new Microsoft.Xna.Framework.Color(r, g, b, a), 0, Microsoft.Xna.Framework.Vector2.Zero, Microsoft.Xna.Framework.Graphics.SpriteEffects.None, 0);
         }
         public void Run()
         {
-            _gameInterface.Run();
+            GameInterface.Run();
         }
         public void Destroy()
         {
@@ -79,12 +145,29 @@ namespace EpsilonEngine
                 gameManager.Destroy();
             }
 
+            foreach (Canvas canvas in _canvasCache)
+            {
+                canvas.Destroy();
+            }
+
             foreach (Scene scene in _sceneCache)
             {
                 scene.Destroy();
             }
 
-            _gameInterface.Destroy();
+            GameInterface.Exit();
+            GameInterface = null;
+
+            GraphicsDeviceManager.Dispose();
+            GraphicsDeviceManager = null;
+
+            GraphicsDevice.Dispose();
+            GraphicsDevice = null;
+
+            SpriteBatch.Dispose();
+            SpriteBatch = null;
+
+            GameWindow = null;
 
             _gameManagers = null;
             _gameManagerCache = null;
@@ -212,6 +295,125 @@ namespace EpsilonEngine
 
             return output;
         }
+        public Canvas GetCanvas(int index)
+        {
+            if (index < 0 || index >= _canvasCache.Length)
+            {
+                throw new Exception("index was out of range.");
+            }
+
+            return _canvasCache[index];
+        }
+        public Canvas GetCanvas(Type type)
+        {
+            if (type is null)
+            {
+                throw new Exception("type cannot be null.");
+            }
+
+            if (!type.IsAssignableFrom(typeof(Canvas)))
+            {
+                throw new Exception("type must be equal to Canvas or be assignable from Canvas.");
+            }
+
+            foreach (Canvas canvas in _canvasCache)
+            {
+                if (canvas.GetType().IsAssignableFrom(type))
+                {
+                    return canvas;
+                }
+            }
+
+            return null;
+        }
+        public T GetCanvas<T>() where T : Canvas
+        {
+            foreach (Canvas canvas in _canvasCache)
+            {
+                if (canvas.GetType().IsAssignableFrom(typeof(T)))
+                {
+                    return (T)canvas;
+                }
+            }
+
+            return null;
+        }
+        public List<Canvas> GetCanvases()
+        {
+            return new List<Canvas>(_canvasCache);
+        }
+        public List<Canvas> GetCanvases(Type type)
+        {
+            if (type is null)
+            {
+                throw new Exception("type cannot be null.");
+            }
+
+            if (!type.IsAssignableFrom(typeof(Canvas)))
+            {
+                throw new Exception("type must be equal to Canvas or be assignable from Canvas.");
+            }
+
+            List<Canvas> output = new List<Canvas>();
+
+            foreach (Canvas canvas in _canvasCache)
+            {
+                if (canvas.GetType().IsAssignableFrom(type))
+                {
+                    output.Add(canvas);
+                }
+            }
+
+            return output;
+        }
+        public List<T> GetCanvases<T>() where T : Canvas
+        {
+            List<T> output = new List<T>();
+
+            foreach (Canvas canvas in _canvasCache)
+            {
+                if (canvas.GetType().IsAssignableFrom(typeof(T)))
+                {
+                    output.Add((T)canvas);
+                }
+            }
+
+            return output;
+        }
+        public int GetCanvasCount()
+        {
+            return _canvasCache.Length;
+        }
+        public Canvas GetCanvasUnsafe(int index)
+        {
+            return _canvasCache[index];
+        }
+        public Canvas GetCanvasUnsafe(Type type)
+        {
+            foreach (Canvas canvas in _canvasCache)
+            {
+                if (canvas.GetType().IsAssignableFrom(type))
+                {
+                    return canvas;
+                }
+            }
+
+            return null;
+        }
+        public List<Canvas> GetCanvasesUnsafe(Type type)
+        {
+            List<Canvas> output = new List<Canvas>();
+
+            foreach (Canvas canvas in _canvasCache)
+            {
+                if (canvas.GetType().IsAssignableFrom(type))
+                {
+                    output.Add(canvas);
+                }
+            }
+
+            return output;
+        }
         public Scene GetScene(int index)
         {
             if (index < 0 || index >= _sceneCache.Length)
@@ -333,18 +535,61 @@ namespace EpsilonEngine
         }
         #endregion
         #region Internals
-        internal void InvokeUpdate()
+        internal void RegisterForUpdate(PumpEvent pumpEvent)
+        {
+            if (pumpEvent is null)
+            {
+                throw new Exception("pumpEvent cannot be null.");
+            }
+
+            _updatePump.Add(pumpEvent);
+            _updatePumpCacheValid = false;
+        }
+        internal void RegisterForRender(PumpEvent pumpEvent)
+        {
+            if (pumpEvent is null)
+            {
+                throw new Exception("pumpEvent cannot be null.");
+            }
+
+            _renderPump.Add(pumpEvent);
+            _renderPumpCacheValid = false;
+        }
+        internal void RegisterForSingleRun(PumpEvent pumpEvent)
+        {
+            if (pumpEvent is null)
+            {
+                throw new Exception("pumpEvent cannot be null.");
+            }
+
+            _singleRunPump.Add(pumpEvent);
+            _singleRunPumpClear = false;
+        }
+        internal void UpdateCallback()
         {
             DebugProfiler.UpdateStart();
 
-           Point viewPortSize = _gameInterface.GetViewportSize();
-            Width = (ushort)viewPortSize.X;
-            Height = (ushort)viewPortSize.Y;
+            if (GraphicsDeviceManager.IsFullScreen)
+            {
+                Width = (ushort)GraphicsDevice.Adapter.CurrentDisplayMode.Width;
+                Height = (ushort)GraphicsDevice.Adapter.CurrentDisplayMode.Height;
+            }
+            else
+            {
+                Width = (ushort)GraphicsDevice.Viewport.Width;
+                Height = (ushort)GraphicsDevice.Viewport.Height;
+            }
 
             if (!_gameManagerCacheValid)
             {
                 _gameManagerCache = _gameManagers.ToArray();
                 _gameManagerCacheValid = true;
+            }
+
+            if (!_canvasCacheValid)
+            {
+                _canvasCache = _canvases.ToArray();
+                _canvasCacheValid = true;
             }
 
             if (!_sceneCacheValid)
@@ -353,39 +598,50 @@ namespace EpsilonEngine
                 _sceneCacheValid = true;
             }
 
-            Update();
-
-            foreach (GameManager gameManager in _gameManagerCache)
+            if (!_singleRunPumpClear)
             {
-                gameManager.InvokeUpdate();
+                int initializationPumpLength = _singleRunPump.Count;
+                for (int i = 0; i < initializationPumpLength; i++)
+                {
+                    _singleRunPump[i].Invoke();
+                }
+                _singleRunPump = new List<PumpEvent>();
+                _singleRunPumpClear = true;
             }
 
-            foreach (Scene scene in _sceneCache)
+            if (!_updatePumpCacheValid)
             {
-                scene.InvokeUpdate();
+                _updatePumpCache = _updatePump.ToArray();
+                _updatePumpCacheValid = true;
+            }
+
+            int updatePumpLength = _updatePumpCache.Length;
+            for (int i = 0; i < updatePumpLength; i++)
+            {
+                _updatePumpCache[i].Invoke();
             }
 
             DebugProfiler.UpdateEnd();
 
             DebugProfiler.RenderStart();
 
-            _gameInterface.GraphicsDevice.Clear(BackgroundColor.ToXNA());
+            GraphicsDevice.Clear(BackgroundColor.ToXNA());
 
-            _gameInterface.SpriteBatch.Begin(Microsoft.Xna.Framework.Graphics.SpriteSortMode.Deferred, Microsoft.Xna.Framework.Graphics.BlendState.AlphaBlend, Microsoft.Xna.Framework.Graphics.SamplerState.PointClamp, null, null, null, null);
+            SpriteBatch.Begin(Microsoft.Xna.Framework.Graphics.SpriteSortMode.Deferred, Microsoft.Xna.Framework.Graphics.BlendState.AlphaBlend, Microsoft.Xna.Framework.Graphics.SamplerState.PointClamp, null, null, null, null);
 
-            Render();
-
-            foreach (GameManager gameManager in _gameManagerCache)
+            if (!_renderPumpCacheValid)
             {
-                gameManager.InvokeRender();
+                _renderPumpCache = _renderPump.ToArray();
+                _renderPumpCacheValid = true;
             }
 
-            foreach (Scene scene in _sceneCache)
+            int renderPumpLength = _renderPumpCache.Length;
+            for (int i = 0; i < renderPumpLength; i++)
             {
-                scene.InvokeRender();
+                _renderPumpCache[i].Invoke();
             }
 
-            _gameInterface.SpriteBatch.End();
+            SpriteBatch.End();
 
             DebugProfiler.RenderEnd();
 
@@ -406,6 +662,18 @@ namespace EpsilonEngine
             _gameManagers.Add(gameManager);
 
             _gameManagerCacheValid = false;
+        }
+        internal void RemoveCanvas(Canvas canvas)
+        {
+            _canvases.Remove(canvas);
+
+            _canvasCacheValid = false;
+        }
+        internal void AddCanvas(Canvas canvas)
+        {
+            _canvases.Add(canvas);
+
+            _canvasCacheValid = false;
         }
         internal void RemoveScene(Scene scene)
         {

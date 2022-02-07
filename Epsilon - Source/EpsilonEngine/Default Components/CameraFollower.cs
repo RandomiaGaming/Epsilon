@@ -18,25 +18,22 @@
         }
         protected override void Update()
         {
-            int positionX = GameObject.WorldPositionX;
-            int positionY = GameObject.WorldPositionY;
-
-            if (positionX + Width >= GameObject.Scene.CameraPositionX + GameObject.Scene.Width - PaddingRight)
+            if (GameObject.PositionX + Width >= GameObject.Scene.CameraPositionX + GameObject.Scene.Width - PaddingRight)
             {
-                GameObject.Scene.CameraPositionX = positionX + Width + PaddingRight - GameObject.Scene.Width;
+                GameObject.Scene.CameraPositionX = GameObject.PositionX + Width + PaddingRight - GameObject.Scene.Width;
             }
-            else if (positionX <= GameObject.Scene.CameraPositionX + PaddingLeft)
+            else if (GameObject.PositionX <= GameObject.Scene.CameraPositionX + PaddingLeft)
             {
-                GameObject.Scene.CameraPositionX = positionX - PaddingLeft;
+                GameObject.Scene.CameraPositionX = GameObject.PositionX - PaddingLeft;
             }
 
-            if (positionY + Height >= GameObject.Scene.CameraPositionY + GameObject.Scene.Height - PaddingUp)
+            if (GameObject.PositionY + Height >= GameObject.Scene.CameraPositionY + GameObject.Scene.Height - PaddingUp)
             {
-                GameObject.Scene.CameraPositionY = positionY + Height + PaddingUp - GameObject.Scene.Height;
+                GameObject.Scene.CameraPositionY = GameObject.PositionY + Height + PaddingUp - GameObject.Scene.Height;
             }
-            else if (positionY <= GameObject.Scene.CameraPositionY + PaddingDown)
+            else if (GameObject.PositionY <= GameObject.Scene.CameraPositionY + PaddingDown)
             {
-                GameObject.Scene.CameraPositionY = positionY - PaddingDown;
+                GameObject.Scene.CameraPositionY = GameObject.PositionY - PaddingDown;
             }
         }
     }

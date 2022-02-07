@@ -80,8 +80,8 @@ namespace EpsilonEngine
             if (_collider is null)
             {
                 //The object has no hitbox and can therefore move freely without fear of collisions and then return.
-                GameObject.LocalPositionX += targetMoveX;
-                GameObject.LocalPositionY += targetMoveY;
+                GameObject.PositionX += targetMoveX;
+                GameObject.PositionY += targetMoveY;
                 return;
             }
 
@@ -136,7 +136,7 @@ namespace EpsilonEngine
                     }
                 }
                 //Move the GameObject.
-                GameObject.LocalPositionX += targetMoveX;
+                GameObject.PositionX += targetMoveX;
                 //Remember to update the collider shape because the object moved.
                 thisColliderShape = _collider.GetWorldShape();
             }
@@ -189,7 +189,7 @@ namespace EpsilonEngine
                     }
                 }
                 //Move the GameObject. 
-                GameObject.LocalPositionX += targetMoveX;
+                GameObject.PositionX += targetMoveX;
                 //Remember to update the collider shape because the object moved.
                 thisColliderShape = _collider.GetWorldShape();
             }
@@ -245,7 +245,7 @@ namespace EpsilonEngine
                     }
                 }
                 //Move the GameObject. 
-                GameObject.LocalPositionY += targetMoveY;
+                GameObject.PositionY += targetMoveY;
             }
             else if (targetMoveY < 0)
             {
@@ -296,7 +296,7 @@ namespace EpsilonEngine
                     }
                 }
                 //Move the GameObject. 
-                GameObject.LocalPositionY += targetMoveY;
+                GameObject.PositionY += targetMoveY;
             }
         }
     }

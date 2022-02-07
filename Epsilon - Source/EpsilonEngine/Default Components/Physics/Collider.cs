@@ -28,10 +28,7 @@ namespace EpsilonEngine
         }
         protected override void Update()
         {
-            int gameObjectWorldPositionX = GameObject.WorldPositionX;
-            int gameObjectWorldPositionY = GameObject.WorldPositionY;
-
-           _worldShape = new Rectangle(Rect.MinX + gameObjectWorldPositionX, Rect.MinY + gameObjectWorldPositionY, Rect.MaxX + gameObjectWorldPositionX, Rect.MaxY + gameObjectWorldPositionY);
+           _worldShape = new Rectangle(Rect.MinX + GameObject.PositionX, Rect.MinY + GameObject.PositionY, Rect.MaxX + GameObject.PositionX, Rect.MaxY + GameObject.PositionY);
         }
         public override string ToString()
         {
