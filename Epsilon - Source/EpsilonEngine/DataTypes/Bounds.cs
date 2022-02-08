@@ -4,118 +4,95 @@ namespace EpsilonEngine
     public struct Bounds
     {
         #region Constants
+        public static readonly Bounds Zero = new Bounds(0, 0, 0, 0);
         public static readonly Bounds One = new Bounds(0, 0, 1, 1);
-        #endregion
-        #region Variables
-        private float _minX;
-        private float _minY;
-        private float _maxX;
-        private float _maxY;
+        public static readonly Bounds NegativeOne = new Bounds(-1, -1, 0, 0);
+
+        public static readonly Bounds UpRight = new Bounds(0, 0, 1, 1);
+        public static readonly Bounds UpLeft = new Bounds(-1, 0, 0, 1);
+        public static readonly Bounds DownRight = new Bounds(0, -1, 1, 0);
+        public static readonly Bounds DownLeft = new Bounds(-1, -1, 0, 0);
         #endregion
         #region Properties
-        public float MinX
-        {
-            get
-            {
-                return _minX;
-            }
-        }
-        public float MinY
-        {
-            get
-            {
-                return _minY;
-            }
-        }
-        public float MaxX
-        {
-            get
-            {
-                return _maxX;
-            }
-        }
-        public float MaxY
-        {
-            get
-            {
-                return _maxY;
-            }
-        }
+        public float MinX { get; private set; }
+        public float MinY { get; private set; }
+        public float MaxX { get; private set; }
+        public float MaxY { get; private set; }
         public Vector Min
         {
             get
             {
-                return new Vector(_minX, _minY);
+                return new Vector(MinX, MinY);
             }
         }
         public Vector Max
         {
             get
             {
-                return new Vector(_maxX, _maxY);
+                return new Vector(MaxX, MaxY);
             }
         }
         public float Width
         {
             get
             {
-                return _maxX - _minX + 1;
+                return MaxX - MinX + 1;
             }
         }
         public float Height
         {
             get
             {
-                return _maxY - _minY + 1;
+                return MaxY - MinY + 1;
             }
         }
         public Vector Size
         {
             get
             {
-                return new Vector(_maxX - _minX + 1f, _maxY - _minY + 1f);
+                return new Vector(MaxX - MinX + 1f, MaxY - MinY + 1f);
             }
         }
         #endregion
         #region Constructors
-        public Bounds(Vector min, Vector max)
-        {
-            if (min.X > max.X || min.Y > max.Y)
-            {
-                throw new Exception("Max must be greater than Min.");
-            }
-            _minX = min.X;
-            _minY = min.Y;
-            _maxX = max.X;
-            _maxY = max.Y;
-        }
         public Bounds(float minX, float minY, float maxX, float maxY)
         {
             if (minX > maxX)
             {
                 throw new Exception("MaxX must be greater than MinX.");
             }
+            MinX = minX;
+            MaxX = maxX;
             if (minY > maxY)
             {
                 throw new Exception("MaxY must be greater than MinY.");
             }
-            _minX = minX;
-            _minY = minY;
-            _maxX = maxX;
-            _maxY = maxY;
+            MinY = minY;
+            MaxY = maxY;
+        }
+        public Bounds(Vector min, Vector max)
+        {
+            if (min.X > max.X || min.Y > max.Y)
+            {
+                throw new Exception("Max must be greater than Min.");
+            }
+            MinX = min.X;
+            MinY = min.Y;
+            MaxX = max.X;
+            MaxY = max.Y;
         }
         public Bounds(Microsoft.Xna.Framework.BoundingBox source)
         {
-            _minX = source.Min.X;
-            _minY = source.Min.Y;
-            _maxX = source.Max.X;
-            _maxY = source.Max.Y;
+            MinX = source.Min.X;
+            MinY = source.Min.Y;
+            MaxX = source.Max.X;
+            MaxY = source.Max.Y;
         }
         #endregion
         #region Overrides
         public override string ToString()
         {
-            return $"EpsilonEngine.Bounds({_minX}, {_minY}, {_maxX}, {_maxY})";
+            return $"EpsilonEngine.Bounds({MinX}, {MinY}, {MaxX}, {MaxY})";
         }
         public override bool Equals(object obj)
         {
@@ -130,24 +107,17 @@ namespace EpsilonEngine
         }
         public static bool operator ==(Bounds a, Bounds b)
         {
-            return (a._minX == b._minX) && (a._minY == b._minY) && (a._maxX == b._maxX) && (a._maxY == b._maxY);
+            return (a.MinX == b.MinX) && (a.MinY == b.MinY) && (a.MaxX == b.MaxX) && (a.MaxY == b.MaxY);
         }
         public static bool operator !=(Bounds a, Bounds b)
         {
-            return (a._minX != b._minX) || (a._minY != b._minY) || (a._maxX != b._maxX) || (a._maxY != b._maxY);
+            return !(a == b);
         }
         #endregion
         #region Methods
         public static bool Incapsulates(Bounds a, Vector b)
         {
-            if (b.X >= a._minX && b.X <= a._maxX && b.Y >= a._minY && b.Y <= a._maxY)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return b.X >= a.MinX && b.X <= a.MaxX && b.Y >= a.MinY && b.Y <= a.MaxY;
         }
         public bool Incapsulates(Vector a)
         {
@@ -155,14 +125,7 @@ namespace EpsilonEngine
         }
         public static bool Incapsulates(Bounds a, Bounds b)
         {
-            if (b._maxY <= a._maxY && b._minY >= a._minY && b._maxX <= a._maxX && b._minX >= a._minX)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return b.MaxY <= a.MaxY && b.MinY >= a.MinY && b.MaxX <= a.MaxX && b.MinX >= a.MinX;
         }
         public bool Incapsulates(Bounds a)
         {
@@ -170,14 +133,7 @@ namespace EpsilonEngine
         }
         public static bool Overlaps(Bounds a, Bounds b)
         {
-            if (a._maxX < b._minX || a._minX > b._maxX || a._maxY < b._minY || a._minY > b._maxY)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            return a.MaxX >= b.MinX && a.MinX <= b.MaxX && a.MaxY >= b.MinY && a.MinY <= b.MaxY;
         }
         public bool Overlaps(Bounds a)
         {
@@ -185,7 +141,7 @@ namespace EpsilonEngine
         }
         public static Microsoft.Xna.Framework.BoundingBox ToXNA(Bounds source)
         {
-            return new Microsoft.Xna.Framework.BoundingBox(new Microsoft.Xna.Framework.Vector3(source._minX, source._minY, 0f), new Microsoft.Xna.Framework.Vector3(source._maxX, source._maxY, 0f));
+            return new Microsoft.Xna.Framework.BoundingBox(new Microsoft.Xna.Framework.Vector3(source.MinX, source.MinY, 0f), new Microsoft.Xna.Framework.Vector3(source.MaxX, source.MaxY, 0f));
         }
         public Microsoft.Xna.Framework.BoundingBox ToXNA()
         {

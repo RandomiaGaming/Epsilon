@@ -40,6 +40,7 @@ namespace EpsilonEngine
 
         public ushort Width { get; private set; } = 1;
         public ushort Height { get; private set; } = 1;
+        public float AspectRatio { get; private set; } = 1;
         #endregion
         #region Constructors
         public Scene(Game game)
@@ -53,6 +54,7 @@ namespace EpsilonEngine
 
             Width = DefaultWidth;
             Height = DefaultHeight;
+           AspectRatio = Width / (float)Height;
 
             Game.AddScene(this);
 
@@ -90,6 +92,8 @@ namespace EpsilonEngine
                 throw new Exception("height must be greater than 0.");
             }
             Height = height;
+
+            AspectRatio = Width / (float)Height;
 
             Game.AddScene(this);
 
@@ -153,16 +157,18 @@ namespace EpsilonEngine
         }
         public void DrawTextureScreenSpaceUnsafe(Texture texture, int x, int y, byte r, byte g, byte b, byte a)
         {
-            int minX = (int)(x * (float)Game.Width / Width);
-            int minY = (int)(y * (float)Game.Height / Height);
-            int maxX = (int)((x + texture.Width) * (float)Game.Width / Width);
-            int maxY = (int)((y + texture.Height) * (float)Game.Height / Height);
+            float scaleFactorX = (float)Game.Width / Width;
+            float scaleFactorY = (float)Game.Height / Height;
+            int minX = (int)(x * scaleFactorX);
+            int minY = (int)(y * scaleFactorY);
+            int maxX = (int)((x + texture.Width) * scaleFactorX);
+            int maxY = (int)((y + texture.Height) * scaleFactorY);
 
             Game.DrawTextureUnsafe(texture, minX, minY, maxX, maxY, r, g, b, a);
         }
         public void Destroy()
         {
-            foreach(SceneManager sceneManager in _sceneManagerCache)
+            foreach (SceneManager sceneManager in _sceneManagerCache)
             {
                 sceneManager.Destroy();
             }

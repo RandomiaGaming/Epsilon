@@ -1,7 +1,7 @@
 ﻿using System;
 namespace EpsilonEngine
 {
-    public sealed class GameInterface : Microsoft.Xna.Framework.Game
+    internal sealed class GameInterface : Microsoft.Xna.Framework.Game
     {
         public Game Game { get; private set; } = null;
         public GameInterface(Game game)

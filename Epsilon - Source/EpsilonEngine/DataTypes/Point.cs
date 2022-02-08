@@ -18,8 +18,8 @@ namespace EpsilonEngine
         public static readonly Point DownLeft = new Point(-1, -1);
         #endregion
         #region Properties
-        public int X;
-        public int Y;
+        public int X { get; private set; }
+        public int Y { get; private set; }
         #endregion
         #region Constructors
         public Point(int x, int y)
@@ -60,7 +60,7 @@ namespace EpsilonEngine
         }
         public static bool operator !=(Point a, Point b)
         {
-            return (a.X != b.X) || (a.Y != b.Y);
+            return !(a == b);
         }
         public static Point operator +(Point a, Point b)
         {

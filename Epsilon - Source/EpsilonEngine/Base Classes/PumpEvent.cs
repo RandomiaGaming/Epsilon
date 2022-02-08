@@ -1,4 +1,4 @@
 ﻿namespace EpsilonEngine
 {
-    public delegate void PumpEvent();
+    internal delegate void PumpEvent();
 }

@@ -3,116 +3,96 @@ namespace EpsilonEngine
 {
     public struct Rectangle
     {
-        #region Variables
-        private int _minX;
-        private int _minY;
-        private int _maxX;
-        private int _maxY;
+        #region Constants
+        public static readonly Rectangle Zero = new Rectangle(0, 0, 0, 0);
+        public static readonly Rectangle One = new Rectangle(0, 0, 1, 1);
+        public static readonly Rectangle NegativeOne = new Rectangle(-1, -1, 0, 0);
+
+        public static readonly Rectangle UpRight = new Rectangle(0, 0, 1, 1);
+        public static readonly Rectangle UpLeft = new Rectangle(-1, 0, 0, 1);
+        public static readonly Rectangle DownRight = new Rectangle(0, -1, 1, 0);
+        public static readonly Rectangle DownLeft = new Rectangle(-1, -1, 0, 0);
         #endregion
         #region Properties
-        public int MinX
-        {
-            get
-            {
-                return _minX;
-            }
-        }
-        public int MinY
-        {
-            get
-            {
-                return _minY;
-            }
-        }
-        public int MaxX
-        {
-            get
-            {
-                return _maxX;
-            }
-        }
-        public int MaxY
-        {
-            get
-            {
-                return _maxY;
-            }
-        }
+        public int MinX { get; private set; }
+        public int MinY { get; private set; }
+        public int MaxX { get; private set; }
+        public int MaxY { get; private set; }
         public Point Min
         {
             get
             {
-                return new Point(_minX, _minY);
+                return new Point(MinX, MinY);
             }
         }
         public Point Max
         {
             get
             {
-                return new Point(_maxX, _maxY);
+                return new Point(MaxX, MaxY);
             }
         }
         public int Width
         {
             get
             {
-                return _maxX - _minX + 1;
+                return MaxX - MinX + 1;
             }
         }
         public int Height
         {
             get
             {
-                return _maxY - _minY + 1;
+                return MaxY - MinY + 1;
             }
         }
         public Point Size
         {
             get
             {
-                return new Point(_maxX - _minX + 1, _maxY - _minY + 1);
+                return new Point(Width, Height);
             }
         }
         #endregion
         #region Constructors
-        public Rectangle(Point min, Point max)
-        {
-            if (min.X > max.X || min.Y > max.Y)
-            {
-                throw new Exception("Max must be greater than Min.");
-            }
-            _minX = min.X;
-            _minY = min.Y;
-            _maxX = max.X;
-            _maxY = max.Y;
-        }
         public Rectangle(int minX, int minY, int maxX, int maxY)
         {
             if (minX > maxX)
             {
                 throw new Exception("MaxX must be greater than MinX.");
             }
+            MinX = minX;
+            MaxX = maxX;
             if (minY > maxY)
             {
                 throw new Exception("MaxY must be greater than MinY.");
             }
-            _minX = minX;
-            _minY = minY;
-            _maxX = maxX;
-            _maxY = maxY;
+            MinY = minY;
+            MaxY = maxY;
+        }
+        public Rectangle(Point min, Point max)
+        {
+            if (min.X > max.X || min.Y > max.Y)
+            {
+                throw new Exception("Max must be greater than Min.");
+            }
+            MinX = min.X;
+            MinY = min.Y;
+            MaxX = max.X;
+            MaxY = max.Y;
         }
         public Rectangle(Microsoft.Xna.Framework.Rectangle source)
         {
-            _minX = source.Left;
-            _minY = source.Top;
-            _maxX = source.Right;
-            _maxY = source.Bottom;
+            MinX = source.Left;
+            MinY = source.Top;
+            MaxX = source.Right;
+            MaxY = source.Bottom;
         }
         #endregion
         #region Overrides
         public override string ToString()
         {
-            return $"EpsilonEngine.Rectangle({_minX}, {_minY}, {_maxX}, {_maxY})";
+            return $"EpsilonEngine.Rectangle({MinX}, {MinY}, {MaxX}, {MaxY})";
         }
         public override bool Equals(object obj)
         {
@@ -127,24 +107,17 @@ namespace EpsilonEngine
         }
         public static bool operator ==(Rectangle a, Rectangle b)
         {
-            return (a._minX == b._minX) && (a._minY == b._minY) && (a._maxX == b._maxX) && (a._maxY == b._maxY);
+            return (a.MinX == b.MinX) && (a.MinY == b.MinY) && (a.MaxX == b.MaxX) && (a.MaxY == b.MaxY);
         }
         public static bool operator !=(Rectangle a, Rectangle b)
         {
-            return (a._minX != b._minX) || (a._minY != b._minY) || (a._maxX != b._maxX) || (a._maxY != b._maxY);
+            return !(a == b);
         }
         #endregion
         #region Methods
         public static bool Incapsulates(Rectangle a, Point b)
         {
-            if (b.X >= a._minX && b.X <= a._maxX && b.Y >= a._minY && b.Y <= a._maxY)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return b.X >= a.MinX && b.X <= a.MaxX && b.Y >= a.MinY && b.Y <= a.MaxY;
         }
         public bool Incapsulates(Point a)
         {
@@ -152,14 +125,7 @@ namespace EpsilonEngine
         }
         public static bool Incapsulates(Rectangle a, Rectangle b)
         {
-            if (b._maxY <= a._maxY && b._minY >= a._minY && b._maxX <= a._maxX && b._minX >= a._minX)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return b.MaxY <= a.MaxY && b.MinY >= a.MinY && b.MaxX <= a.MaxX && b.MinX >= a.MinX;
         }
         public bool Incapsulates(Rectangle a)
         {
@@ -167,14 +133,7 @@ namespace EpsilonEngine
         }
         public static bool Overlaps(Rectangle a, Rectangle b)
         {
-            if (a._maxX < b._minX || a._minX > b._maxX || a._maxY < b._minY || a._minY > b._maxY)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            return a.MaxX >= b.MinX && a.MinX <= b.MaxX && a.MaxY >= b.MinY && a.MinY <= b.MaxY;
         }
         public bool Overlaps(Rectangle a)
         {
@@ -182,7 +141,7 @@ namespace EpsilonEngine
         }
         public static Microsoft.Xna.Framework.Rectangle ToXNA(Rectangle source)
         {
-            return new Microsoft.Xna.Framework.Rectangle(source._minX, source._maxY, source.Width, source.Height);
+            return new Microsoft.Xna.Framework.Rectangle(source.MinX, source.MaxY, source.Width, source.Height);
         }
         public Microsoft.Xna.Framework.Rectangle ToXNA()
         {

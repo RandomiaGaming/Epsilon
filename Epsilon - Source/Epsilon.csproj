@@ -68,7 +68,6 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="EpsilonEngine\Base Classes\GameInterface.cs" />
     <Compile Include="EpsilonEngine\Base Classes\PumpEvent.cs" />
-    <Compile Include="EpsilonEngine\Base Classes\Screen Space\Behavior.cs" />
     <Compile Include="EpsilonEngine\Base Classes\Screen Space\Element.cs" />
     <Compile Include="EpsilonEngine\Base Classes\Screen Space\Canvas.cs" />
     <Compile Include="EpsilonEngine\Base Classes\Screen Space\CanvasBehavior.cs" />
@@ -79,24 +78,15 @@
     <Compile Include="EpsilonEngine\Base Classes\World Space\Scene.cs" />
     <Compile Include="EpsilonEngine\Base Classes\GameManager.cs" />
     <Compile Include="EpsilonEngine\Base Classes\World Space\SceneManager.cs" />
-    <Compile Include="EpsilonEngine\DataTypes\Collision.cs" />
     <Compile Include="EpsilonEngine\DataTypes\Color.cs" />
-    <Compile Include="EpsilonEngine\DataTypes\EpsilonEvent.cs" />
-    <Compile Include="EpsilonEngine\DataTypes\Overlap.cs" />
     <Compile Include="EpsilonEngine\DataTypes\Point.cs" />
     <Compile Include="EpsilonEngine\DataTypes\Bounds.cs" />
     <Compile Include="EpsilonEngine\DataTypes\Rectangle.cs" />
-    <Compile Include="EpsilonEngine\DataTypes\Side.cs" />
-    <Compile Include="EpsilonEngine\DataTypes\SideInfo.cs" />
     <Compile Include="EpsilonEngine\DataTypes\Texture.cs" />
     <Compile Include="EpsilonEngine\DataTypes\Vector.cs" />
     <Compile Include="EpsilonEngine\Default Components\CameraFollower.cs" />
+    <Compile Include="EpsilonEngine\Default Components\Image.cs" />
     <Compile Include="EpsilonEngine\Default Components\ParticleSystem.cs" />
-    <Compile Include="EpsilonEngine\Default Components\Physics\Collider.cs" />
-    <Compile Include="EpsilonEngine\Default Components\Physics\PhysicsLayer.cs" />
-    <Compile Include="EpsilonEngine\Default Components\Physics\PhysicsManager.cs" />
-    <Compile Include="EpsilonEngine\Default Components\Physics\Rigidbody.cs" />
-    <Compile Include="EpsilonEngine\Default Components\ScreenSpace\Image.cs" />
     <Compile Include="EpsilonEngine\Default Components\TextureRenderer.cs" />
     <Compile Include="EpsilonEngine\Helper Classes\MathHelper.cs" />
     <Compile Include="EpsilonEngine\Helper Classes\RandomnessHelper.cs" />
@@ -111,10 +101,10 @@
     <Compile Include="EpsilonEngine\Input\VirtualInput.cs" />
     <Compile Include="Epsilon\Epsilon.cs" />
     <Compile Include="Epsilon\Ground.cs" />
-    <Compile Include="Epsilon\BouncyBall.cs" />
-    <Compile Include="Epsilon\PauseButton.cs" />
+    <Compile Include="Epsilon\Player.cs" />
+    <Compile Include="Epsilon\StageData.cs" />
     <Compile Include="Epsilon\StagePlayer.cs" />
-    <Compile Include="Epsilon\TestCanvas.cs" />
+    <Compile Include="Epsilon\PauseMenu.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -153,7 +143,6 @@
     <EmbeddedResource Include="Epsilon\Textures\UI Textures\Eraser.png" />
     <EmbeddedResource Include="Epsilon\Textures\UI Textures\menuicon.png" />
     <EmbeddedResource Include="Epsilon\Textures\UI Textures\MoreItems.png" />
-    <EmbeddedResource Include="Epsilon\Textures\UI Textures\PauseButton.png" />
     <EmbeddedResource Include="Epsilon\Textures\UI Textures\Play.png" />
     <EmbeddedResource Include="Epsilon\Textures\UI Textures\Reset.png" />
     <EmbeddedResource Include="Epsilon\Textures\UI Textures\Selection.png" />
@@ -177,6 +166,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Epsilon\Textures\UI Textures\Font.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Epsilon\Textures\UI Textures\Pause.png" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\MonoGame.Framework.DesktopGL.3.8.0.1641\build\MonoGame.Framework.DesktopGL.targets" Condition="Exists('..\packages\MonoGame.Framework.DesktopGL.3.8.0.1641\build\MonoGame.Framework.DesktopGL.targets')" />

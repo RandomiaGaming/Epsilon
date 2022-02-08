@@ -6,8 +6,8 @@ namespace Epsilon
         public Epsilon()
         {
             BackgroundColor = new Color(255, 150, 255, 255);
-            new StagePlayer(this);
-            new TestCanvas(this);
+            new StagePlayer(this, new StageData());
+            new PauseMenu(this);
         }
         public override string ToString()
         {

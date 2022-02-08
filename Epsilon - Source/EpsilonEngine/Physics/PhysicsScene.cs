@@ -1,16 +1,16 @@
 ﻿using System;
 namespace EpsilonEngine
 {
-    public sealed class PhysicsManager : SceneManager
+    public sealed class PhysicsScene : Scene
     {
         public PhysicsLayer[] PhysicsLayers { get; private set; } = new PhysicsLayer[0];
-        public PhysicsManager(Scene scene) : base(scene)
+        public PhysicsScene(Game game) : base(game)
         {
 
         }
         public override string ToString()
         {
-            return $"EpsilonEngine.PhysicsManager()";
+            return $"EpsilonEngine.PhysicsScene()";
         }
         public void ManageCollider(Collider collider)
         {

@@ -1,4 +1,28 @@
-﻿using System;
+﻿using EpsilonEngine;
+namespace Epsilon
+{
+    public sealed class Player : GameObject
+    {
+        public Player(StagePlayer stagePlayer, Texture texture) : base(stagePlayer)
+        {
+            TextureRenderer textureRenderer = new TextureRenderer(this);
+            textureRenderer.Texture = texture;
+            PositionX = RandomnessHelper.NextInt(16, Scene.Width - 32);
+            PositionY = RandomnessHelper.NextInt(16, Scene.Height - 32);
+        }
+        public override string ToString()
+        {
+            return $"Epsilon.BouncyBall()";
+        }
+    }
+}
+
+
+
+
+
+
+/*using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -69,3 +93,4 @@ namespace EpsilonEngine
         }
     }
 }
+*/

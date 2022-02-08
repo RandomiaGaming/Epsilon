@@ -53,39 +53,6 @@ namespace EpsilonEngine
         }
         #endregion
         #region Methods
-        public void DrawTextureScreenSpace(Texture texture, Bounds bounds, Color color)
-        {
-            if (texture is null)
-            {
-                throw new Exception("texture cannot be null.");
-            }
-            DrawTextureScreenSpaceUnsafe(texture, bounds.MinX, bounds.MinY, bounds.MaxX, bounds.MaxY, color.R, color.B, color.B, color.A);
-        }
-        public void DrawTextureScreenSpace(Texture texture, float minX, float minY, float maxX, float maxY, byte r, byte g, byte b, byte a)
-        {
-            if (texture is null)
-            {
-                throw new Exception("texture cannot be null.");
-            }
-            if(maxX < minX)
-            {
-                throw new Exception("maxX must be greater than minX.");
-            }
-            if (maxY < minY)
-            {
-                throw new Exception("maxY must be greater than minY.");
-            }
-            DrawTextureScreenSpaceUnsafe(texture, minX, minY, maxX, maxY, r, g, b, a);
-        }
-        public void DrawTextureScreenSpaceUnsafe(Texture texture, float minX, float minY, float maxX, float maxY, byte r, byte g, byte b, byte a)
-        {
-            int minXInt = (int)(minX * Game.Width);
-            int minYInt = (int)(minY * Game.Height);
-            int maxXInt = (int)(maxX * Game.Width);
-            int maxYInt = (int)(maxY * Game.Height);
-
-            Game.DrawTextureUnsafe(texture, minXInt, minYInt, maxXInt, maxYInt, r, g, b, a);
-        }
         public void Destroy()
         {
             foreach(CanvasBehavior canvasBehavior in _canvasBehaviorCache)
@@ -348,6 +315,14 @@ namespace EpsilonEngine
         }
         #endregion
         #region Internals
+        internal void OnScreenResize()
+        {
+            foreach(Element element in _elementCache)
+            {
+                element.RecalculateWorldX();
+                element.RecalculateWorldY();
+            }
+        }
         internal void ClearCache()
         {
             if (!_canvasBehaviorCacheValid)

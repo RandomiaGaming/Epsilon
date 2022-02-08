@@ -18,8 +18,8 @@ namespace EpsilonEngine
         public static readonly Vector DownLeft = new Vector(-1, -1);
         #endregion
         #region Properties
-        public float X;
-        public float Y;
+        public float X { get; private set; }
+        public float Y { get; private set; }
         #endregion
         #region Constructors
         public Vector(float x, float y)

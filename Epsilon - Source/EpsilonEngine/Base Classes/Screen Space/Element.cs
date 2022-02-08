@@ -6,13 +6,14 @@ namespace EpsilonEngine
     public class Element
     {
         #region Variables
-        private List<Behavior> _behaviors = new List<Behavior>();
-        private Behavior[] _behaviorCache = new Behavior[0];
-        private bool _behaviorCacheValid = true;
-
         private List<Element> _children = new List<Element>();
         private Element[] _childCache = new Element[0];
         private bool _childCacheValid = true;
+
+        private float _localMinX = 0f;
+        private float _localMinY = 0f;
+        private float _localMaxX = 1f;
+        private float _localMaxY = 1f;
         #endregion
         #region Properties
         public bool IsDestroyed { get; private set; } = false;
@@ -22,10 +23,54 @@ namespace EpsilonEngine
         public Canvas Canvas { get; private set; } = null;
         public Element Parent { get; private set; } = null;
 
-        public float LocalMinX { get; set; } = 0;
-        public float LocalMinY { get; set; } = 0;
-        public float LocalMaxX { get; set; } = 1;
-        public float LocalMaxY { get; set; } = 1;
+        public float LocalMinX
+        {
+            get
+            {
+                return _localMinX;
+            }
+            set
+            {
+                _localMinX = value;
+                RecalculateWorldX();
+            }
+        }
+        public float LocalMinY
+        {
+            get
+            {
+                return _localMinY;
+            }
+            set
+            {
+                _localMinY = value;
+                RecalculateWorldY();
+            }
+        }
+        public float LocalMaxX
+        {
+            get
+            {
+                return _localMaxX;
+            }
+            set
+            {
+                _localMaxX = value;
+                RecalculateWorldX();
+            }
+        }
+        public float LocalMaxY
+        {
+            get
+            {
+                return _localMaxY;
+            }
+            set
+            {
+                _localMaxY = value;
+                RecalculateWorldY();
+            }
+        }
         public Vector LocalMin
         {
             get
@@ -65,81 +110,55 @@ namespace EpsilonEngine
             }
         }
 
-        public float MinX
+        public float WorldMinX { get; private set; } = 0f;
+        public float WorldMinY { get; private set; } = 0f;
+        public float WorldMaxX { get; private set; } = 1f;
+        public float WorldMaxY { get; private set; } = 1f;
+        public Vector WorldMin
         {
             get
             {
-                if (IsOrphan)
-                {
-                    return LocalMinX;
-                }
-                else
-                {
-                    return MathHelper.Lerp(LocalMinX, Parent.MinX, Parent.MaxX);
-                }
+                return new Vector(WorldMinX, WorldMinY);
             }
         }
-        public float MinY
+        public Vector WorldMax
         {
             get
             {
-                if (IsOrphan)
-                {
-                    return LocalMinY;
-                }
-                else
-                {
-                    return MathHelper.Lerp(LocalMinY, Parent.MinY, Parent.MaxY);
-                }
+                return new Vector(WorldMaxX, WorldMaxY);
             }
         }
-        public float MaxX
+        public Bounds WorldBounds
         {
             get
             {
-                if (IsOrphan)
-                {
-                    return LocalMaxX;
-                }
-                else
-                {
-                    return MathHelper.Lerp(LocalMaxX, Parent.MinX, Parent.MaxX);
-                }
+                return new Bounds(WorldMinX, WorldMinY, WorldMaxX, WorldMaxY);
             }
         }
-        public float MaxY
+
+        public int ScreenMinX { get; private set; } = 0;
+        public int ScreenMinY { get; private set; } = 0;
+        public int ScreenMaxX { get; private set; } = 1920;
+        public int ScreenMaxY { get; private set; } = 1080;
+        public Point ScreenMin
         {
             get
             {
-                if (IsOrphan)
-                {
-                    return LocalMaxY;
-                }
-                else
-                {
-                    return MathHelper.Lerp(LocalMaxY, Parent.MinY, Parent.MaxY);
-                }
+                return new Point(ScreenMinX, ScreenMinY);
             }
         }
-        public Vector Min
+        public Point ScreenMax
         {
             get
             {
-                return new Vector(MinX, MinY);
+                return new Point(ScreenMaxX, ScreenMaxY);
             }
         }
-        public Vector Max
+        public Rectangle ScreenRect
         {
             get
             {
-                return new Vector(MaxX, MaxY);
-            }
-        }
-        public Bounds Bounds
-        {
-            get
-            {
-                return new Bounds(MinX, MinY, MaxX, MaxY);
+                return new Rectangle(ScreenMinX, ScreenMinY, ScreenMaxX, ScreenMaxY);
             }
         }
         #endregion
@@ -172,6 +191,9 @@ namespace EpsilonEngine
             {
                 Game.RegisterForRender(Render);
             }
+
+            RecalculateScreenX();
+            RecalculateScreenY();
         }
         public Element(Canvas canvas, Element parent)
         {
@@ -211,6 +233,9 @@ namespace EpsilonEngine
             {
                 Game.RegisterForRender(Render);
             }
+
+            RecalculateWorldX();
+            RecalculateWorldY();
         }
         #endregion
         #region Overrides
@@ -220,34 +245,6 @@ namespace EpsilonEngine
         }
         #endregion
         #region Methods
-        public void DrawTextureLocalSpace(Texture texture, Bounds bounds, Color color)
-        {
-            if (texture is null)
-            {
-                throw new Exception("texture cannot be null.");
-            }
-            DrawTextureLocalSpaceUnsafe(texture, bounds.MinX, bounds.MinY, bounds.MaxX, bounds.MaxY, color.R, color.B, color.B, color.A);
-        }
-        public void DrawTextureLocalSpace(Texture texture, float minX, float minY, float maxX, float maxY, byte r, byte g, byte b, byte a)
-        {
-            if (texture is null)
-            {
-                throw new Exception("texture cannot be null.");
-            }
-            if (maxX < minX)
-            {
-                throw new Exception("maxX must be greater than minX.");
-            }
-            if (maxY < minY)
-            {
-                throw new Exception("maxY must be greater than minY.");
-            }
-            DrawTextureLocalSpaceUnsafe(texture, minX, minY, maxX, maxY, r, g, b, a);
-        }
-        public void DrawTextureLocalSpaceUnsafe(Texture texture, float minX, float minY, float maxX, float maxY, byte r, byte g, byte b, byte a)
-        {
-            Canvas.DrawTextureScreenSpaceUnsafe(texture, MathHelper.Lerp(minX, MinX, MaxX), MathHelper.Lerp(minY, MinY, MaxY), MathHelper.Lerp(maxX, MinX, MaxX), MathHelper.Lerp(maxY, MinY, MaxY), r, g, b, a);
-        }
         public void Destroy()
         {
             foreach (Element child in _childCache)
@@ -255,140 +252,14 @@ namespace EpsilonEngine
                 child.Destroy();
             }
 
-            foreach (Behavior behavior in _behaviorCache)
-            {
-                behavior.Destroy();
-            }
-
             Canvas.RemoveElement(this);
 
             _childCache = null;
             _children = null;
-            _behaviorCache = null;
-            _behaviors = null;
             Canvas = null;
             Game = null;
 
             IsDestroyed = true;
-        }
-        public Behavior GetBehavior(int index)
-        {
-            if (index < 0 || index >= _behaviorCache.Length)
-            {
-                throw new Exception("index was out of range.");
-            }
-
-            return _behaviorCache[index];
-        }
-        public Behavior GetBehavior(Type type)
-        {
-            if (type is null)
-            {
-                throw new Exception("type cannot be null.");
-            }
-
-            if (!type.IsAssignableFrom(typeof(Behavior)))
-            {
-                throw new Exception("type must be equal to Behavior or be assignable from Behavior.");
-            }
-
-            foreach (Behavior behavior in _behaviorCache)
-            {
-                if (behavior.GetType().IsAssignableFrom(type))
-                {
-                    return behavior;
-                }
-            }
-
-            return null;
-        }
-        public T GetBehavior<T>() where T : Behavior
-        {
-            foreach (Behavior behavior in _behaviorCache)
-            {
-                if (behavior.GetType().IsAssignableFrom(typeof(T)))
-                {
-                    return (T)behavior;
-                }
-            }
-
-            return null;
-        }
-        public List<Behavior> GetBehaviors()
-        {
-            return new List<Behavior>(_behaviorCache);
-        }
-        public List<Behavior> GetBehaviors(Type type)
-        {
-            if (type is null)
-            {
-                throw new Exception("type cannot be null.");
-            }
-
-            if (!type.IsAssignableFrom(typeof(Behavior)))
-            {
-                throw new Exception("type must be equal to Behavior or be assignable from Behavior.");
-            }
-
-            List<Behavior> output = new List<Behavior>();
-
-            foreach (Behavior behavior in _behaviorCache)
-            {
-                if (behavior.GetType().IsAssignableFrom(type))
-                {
-                    output.Add(behavior);
-                }
-            }
-
-            return output;
-        }
-        public List<T> GetBehaviors<T>() where T : Behavior
-        {
-            List<T> output = new List<T>();
-
-            foreach (Behavior behavior in _behaviorCache)
-            {
-                if (behavior.GetType().IsAssignableFrom(typeof(T)))
-                {
-                    output.Add((T)behavior);
-                }
-            }
-
-            return output;
-        }
-        public int GetBehaviorCount()
-        {
-            return _behaviorCache.Length;
-        }
-        public Behavior GetBehaviorUnsafe(int index)
-        {
-            return _behaviorCache[index];
-        }
-        public Behavior GetBehaviorUnsafe(Type type)
-        {
-            foreach (Behavior behavior in _behaviorCache)
-            {
-                if (behavior.GetType().IsAssignableFrom(type))
-                {
-                    return behavior;
-                }
-            }
-
-            return null;
-        }
-        public List<Behavior> GetBehaviorsUnsafe(Type type)
-        {
-            List<Behavior> output = new List<Behavior>();
-
-            foreach (Behavior behavior in _behaviorCache)
-            {
-                if (behavior.GetType().IsAssignableFrom(type))
-                {
-                    output.Add(behavior);
-                }
-            }
-
-            return output;
         }
         public Element GetChild(int index)
         {
@@ -513,33 +384,11 @@ namespace EpsilonEngine
         #region Internals
         internal void ClearCache()
         {
-            if (!_behaviorCacheValid)
-            {
-                _behaviorCache = _behaviors.ToArray();
-                _behaviorCacheValid = true;
-            }
-
             if (!_childCacheValid)
             {
                 _childCache = _children.ToArray();
                 _childCacheValid = true;
             }
-        }
-        internal void RemoveBehavior(Behavior behavior)
-        {
-            Game.RegisterForSingleRun(ClearCache);
-
-            _behaviors.Remove(behavior);
-
-            _behaviorCacheValid = false;
-        }
-        internal void AddBehavior(Behavior behavior)
-        {
-            Game.RegisterForSingleRun(ClearCache);
-
-            _behaviors.Add(behavior);
-
-            _behaviorCacheValid = false;
         }
         internal void RemoveChild(Element child)
         {
@@ -556,6 +405,68 @@ namespace EpsilonEngine
             _children.Add(child);
 
             _childCacheValid = false;
+        }
+        internal void RecalculateWorldX()
+        {
+            if (IsOrphan)
+            {
+                WorldMinX = LocalMinX;
+                WorldMaxX = LocalMaxX;
+            }
+            else
+            {
+                WorldMinX = MathHelper.Lerp(LocalMinX, Parent.WorldMinX, Parent.WorldMaxX);
+                WorldMaxX = MathHelper.Lerp(LocalMaxX, Parent.WorldMinX, Parent.WorldMaxX);
+            }
+
+            ScreenMinX = (int)(WorldMinX * Game.Width);
+            ScreenMaxX = (int)(WorldMaxX * Game.Width);
+
+            foreach (Element child in _childCache)
+            {
+                child.RecalculateWorldX();
+            }
+        }
+        internal void RecalculateWorldY()
+        {
+            if (IsOrphan)
+            {
+                WorldMinY = LocalMinY;
+                WorldMaxY = LocalMaxY;
+            }
+            else
+            {
+                WorldMinY = MathHelper.Lerp(LocalMinY, Parent.WorldMinY, Parent.WorldMaxY);
+                WorldMaxY = MathHelper.Lerp(LocalMaxY, Parent.WorldMinY, Parent.WorldMaxY);
+            }
+
+            ScreenMinY = (int)(WorldMinY * Game.Height);
+            ScreenMaxY = (int)(WorldMaxY * Game.Height);
+
+            foreach (Element child in _childCache)
+            {
+                child.RecalculateWorldY();
+            }
+        }
+        internal void RecalculateScreenX()
+        {
+            ScreenMinX = (int)(WorldMinX * Game.Width);
+            ScreenMaxX = (int)(WorldMaxX * Game.Width);
+
+            foreach (Element child in _childCache)
+            {
+                child.RecalculateScreenX();
+            }
+        }
+        internal void RecalculateScreenY()
+        {
+            ScreenMinY = (int)(WorldMinY * Game.Height);
+            ScreenMaxY = (int)(WorldMaxY * Game.Height);
+
+            foreach (Element child in _childCache)
+            {
+                child.RecalculateScreenY();
+            }
         }
         #endregion
         #region Overridables

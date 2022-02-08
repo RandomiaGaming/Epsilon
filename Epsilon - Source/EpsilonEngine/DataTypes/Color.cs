@@ -26,40 +26,40 @@ namespace EpsilonEngine
         public static readonly Color SoftPink = new Color(255, 150, 255, 255);
         #endregion
         #region Properties
-        public byte R;
-        public byte G;
-        public byte B;
-        public byte A;
+        public byte R { get; private set; }
+        public byte G { get; private set; }
+        public byte B { get; private set; }
+        public byte A { get; private set; }
         #endregion
         #region Constructors
-        public Color(byte r, byte g, byte b)
-        {
-            this.R = r;
-            this.G = g;
-            this.B = b;
-            this.A = byte.MaxValue;
-        }
         public Color(byte r, byte g, byte b, byte a)
         {
-            this.R = r;
-            this.G = g;
-            this.B = b;
-            this.A = a;
+            R = r;
+            G = g;
+            B = b;
+            A = a;
+        }
+        public Color(byte r, byte g, byte b)
+        {
+            R = r;
+            G = g;
+            B = b;
+            A = byte.MaxValue;
         }
         public Color(uint source)
         {
             byte[] sourceBytes = BitConverter.GetBytes(source);
-            this.R = sourceBytes[0];
-            this.G = sourceBytes[1];
-            this.B = sourceBytes[2];
-            this.A = sourceBytes[3];
+            R = sourceBytes[0];
+            G = sourceBytes[1];
+            B = sourceBytes[2];
+            A = sourceBytes[3];
         }
         public Color(Microsoft.Xna.Framework.Color source)
         {
-            this.R = source.R;
-            this.G = source.G;
-            this.B = source.B;
-            this.A = source.A;
+            R = source.R;
+            G = source.G;
+            B = source.B;
+            A = source.A;
         }
         #endregion
         #region Overrides
@@ -88,7 +88,7 @@ namespace EpsilonEngine
         }
         public static bool operator !=(Color a, Color b)
         {
-            return (a.R != b.R) || (a.G != b.G) || (a.B != b.B) || (a.A != b.A);
+            return !(a == b);
         }
         #endregion
         #region Methods
@@ -97,7 +97,6 @@ namespace EpsilonEngine
             source.R = (byte)(byte.MaxValue - source.R);
             source.G = (byte)(byte.MaxValue - source.G);
             source.B = (byte)(byte.MaxValue - source.B);
-            source.A = (byte)(byte.MaxValue - source.A);
             return source;
         }
         public Color Invert()

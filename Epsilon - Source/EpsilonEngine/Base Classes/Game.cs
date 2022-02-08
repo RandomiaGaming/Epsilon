@@ -31,6 +31,8 @@ namespace EpsilonEngine
 
         private List<PumpEvent> _singleRunPump = new List<PumpEvent>();
         private bool _singleRunPumpClear = true;
+
+        private GameInterface _gameInterface = null;
         #endregion
         #region Properties
         public bool IsDestroyed { get; private set; } = false;
@@ -38,12 +40,19 @@ namespace EpsilonEngine
         public Color BackgroundColor { get; set; } = DefaultBackgroundColor;
         public ushort Width { get; private set; } = 1920;
         public ushort Height { get; private set; } = 1080;
+        public float AspectRatio { get; private set; } = 1f;
 
         public float CurrentFPS { get; private set; } = 0f;
         public TimeSpan TimeSinceStart { get; private set; } = new TimeSpan(0);
         public TimeSpan DeltaTime { get; private set; } = new TimeSpan(0);
 
-        public GameInterface GameInterface { get; private set; } = null;
+        public Microsoft.Xna.Framework.Game XNAGame
+        {
+            get
+            {
+                return _gameInterface;
+            }
+        }
         public Microsoft.Xna.Framework.GraphicsDeviceManager GraphicsDeviceManager { get; private set; } = null;
         public Microsoft.Xna.Framework.Graphics.GraphicsDevice GraphicsDevice { get; private set; } = null;
         public Microsoft.Xna.Framework.GameWindow GameWindow { get; private set; } = null;
@@ -52,9 +61,9 @@ namespace EpsilonEngine
         #region Constructors
         public Game()
         {
-            GameInterface = new GameInterface(this);
+            _gameInterface = new GameInterface(this);
 
-            GraphicsDeviceManager = new Microsoft.Xna.Framework.GraphicsDeviceManager(GameInterface);
+            GraphicsDeviceManager = new Microsoft.Xna.Framework.GraphicsDeviceManager(_gameInterface);
             GraphicsDeviceManager.GraphicsProfile = Microsoft.Xna.Framework.Graphics.GraphicsProfile.Reach;
             GraphicsDeviceManager.SynchronizeWithVerticalRetrace = false;
             GraphicsDeviceManager.HardwareModeSwitch = true;
@@ -64,13 +73,13 @@ namespace EpsilonEngine
             GraphicsDeviceManager.SupportedOrientations = Microsoft.Xna.Framework.DisplayOrientation.LandscapeLeft | Microsoft.Xna.Framework.DisplayOrientation.LandscapeRight | Microsoft.Xna.Framework.DisplayOrientation.Portrait | Microsoft.Xna.Framework.DisplayOrientation.PortraitDown | Microsoft.Xna.Framework.DisplayOrientation.Unknown | Microsoft.Xna.Framework.DisplayOrientation.Default;
             GraphicsDeviceManager.ApplyChanges();
 
-            GraphicsDevice = GameInterface.GraphicsDevice;
+            GraphicsDevice = _gameInterface.GraphicsDevice;
 
             GraphicsDevice.BlendState = Microsoft.Xna.Framework.Graphics.BlendState.AlphaBlend;
             GraphicsDevice.DepthStencilState = Microsoft.Xna.Framework.Graphics.DepthStencilState.None;
             GraphicsDevice.RasterizerState = Microsoft.Xna.Framework.Graphics.RasterizerState.CullNone;
 
-            GameWindow = GameInterface.Window;
+            GameWindow = _gameInterface.Window;
 
             GameWindow.AllowAltF4 = true;
             GameWindow.AllowUserResizing = true;
@@ -78,20 +87,22 @@ namespace EpsilonEngine
             GameWindow.Position = new Point(GraphicsDevice.Adapter.CurrentDisplayMode.Width / 4, GraphicsDevice.Adapter.CurrentDisplayMode.Height / 4).ToXNA();
             GameWindow.Title = "Game";
 
-            GameInterface.InactiveSleepTime = new TimeSpan(0);
-            GameInterface.TargetElapsedTime = new TimeSpan(10000000 / 60);
-            GameInterface.MaxElapsedTime = new TimeSpan(10000000 / 60);
-            GameInterface.IsFixedTimeStep = false;
-            GameInterface.IsMouseVisible = true;
+            _gameInterface.InactiveSleepTime = new TimeSpan(0);
+            _gameInterface.TargetElapsedTime = new TimeSpan(10000000 / 60);
+            _gameInterface.MaxElapsedTime = new TimeSpan(10000000 / 60);
+            _gameInterface.IsFixedTimeStep = false;
+            _gameInterface.IsMouseVisible = true;
 
             SpriteBatch = new Microsoft.Xna.Framework.Graphics.SpriteBatch(GraphicsDevice);
             SpriteBatch.Name = "Main SpriteBatch";
             SpriteBatch.Tag = null;
 
+            GameWindow.ClientSizeChanged += ResizeCallback;
+
             Type thisType = GetType();
 
             MethodInfo updateMethod = thisType.GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Instance);
-            if(updateMethod.DeclaringType != typeof(Game))
+            if (updateMethod.DeclaringType != typeof(Game))
             {
                 RegisterForUpdate(Update);
             }
@@ -100,6 +111,28 @@ namespace EpsilonEngine
             if (renderMethod.DeclaringType != typeof(Game))
             {
                 RegisterForRender(Render);
+            }
+
+            ResizeCallback(null, null);
+        }
+        private void ResizeCallback(object sender, EventArgs e)
+        {
+            if (GraphicsDeviceManager.IsFullScreen)
+            {
+                Width = (ushort)GraphicsDevice.Adapter.CurrentDisplayMode.Width;
+                Height = (ushort)GraphicsDevice.Adapter.CurrentDisplayMode.Height;
+            }
+            else
+            {
+                Width = (ushort)GraphicsDevice.Viewport.Width;
+                Height = (ushort)GraphicsDevice.Viewport.Height;
+            }
+
+            AspectRatio = Width / (float)Height;
+
+            foreach (Canvas canvas in _canvasCache)
+            {
+                canvas.OnScreenResize();
             }
         }
         #endregion
@@ -136,7 +169,7 @@ namespace EpsilonEngine
         }
         public void Run()
         {
-            GameInterface.Run();
+            _gameInterface.Run();
         }
         public void Destroy()
         {
@@ -155,8 +188,8 @@ namespace EpsilonEngine
                 scene.Destroy();
             }
 
-            GameInterface.Exit();
-            GameInterface = null;
+            _gameInterface.Exit();
+            _gameInterface = null;
 
             GraphicsDeviceManager.Dispose();
             GraphicsDeviceManager = null;
@@ -568,17 +601,6 @@ namespace EpsilonEngine
         internal void UpdateCallback()
         {
             DebugProfiler.UpdateStart();
-
-            if (GraphicsDeviceManager.IsFullScreen)
-            {
-                Width = (ushort)GraphicsDevice.Adapter.CurrentDisplayMode.Width;
-                Height = (ushort)GraphicsDevice.Adapter.CurrentDisplayMode.Height;
-            }
-            else
-            {
-                Width = (ushort)GraphicsDevice.Viewport.Width;
-                Height = (ushort)GraphicsDevice.Viewport.Height;
-            }
 
             if (!_gameManagerCacheValid)
             {
