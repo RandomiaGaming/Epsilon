@@ -3,10 +3,9 @@ namespace EpsilonEngine
 {
     public sealed class PhysicsLayer
     {
-        public int PhysicsLayerIndex { get; private set; } = 0;
         public PhysicsScene PhysicsScene { get; private set; } = null;
         public Collider[] ManagedColliders { get; private set; } = new Collider[0];
-        public PhysicsLayer(PhysicsScene physicsScene, int physicsLayerIndex)
+        public PhysicsLayer(PhysicsScene physicsScene)
         {
             if (physicsScene is null)
             {

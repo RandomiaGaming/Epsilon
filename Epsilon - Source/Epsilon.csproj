@@ -99,6 +99,12 @@
     <Compile Include="EpsilonEngine\Input\RegisterHardwareInputAttribute.cs" />
     <Compile Include="EpsilonEngine\Input\RegisterVirtualInputAttribute.cs" />
     <Compile Include="EpsilonEngine\Input\VirtualInput.cs" />
+    <Compile Include="EpsilonEngine\Physics\Collision.cs" />
+    <Compile Include="EpsilonEngine\Physics\Direction.cs" />
+    <Compile Include="EpsilonEngine\Physics\DirectionInfo.cs" />
+    <Compile Include="EpsilonEngine\Physics\Overlap.cs" />
+    <Compile Include="EpsilonEngine\Physics\PhysicsObject.cs" />
+    <Compile Include="EpsilonEngine\Physics\PhysicsScene.cs" />
     <Compile Include="Epsilon\Epsilon.cs" />
     <Compile Include="Epsilon\Ground.cs" />
     <Compile Include="Epsilon\Player.cs" />

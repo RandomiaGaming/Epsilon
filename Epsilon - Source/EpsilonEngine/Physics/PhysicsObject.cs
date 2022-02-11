@@ -8,6 +8,9 @@ namespace EpsilonEngine
         public PhysicsScene PhysicsScene { get; private set; } = null;
         public PhysicsLayer ThisPhysicsLayer { get; private set; } = null;
         public PhysicsLayer[] CollisionPhysicsLayers { get; private set; } = null;
+
+
+
         //Velocity is the objects move speed over time in pixels per frame.
         public float VelocityX { get; set; } = 0f;
         public float VelocityY { get; set; } = 0f;
@@ -24,20 +27,10 @@ namespace EpsilonEngine
             }
         }
         //Bounciness is the percentage of the objects velocity that is reflected in a collision. Negative values indicate a traditional bounce.
-        public float BouncynessX { get; set; } = 0f;
-        public float BouncynessY { get; set; } = 0f;
-        public Vector Bouncyness
-        {
-            get
-            {
-                return new Vector(BouncynessX, BouncynessY);
-            }
-            set
-            {
-                BouncynessX = value.X;
-                BouncynessY = value.Y;
-            }
-        }
+        public float BouncynessUp { get; set; } = 0f;
+        public float BouncynessLeft { get; set; } = 0f;
+        public float BouncynessRight { get; set; } = 0f;
+        public float BouncynessDown { get; set; } = 0f;
         //Subpixel stores how close the object is to moving another pixel.
         public float SubPixelX { get; private set; } = 0f;
         public float SubPixelY { get; private set; } = 0f;
@@ -103,147 +96,170 @@ namespace EpsilonEngine
                 return new Rectangle(WorldColliderMinX, WorldColliderMinY, WorldColliderMaxX, WorldColliderMaxY);
             }
         }
-        //SolidSides stores on which side the object blocks others from moving.
-        public bool SolidTop { get; set; } = true;
-        public bool SolidBottom { get; set; } = true;
+        //SolidSides stores on which side the object blocks other objects from moving.
+        public bool SolidUp { get; set; } = true;
+        public bool SolidDown { get; set; } = true;
         public bool SolidLeft { get; set; } = true;
         public bool SolidRight { get; set; } = true;
         public DirectionInfo SolidSides
         {
             get
             {
-                return new DirectionInfo(SolidRight, SolidTop, SolidLeft, SolidBottom);
+                return new DirectionInfo(SolidRight, SolidUp, SolidLeft, SolidDown);
             }
             set
             {
                 SolidRight = value.Right;
-                SolidTop = value.Top;
+                SolidUp = value.Up;
                 SolidLeft = value.Left;
-                SolidBottom = value.Bottom;
+                SolidDown = value.Down;
             }
         }
-        //PhaseThroughSides stores which sides the objects can phase through other solid colliders.
-        public bool PhaseThroughTop { get; set; } = false;
-        public bool PhaseThroughBottom { get; set; } = false;
+        //PhaseThroughSides stores in which directions the object can phase through other solid colliders.
+        public bool PhaseThroughUp { get; set; } = false;
+        public bool PhaseThroughDown { get; set; } = false;
         public bool PhaseThroughLeft { get; set; } = false;
         public bool PhaseThroughRight { get; set; } = false;
-        public DirectionInfo PhaseThroughSides
+        public DirectionInfo PhaseThroughDirections
         {
             get
             {
-                return new DirectionInfo(PhaseThroughRight, PhaseThroughTop, PhaseThroughLeft, PhaseThroughBottom);
+                return new DirectionInfo(PhaseThroughRight, PhaseThroughUp, PhaseThroughLeft, PhaseThroughDown);
             }
             set
             {
                 PhaseThroughRight = value.Right;
-                PhaseThroughTop = value.Top;
+                PhaseThroughUp = value.Up;
                 PhaseThroughLeft = value.Left;
-                PhaseThroughBottom = value.Bottom;
+                PhaseThroughDown = value.Down;
             }
         }
-        //PushableSides stores which directions the object can be pushed along.
-        public bool PushableTop { get; set; } = false;
-        public bool PushableBottom { get; set; } = false;
+        //PushableSides stores in which directions the object can be pushed.
+        public bool PushableUp { get; set; } = false;
+        public bool PushableDown { get; set; } = false;
         public bool PushableLeft { get; set; } = false;
         public bool PushableRight { get; set; } = false;
-        public DirectionInfo PushableSides
+        public DirectionInfo PushableDirections
         {
             get
             {
-                return new DirectionInfo(PushableRight, PushableTop, PushableLeft, PushableBottom);
+                return new DirectionInfo(PushableRight, PushableUp, PushableLeft, PushableDown);
             }
             set
             {
                 PushableRight = value.Right;
-                PushableTop = value.Top;
+                PushableUp = value.Up;
                 PushableLeft = value.Left;
-                PushableBottom = value.Bottom;
+                PushableDown = value.Down;
             }
         }
         //PushOthersSides stores in which directions the object will push others.
-        public bool PushOthersTop { get; set; } = false;
-        public bool PushOthersBottom { get; set; } = false;
+        public bool PushOthersUp { get; set; } = false;
+        public bool PushOthersDown { get; set; } = false;
         public bool PushOthersLeft { get; set; } = false;
         public bool PushOthersRight { get; set; } = false;
-        public DirectionInfo PushOthersSides
+        public DirectionInfo PushOthersDirections
         {
             get
             {
-                return new DirectionInfo(PushOthersRight, PushOthersTop, PushOthersLeft, PushOthersBottom);
+                return new DirectionInfo(PushOthersRight, PushOthersUp, PushOthersLeft, PushOthersDown);
             }
             set
             {
                 PushOthersRight = value.Right;
-                PushOthersTop = value.Top;
+                PushOthersUp = value.Up;
                 PushOthersLeft = value.Left;
-                PushOthersBottom = value.Bottom;
+                PushOthersDown = value.Down;
             }
         }
-        //DragableSides stores which directions the object can be dragged.
-        public bool DragableTop { get; set; } = false;
-        public bool DragableBottom { get; set; } = false;
+        //DragableSides stores on which sides the object can be dragged by other objects.
+        public bool DragableUp { get; set; } = false;
+        public bool DragableDown { get; set; } = false;
         public bool DragableLeft { get; set; } = false;
         public bool DragableRight { get; set; } = false;
         public DirectionInfo DragableSides
         {
             get
             {
-                return new DirectionInfo(DragableRight, DragableTop, DragableLeft, DragableBottom);
+                return new DirectionInfo(DragableRight, DragableUp, DragableLeft, DragableDown);
             }
             set
             {
                 DragableRight = value.Right;
-                DragableTop = value.Top;
+                DragableUp = value.Up;
                 DragableLeft = value.Left;
-                DragableBottom = value.Bottom;
+                DragableDown = value.Down;
             }
         }
-        //DragOthersSides stores in which directions the object will drag others.
-        public bool DragOthersTop { get; set; } = false;
-        public bool DragOthersBottom { get; set; } = false;
+        //DragOthersSides stores on which sides the object will latch on to and drag other objects.
+        public bool DragOthersUp { get; set; } = false;
+        public bool DragOthersDown { get; set; } = false;
         public bool DragOthersLeft { get; set; } = false;
         public bool DragOthersRight { get; set; } = false;
         public DirectionInfo DragOthersSides
         {
             get
             {
-                return new DirectionInfo(DragOthersRight, DragOthersTop, DragOthersLeft, DragOthersBottom);
+                return new DirectionInfo(DragOthersRight, DragOthersUp, DragOthersLeft, DragOthersDown);
             }
             set
             {
                 DragOthersRight = value.Right;
-                DragOthersTop = value.Top;
+                DragOthersUp = value.Up;
                 DragOthersLeft = value.Left;
-                DragOthersBottom = value.Bottom;
+                DragOthersDown = value.Down;
             }
         }
         #endregion
-        public PhysicsObject(PhysicsScene physicsScene, int physicsLayer, List<int> collisionPhysicsLayers) : base(physicsScene)
+        public PhysicsObject(PhysicsScene physicsScene) : base(physicsScene)
         {
-            PhysicsScene = physicsScene;
 
-
-            CollisionPhysicsLayerIndex = collisionPhysicsLayerIndex;
         }
         public override string ToString()
         {
-            return $"EpsilonEngine.Rigidbody()";
+            return $"EpsilonEngine.PhysicsObject()";
+        }
+        private int PhysicsMoveUp(int moveDistance)
+        {
+            PositionX += moveDistance;
+            return moveDistance;
+        }
+        private int PhysicsMoveDown(int moveDistance)
+        {
+            PositionX += moveDistance;
+            return moveDistance;
+        }
+        private int PhysicsMoveLeft(int moveDistance)
+        {
+            PositionX += moveDistance;
+            return moveDistance;
+        }
+        private int PhysicsMoveRight(int moveDistance)
+        {
+            PositionX += moveDistance;
+            return moveDistance;
         }
         protected override void Update()
         {
             SubPixelX += VelocityX;
-            SubPixelY += VelocityY;
             int targetMoveX = (int)SubPixelX;
-            int targetMoveY = (int)SubPixelY;
 
-            if (targetMoveX == 0 && targetMoveY == 0)
+            if (targetMoveX != 0)
             {
-                //No movement occured this frame so return.
-                return;
+                SubPixelX -= targetMoveX;
+                int distanceTravelledX = PhysicsMoveX(targetMoveX);
+
+                if(distanceTravelledX != targetMoveX)
+                {
+                    if(targetMoveX >)
+                }
             }
 
-            _subPixelX -= (int)_subPixelX;
-            _subPixelY -= (int)_subPixelY;
+            SubPixelY += VelocityY;
+            int targetMoveY = (int)SubPixelY;
+            SubPixelY -= targetMoveY;
+
+            Move(targetMoveX, targetMoveY);
 
             if (_collider is null)
             {
@@ -292,7 +308,7 @@ namespace EpsilonEngine
                             {
                                 //Set the target move to the maximun and zero out the velocity due to a collision.
                                 targetMoveX = maxMove;
-                                VelocityX *= BouncynessX;
+                                VelocityX *= BouncynessUp;
 
                                 if (targetMoveX == 0)
                                 {
@@ -345,7 +361,7 @@ namespace EpsilonEngine
                             {
                                 //Set the target move to the maximun and zero out the velocity due to a collision.
                                 targetMoveX = maxMove;
-                                VelocityX *= BouncynessX;
+                                VelocityX *= BouncynessUp;
 
                                 if (targetMoveX == 0)
                                 {
@@ -401,7 +417,7 @@ namespace EpsilonEngine
                             {
                                 //Set the target move to the maximun and zero out the velocity due to a collision.
                                 targetMoveY = maxMove;
-                                VelocityY *= BouncynessY;
+                                VelocityY *= BouncynessDown;
 
                                 if (targetMoveY == 0)
                                 {
@@ -452,7 +468,7 @@ namespace EpsilonEngine
                             {
                                 //Set the target move to the maximun and zero out the velocity due to a collision.
                                 targetMoveY = maxMove;
-                                VelocityY *= BouncynessY;
+                                VelocityY *= BouncynessDown;
 
                                 if (targetMoveY == 0)
                                 {
