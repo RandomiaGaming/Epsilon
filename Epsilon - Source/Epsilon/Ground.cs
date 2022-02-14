@@ -2,12 +2,12 @@
 using EpsilonEngine;
 namespace Epsilon
 {
-    public sealed class Ground : GameObject
+    public sealed class Ground : PhysicsObject
     {
-        public Ground(StagePlayer stagePlayer) : base(stagePlayer)
+        public Ground(StagePlayer stagePlayer, PhysicsLayer physicsLayer, Texture groundTexture) : base(stagePlayer, physicsLayer)
         {
             TextureRenderer textureRenderer = new TextureRenderer(this);
-            textureRenderer.Texture = new Texture(Game, Assembly.GetCallingAssembly().GetManifestResourceStream("Epsilon.Epsilon.Textures.Item_Textures.Ground.png"));
+            textureRenderer.Texture = groundTexture;
         }
         public override string ToString()
         {

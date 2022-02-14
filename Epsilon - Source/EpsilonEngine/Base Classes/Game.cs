@@ -165,7 +165,8 @@ namespace EpsilonEngine
         {
             int width = maxX - minX;
             int height = maxY - minY;
-            SpriteBatch.Draw(texture.ToXNA(), new Microsoft.Xna.Framework.Rectangle(minX, (Height - minY) - height, width, height), new Microsoft.Xna.Framework.Rectangle(0, 0, texture.Width, texture.Height), new Microsoft.Xna.Framework.Color(r, g, b, a), 0, Microsoft.Xna.Framework.Vector2.Zero, Microsoft.Xna.Framework.Graphics.SpriteEffects.None, 0);
+            minY = Height - minY - maxY + minY;
+            SpriteBatch.Draw(texture.XNABase, new Microsoft.Xna.Framework.Rectangle(minX, minY, width, height), new Microsoft.Xna.Framework.Color(r, g, b, a));
         }
         public void Run()
         {
@@ -647,9 +648,11 @@ namespace EpsilonEngine
 
             DebugProfiler.RenderStart();
 
-            GraphicsDevice.Clear(BackgroundColor.ToXNA());
-
-            SpriteBatch.Begin(Microsoft.Xna.Framework.Graphics.SpriteSortMode.Deferred, Microsoft.Xna.Framework.Graphics.BlendState.AlphaBlend, Microsoft.Xna.Framework.Graphics.SamplerState.PointClamp, null, null, null, null);
+            int sceneCacheLength = _sceneCache.Length;
+            for (int i = 0; i < sceneCacheLength; i++)
+            {
+                _sceneCache[i].RenderStart();
+            }
 
             if (!_renderPumpCacheValid)
             {
@@ -661,6 +664,21 @@ namespace EpsilonEngine
             for (int i = 0; i < renderPumpLength; i++)
             {
                 _renderPumpCache[i].Invoke();
+            }
+
+            for (int i = 0; i < sceneCacheLength; i++)
+            {
+                _sceneCache[i].RenderEnd();
+            }
+
+            GraphicsDevice.Clear(BackgroundColor.ToXNA());
+
+            SpriteBatch.Begin(Microsoft.Xna.Framework.Graphics.SpriteSortMode.Deferred, Microsoft.Xna.Framework.Graphics.BlendState.AlphaBlend, Microsoft.Xna.Framework.Graphics.SamplerState.PointClamp, null, null, null, null);
+
+            for (int i = 0; i < sceneCacheLength; i++)
+            {
+                Microsoft.Xna.Framework.Graphics.RenderTarget2D sceneRenderTarget = _sceneCache[i]._renderTarget;
+                SpriteBatch.Draw(sceneRenderTarget, new Microsoft.Xna.Framework.Rectangle(0, 0, Width, Height), Microsoft.Xna.Framework.Color.White);
             }
 
             SpriteBatch.End();

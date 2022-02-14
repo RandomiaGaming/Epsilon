@@ -103,6 +103,7 @@
     <Compile Include="EpsilonEngine\Physics\Direction.cs" />
     <Compile Include="EpsilonEngine\Physics\DirectionInfo.cs" />
     <Compile Include="EpsilonEngine\Physics\Overlap.cs" />
+    <Compile Include="EpsilonEngine\Physics\PhysicsLayer.cs" />
     <Compile Include="EpsilonEngine\Physics\PhysicsObject.cs" />
     <Compile Include="EpsilonEngine\Physics\PhysicsScene.cs" />
     <Compile Include="Epsilon\Epsilon.cs" />

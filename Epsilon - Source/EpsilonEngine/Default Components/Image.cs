@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace EpsilonEngine
 {
     public class Image : Element
@@ -24,22 +20,22 @@ namespace EpsilonEngine
                 _texture = value;
             }
         }
-        public byte R { get; set; } = 255;
-        public byte G { get; set; } = 255;
-        public byte B { get; set; } = 255;
-        public byte A { get; set; } = 255;
+        public byte ColorR { get; set; } = 255;
+        public byte ColorG { get; set; } = 255;
+        public byte ColorB { get; set; } = 255;
+        public byte ColorA { get; set; } = 255;
         public Color Color
         {
             get
             {
-                return new Color(R, G, B, A);
+                return new Color(ColorR, ColorG, ColorB, ColorA);
             }
             set
             {
-                R = value.R;
-                G = value.G;
-                B = value.B;
-                A = value.A;
+                ColorR = value.R;
+                ColorG = value.G;
+                ColorB = value.B;
+                ColorA = value.A;
             }
         }
         public Image(Canvas canvas, Texture texture) : base(canvas)
@@ -49,8 +45,6 @@ namespace EpsilonEngine
                 throw new Exception("texture cannot be null.");
             }
             _texture = texture;
-
-            Game.RegisterForRender(DrawTexture);
         }
         public Image(Canvas canvas, Element parent, Texture texture) : base(canvas, parent)
         {
@@ -59,12 +53,10 @@ namespace EpsilonEngine
                 throw new Exception("texture cannot be null.");
             }
             _texture = texture;
-
-            Game.RegisterForRender(DrawTexture);
         }
-        internal void DrawTexture()
+       protected sealed override void Render()
         {
-            Game.DrawTextureUnsafe(Texture, ScreenMinX, ScreenMinY, ScreenMaxX, ScreenMaxY, R, G, B, A);
+            Game.DrawTextureUnsafe(Texture, ScreenMinX, ScreenMinY, ScreenMaxX, ScreenMaxY, ColorR, ColorG, ColorB, ColorA);
         }
     }
 }

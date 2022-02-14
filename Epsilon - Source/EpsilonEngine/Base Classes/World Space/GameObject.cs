@@ -12,7 +12,7 @@ namespace EpsilonEngine
         #endregion
         #region Properties
         public bool IsDestroyed { get; private set; } = false;
-        
+
         public Game Game { get; private set; } = null;
         public Scene Scene { get; private set; } = null;
 
@@ -68,7 +68,7 @@ namespace EpsilonEngine
         #region Methods
         public void DrawTextureLocalSpace(Texture texture, Point position, Color color)
         {
-            if(texture is null)
+            if (texture is null)
             {
                 throw new Exception("texture cannot be null.");
             }
@@ -223,7 +223,7 @@ namespace EpsilonEngine
         }
         #endregion
         #region Internals
-        internal void ClearCache()
+        private void ClearCache()
         {
             if (!_componentCacheValid)
             {

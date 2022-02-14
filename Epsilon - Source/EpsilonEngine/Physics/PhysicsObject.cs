@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 namespace EpsilonEngine
 {
-    public sealed class PhysicsObject : GameObject
+    public class PhysicsObject : GameObject
     {
         #region Properties
         public PhysicsScene PhysicsScene { get; private set; } = null;
-        public PhysicsLayer ThisPhysicsLayer { get; private set; } = null;
-        public PhysicsLayer[] CollisionPhysicsLayers { get; private set; } = null;
-
-
-
+        public PhysicsLayer PhysicsLayer { get; private set; } = null;
+        public PhysicsLayer CollisionPhysicsLayer { get; set; } = null;
         //Velocity is the objects move speed over time in pixels per frame.
         public float VelocityX { get; set; } = 0f;
         public float VelocityY { get; set; } = 0f;
@@ -211,33 +207,34 @@ namespace EpsilonEngine
             }
         }
         #endregion
-        public PhysicsObject(PhysicsScene physicsScene) : base(physicsScene)
+        #region Constructors
+        public PhysicsObject(PhysicsScene physicsScene, PhysicsLayer physicsLayer) : base(physicsScene)
         {
+            if (physicsScene is null)
+            {
+                throw new Exception("physicsScene cannot be null.");
+            }
+            PhysicsScene = physicsScene;
 
+            if (physicsLayer is null)
+            {
+                throw new Exception("physicsLayer cannot be null.");
+            }
+            if (physicsLayer.PhysicsScene != physicsScene)
+            {
+                throw new Exception("physicsScene cannot be null.");
+            }
+            PhysicsLayer = physicsLayer;
+
+            PhysicsScene.AddPhysicsObject(this);
+
+            PhysicsLayer.AddPhysicsObject(this);
         }
+        #endregion
+        #region Overrides
         public override string ToString()
         {
             return $"EpsilonEngine.PhysicsObject()";
-        }
-        private int PhysicsMoveUp(int moveDistance)
-        {
-            PositionX += moveDistance;
-            return moveDistance;
-        }
-        private int PhysicsMoveDown(int moveDistance)
-        {
-            PositionX += moveDistance;
-            return moveDistance;
-        }
-        private int PhysicsMoveLeft(int moveDistance)
-        {
-            PositionX += moveDistance;
-            return moveDistance;
-        }
-        private int PhysicsMoveRight(int moveDistance)
-        {
-            PositionX += moveDistance;
-            return moveDistance;
         }
         protected override void Update()
         {
@@ -247,19 +244,178 @@ namespace EpsilonEngine
             if (targetMoveX != 0)
             {
                 SubPixelX -= targetMoveX;
-                int distanceTravelledX = PhysicsMoveX(targetMoveX);
 
-                if(distanceTravelledX != targetMoveX)
+                int distanceTravelledX = PhysicsMoveXAxisUnsafe(targetMoveX);
+
+                if (distanceTravelledX < targetMoveX)
                 {
-                    if(targetMoveX >)
+                    VelocityX *= BouncynessRight;
+                }
+                else if (distanceTravelledX > targetMoveX)
+                {
+                    VelocityX *= BouncynessLeft;
                 }
             }
 
             SubPixelY += VelocityY;
             int targetMoveY = (int)SubPixelY;
-            SubPixelY -= targetMoveY;
 
-            Move(targetMoveX, targetMoveY);
+            if (targetMoveY != 0)
+            {
+                SubPixelY -= targetMoveY;
+
+                int distanceTravelledY = PhysicsMoveYAxisUnsafe(targetMoveY);
+
+                if (distanceTravelledY < targetMoveY)
+                {
+                    VelocityY *= BouncynessUp;
+                }
+                else if (distanceTravelledY > targetMoveY)
+                {
+                    VelocityY *= BouncynessDown;
+                }
+            }
+        }
+        #endregion
+        #region Methods
+        public Point PhysicsMove(Point moveDistance)
+        {
+            int outputX = 0;
+            if (moveDistance.X < 0)
+            {
+                outputX = PhysicsMoveLeftUnsafe(moveDistance.X * -1);
+            }
+            else
+            {
+                outputX = PhysicsMoveRightUnsafe(moveDistance.X);
+            }
+
+            int outputY = 0;
+            if (moveDistance.Y < 0)
+            {
+                outputY = PhysicsMoveLeftUnsafe(moveDistance.Y * -1);
+            }
+            else
+            {
+                outputY = PhysicsMoveRightUnsafe(moveDistance.Y);
+            }
+
+            moveDistance.X = outputX;
+            moveDistance.Y = outputY;
+            return moveDistance;
+        }
+
+        public int PhysicsMoveXAxis(int moveDistance)
+        {
+            if (moveDistance == 0)
+            {
+                return 0;
+            }
+            else if (moveDistance < 0)
+            {
+                return PhysicsMoveLeftUnsafe(moveDistance * -1);
+            }
+            else
+            {
+                return PhysicsMoveRightUnsafe(moveDistance);
+            }
+        }
+        public int PhysicsMoveYAxis(int moveDistance)
+        {
+            if (moveDistance == 0)
+            {
+                return 0;
+            }
+            else if (moveDistance < 0)
+            {
+                return PhysicsMoveDownUnsafe(moveDistance * -1);
+            }
+            else
+            {
+                return PhysicsMoveUpUnsafe(moveDistance);
+            }
+        }
+
+        public int PhysicsMoveUp(int moveDistance)
+        {
+            if (moveDistance < 0)
+            {
+                throw new Exception("moveDistance must be greater than or equal to 0.");
+            }
+            return PhysicsMoveUpUnsafe(moveDistance);
+        }
+        public int PhysicsMoveDown(int moveDistance)
+        {
+            if (moveDistance < 0)
+            {
+                throw new Exception("moveDistance must be greater than or equal to 0.");
+            }
+            return PhysicsMoveDownUnsafe(moveDistance);
+        }
+        public int PhysicsMoveRight(int moveDistance)
+        {
+            if (moveDistance < 0)
+            {
+                throw new Exception("moveDistance must be greater than or equal to 0.");
+            }
+            return PhysicsMoveRightUnsafe(moveDistance);
+        }
+        public int PhysicsMoveLeft(int moveDistance)
+        {
+            if (moveDistance < 0)
+            {
+                throw new Exception("moveDistance must be greater than or equal to 0.");
+            }
+            return PhysicsMoveLeftUnsafe(moveDistance);
+        }
+
+
+
+        public int PhysicsMoveXAxisUnsafe(int moveDistance)
+        {
+            if (moveDistance < 0)
+            {
+                return PhysicsMoveLeftUnsafe(moveDistance * -1);
+            }
+            else
+            {
+                return PhysicsMoveRightUnsafe(moveDistance);
+            }
+        }
+        public int PhysicsMoveYAxisUnsafe(int moveDistance)
+        {
+            if (moveDistance < 0)
+            {
+                return PhysicsMoveDownUnsafe(moveDistance * -1);
+            }
+            else
+            {
+                return PhysicsMoveUpUnsafe(moveDistance);
+            }
+        }
+
+        public int PhysicsMoveUpUnsafe(int moveDistance)
+        {
+            PositionY += moveDistance;
+            return moveDistance;
+        }
+        public int PhysicsMoveDownUnsafe(int moveDistance)
+        {
+            PositionY -= moveDistance;
+            return moveDistance;
+        }
+        public int PhysicsMoveRightUnsafe(int moveDistance)
+        {
+            PositionX += moveDistance;
+            return moveDistance;
+        }
+        public int PhysicsMoveLeftUnsafe(int moveDistance)
+        {
+            PositionX -= moveDistance;
+            return moveDistance;
+        }
+        #endregion
+        /*
 
             if (_collider is null)
             {
@@ -481,7 +637,6 @@ namespace EpsilonEngine
                 }
                 //Move the GameObject. 
                 GameObject.PositionY += targetMoveY;
-            }
-        }
+            }*/
     }
 }

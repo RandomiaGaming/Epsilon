@@ -6,11 +6,11 @@ namespace EpsilonEngine
     public sealed class Texture
     {
         #region Variables
-        private Microsoft.Xna.Framework.Graphics.Texture2D _base = null;
+        internal Microsoft.Xna.Framework.Graphics.Texture2D XNABase { get; private set; } = null;
+        internal Microsoft.Xna.Framework.Rectangle XNARectangle { get; private set; } = new Microsoft.Xna.Framework.Rectangle(0, 0, 0, 0);
         private Color[] buffer = new Color[0];
         #endregion
         #region Properties
-        public Microsoft.Xna.Framework.Rectangle Rect { get; private set; }
         public ushort Width { get; private set; }
         public ushort Height { get; private set; }
         public Game Engine { get; private set; }
@@ -36,6 +36,8 @@ namespace EpsilonEngine
             }
             Height = height;
 
+            XNARectangle = new Microsoft.Xna.Framework.Rectangle(0, 0, Width, Height);
+
             buffer = new Color[width * height];
 
             for (int i = 0; i < buffer.Length; i++)
@@ -43,9 +45,7 @@ namespace EpsilonEngine
                 buffer[i] = Color.Black;
             }
 
-            _base = new Microsoft.Xna.Framework.Graphics.Texture2D(game.GraphicsDevice, width, height);
-
-            Rect = new Microsoft.Xna.Framework.Rectangle(0, 0, Width, Height);
+            XNABase = new Microsoft.Xna.Framework.Graphics.Texture2D(game.GraphicsDevice, width, height);
         }
         public Texture(Game engine, ushort width, ushort height, Color[] data)
         {
@@ -67,6 +67,8 @@ namespace EpsilonEngine
             }
             Height = height;
 
+            XNARectangle = new Microsoft.Xna.Framework.Rectangle(0, 0, Width, Height);
+
             if (data is null)
             {
                 throw new Exception("data cannot be null.");
@@ -79,7 +81,7 @@ namespace EpsilonEngine
 
             buffer = (Color[])data.Clone();
 
-            _base = new Microsoft.Xna.Framework.Graphics.Texture2D(engine.GraphicsDevice, width, height);
+            XNABase = new Microsoft.Xna.Framework.Graphics.Texture2D(engine.GraphicsDevice, width, height);
 
             Microsoft.Xna.Framework.Color[] XNABuffer = new Microsoft.Xna.Framework.Color[width * height];
 
@@ -88,9 +90,7 @@ namespace EpsilonEngine
                 XNABuffer[i] = buffer[i].ToXNA();
             }
 
-            _base.SetData(XNABuffer);
-
-            Rect = new Microsoft.Xna.Framework.Rectangle(0, 0, Width, Height);
+            XNABase.SetData(XNABuffer);
         }
         public Texture(Game engine, string filePath)
         {
@@ -105,32 +105,33 @@ namespace EpsilonEngine
                 throw new Exception("filePath does not exist.");
             }
 
-            _base = Microsoft.Xna.Framework.Graphics.Texture2D.FromFile(engine.GraphicsDevice, filePath);
+            XNABase = Microsoft.Xna.Framework.Graphics.Texture2D.FromFile(engine.GraphicsDevice, filePath);
 
-            if (_base.Width <= 0)
+            if (XNABase.Width <= 0)
             {
                 throw new Exception("width must be greater than 0.");
             }
-            if (_base.Width > ushort.MaxValue)
+            if (XNABase.Width > ushort.MaxValue)
             {
                 throw new Exception("width was too large.");
             }
-            Width = (ushort)_base.Width;
+            Width = (ushort)XNABase.Width;
 
-            if (_base.Height <= 0)
+            if (XNABase.Height <= 0)
             {
                 throw new Exception("height must be greater than 0.");
             }
-            if (_base.Height > ushort.MaxValue)
+            if (XNABase.Height > ushort.MaxValue)
             {
                 throw new Exception("height was too large.");
             }
-            Height = (ushort)_base.Height;
+            Height = (ushort)XNABase.Height;
 
+            XNARectangle = new Microsoft.Xna.Framework.Rectangle(0, 0, Width, Height);
 
             Microsoft.Xna.Framework.Color[] XNABuffer = new Microsoft.Xna.Framework.Color[Width * Height];
 
-            _base.GetData(XNABuffer);
+            XNABase.GetData(XNABuffer);
 
             buffer = new Color[Width * Height];
 
@@ -138,8 +139,6 @@ namespace EpsilonEngine
             {
                 buffer[i] = new Color(XNABuffer[i]);
             }
-
-            Rect = new Microsoft.Xna.Framework.Rectangle(0, 0, Width, Height);
         }
         public Texture(Game engine, Stream stream)
         {
@@ -149,32 +148,33 @@ namespace EpsilonEngine
             }
             Engine = engine;
 
-            _base = Microsoft.Xna.Framework.Graphics.Texture2D.FromStream(engine.GraphicsDevice, stream);
+            XNABase = Microsoft.Xna.Framework.Graphics.Texture2D.FromStream(engine.GraphicsDevice, stream);
 
-            if (_base.Width <= 0)
+            if (XNABase.Width <= 0)
             {
                 throw new Exception("width must be greater than 0.");
             }
-            if (_base.Width > ushort.MaxValue)
+            if (XNABase.Width > ushort.MaxValue)
             {
                 throw new Exception("width was too large.");
             }
-            Width = (ushort)_base.Width;
+            Width = (ushort)XNABase.Width;
 
-            if (_base.Height <= 0)
+            if (XNABase.Height <= 0)
             {
                 throw new Exception("height must be greater than 0.");
             }
-            if (_base.Height > ushort.MaxValue)
+            if (XNABase.Height > ushort.MaxValue)
             {
                 throw new Exception("height was too large.");
             }
-            Height = (ushort)_base.Height;
+            Height = (ushort)XNABase.Height;
 
+            XNARectangle = new Microsoft.Xna.Framework.Rectangle(0, 0, Width, Height);
 
             Microsoft.Xna.Framework.Color[] XNABuffer = new Microsoft.Xna.Framework.Color[Width * Height];
 
-            _base.GetData(XNABuffer);
+            XNABase.GetData(XNABuffer);
 
             buffer = new Color[Width * Height];
 
@@ -182,8 +182,6 @@ namespace EpsilonEngine
             {
                 buffer[i] = new Color(XNABuffer[i]);
             }
-
-            Rect = new Microsoft.Xna.Framework.Rectangle(0, 0, Width, Height);
         }
         public Texture(Game engine, Microsoft.Xna.Framework.Graphics.Texture2D source)
         {
@@ -201,32 +199,33 @@ namespace EpsilonEngine
             {
                 throw new Exception("source belongs to a different Game.");
             }
-            _base = source;
+            XNABase = source;
 
-            if (_base.Width <= 0)
+            if (XNABase.Width <= 0)
             {
                 throw new Exception("width must be greater than 0.");
             }
-            if (_base.Width > ushort.MaxValue)
+            if (XNABase.Width > ushort.MaxValue)
             {
                 throw new Exception("width was too large.");
             }
-            Width = (ushort)_base.Width;
+            Width = (ushort)XNABase.Width;
 
-            if (_base.Height <= 0)
+            if (XNABase.Height <= 0)
             {
                 throw new Exception("height must be greater than 0.");
             }
-            if (_base.Height > ushort.MaxValue)
+            if (XNABase.Height > ushort.MaxValue)
             {
                 throw new Exception("height was too large.");
             }
-            Height = (ushort)_base.Height;
+            Height = (ushort)XNABase.Height;
 
+            XNARectangle = new Microsoft.Xna.Framework.Rectangle(0, 0, Width, Height);
 
             Microsoft.Xna.Framework.Color[] XNABuffer = new Microsoft.Xna.Framework.Color[Width * Height];
 
-            _base.GetData(XNABuffer);
+            XNABase.GetData(XNABuffer);
 
             buffer = new Color[Width * Height];
 
@@ -234,8 +233,6 @@ namespace EpsilonEngine
             {
                 buffer[i] = new Color(XNABuffer[i]);
             }
-
-            Rect = new Microsoft.Xna.Framework.Rectangle(0, 0, Width, Height);
         }
         #endregion
         #region Overrides
@@ -282,11 +279,11 @@ namespace EpsilonEngine
                 XNABuffer[i] = buffer[i].ToXNA();
             }
 
-            _base.SetData(XNABuffer);
+            XNABase.SetData(XNABuffer);
         }
         public Microsoft.Xna.Framework.Graphics.Texture2D ToXNA()
         {
-            return _base;
+            return XNABase;
         }
         #endregion
     }

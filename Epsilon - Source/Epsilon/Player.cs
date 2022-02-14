@@ -1,18 +1,20 @@
 ﻿using EpsilonEngine;
 namespace Epsilon
 {
-    public sealed class Player : GameObject
+    public sealed class Player : PhysicsObject
     {
-        public Player(StagePlayer stagePlayer, Texture texture) : base(stagePlayer)
+        public Player(StagePlayer stagePlayer, PhysicsLayer physicsLayer, Texture texture) : base(stagePlayer, physicsLayer)
         {
             TextureRenderer textureRenderer = new TextureRenderer(this);
             textureRenderer.Texture = texture;
             PositionX = RandomnessHelper.NextInt(16, Scene.Width - 32);
             PositionY = RandomnessHelper.NextInt(16, Scene.Height - 32);
+            VelocityX = 0.01f;
+            VelocityY = 0.01f;
         }
         public override string ToString()
         {
-            return $"Epsilon.BouncyBall()";
+            return $"Epsilon.Player()";
         }
     }
 }

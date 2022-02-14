@@ -5,10 +5,6 @@ namespace EpsilonEngine
 {
     public class Scene
     {
-        #region Constants
-        public const ushort DefaultWidth = 256;
-        public const ushort DefaultHeight = 144;
-        #endregion
         #region Variables
         private List<GameObject> _gameObjects = new List<GameObject>();
         private GameObject[] _gameObjectCache = new GameObject[0];
@@ -17,6 +13,9 @@ namespace EpsilonEngine
         private List<SceneManager> _sceneManagers = new List<SceneManager>();
         private SceneManager[] _sceneManagerCache = new SceneManager[0];
         private bool _sceneManagerCacheValid = true;
+
+        private Microsoft.Xna.Framework.Graphics.SpriteBatch _spriteBatch = null;
+        public Microsoft.Xna.Framework.Graphics.RenderTarget2D _renderTarget = null;
         #endregion
         #region Properties
         public bool IsDestroyed { get; private set; } = false;
@@ -43,35 +42,6 @@ namespace EpsilonEngine
         public float AspectRatio { get; private set; } = 1;
         #endregion
         #region Constructors
-        public Scene(Game game)
-        {
-            if (game is null)
-            {
-                throw new Exception("game cannot be null.");
-            }
-
-            Game = game;
-
-            Width = DefaultWidth;
-            Height = DefaultHeight;
-           AspectRatio = Width / (float)Height;
-
-            Game.AddScene(this);
-
-            Type thisType = GetType();
-
-            MethodInfo updateMethod = thisType.GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Instance);
-            if (updateMethod.DeclaringType != typeof(Scene))
-            {
-                Game.RegisterForUpdate(Update);
-            }
-
-            MethodInfo renderMethod = thisType.GetMethod("Render", BindingFlags.NonPublic | BindingFlags.Instance);
-            if (renderMethod.DeclaringType != typeof(Scene))
-            {
-                Game.RegisterForRender(Render);
-            }
-        }
         public Scene(Game game, ushort width, ushort height)
         {
             if (game is null)
@@ -94,6 +64,10 @@ namespace EpsilonEngine
             Height = height;
 
             AspectRatio = Width / (float)Height;
+
+            _spriteBatch = new Microsoft.Xna.Framework.Graphics.SpriteBatch(Game.GraphicsDevice);
+
+            _renderTarget = new Microsoft.Xna.Framework.Graphics.RenderTarget2D(Game.GraphicsDevice, width, height);
 
             Game.AddScene(this);
 
@@ -157,14 +131,7 @@ namespace EpsilonEngine
         }
         public void DrawTextureScreenSpaceUnsafe(Texture texture, int x, int y, byte r, byte g, byte b, byte a)
         {
-            float scaleFactorX = (float)Game.Width / Width;
-            float scaleFactorY = (float)Game.Height / Height;
-            int minX = (int)(x * scaleFactorX);
-            int minY = (int)(y * scaleFactorY);
-            int maxX = (int)((x + texture.Width) * scaleFactorX);
-            int maxY = (int)((y + texture.Height) * scaleFactorY);
-
-            Game.DrawTextureUnsafe(texture, minX, minY, maxX, maxY, r, g, b, a);
+            _spriteBatch.Draw(texture.XNABase, new Microsoft.Xna.Framework.Vector2(x, Height - y - texture.Height), new Microsoft.Xna.Framework.Color(r, g, b, a));
         }
         public void Destroy()
         {
@@ -428,7 +395,7 @@ namespace EpsilonEngine
         }
         #endregion
         #region Internals
-        internal void ClearCache()
+        private void ClearCache()
         {
             if (!_sceneManagerCacheValid)
             {
@@ -441,6 +408,17 @@ namespace EpsilonEngine
                 _gameObjectCache = _gameObjects.ToArray();
                 _gameObjectCacheValid = true;
             }
+        }
+        internal void RenderStart()
+        {
+            Game.GraphicsDevice.SetRenderTarget(_renderTarget);
+            Game.GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.Transparent);
+            _spriteBatch.Begin(Microsoft.Xna.Framework.Graphics.SpriteSortMode.Deferred, Microsoft.Xna.Framework.Graphics.BlendState.AlphaBlend, Microsoft.Xna.Framework.Graphics.SamplerState.PointClamp, null, null, null, null);
+        }
+        internal void RenderEnd()
+        {
+            _spriteBatch.End();
+            Game.GraphicsDevice.SetRenderTarget(null);
         }
         internal void RemoveSceneManager(SceneManager sceneManager)
         {
