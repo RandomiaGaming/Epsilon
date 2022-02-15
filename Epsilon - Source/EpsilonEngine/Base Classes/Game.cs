@@ -6,7 +6,7 @@ namespace EpsilonEngine
     public class Game
     {
         #region Constants
-        public static readonly Color DefaultBackgroundColor = new Color(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
+        public static readonly Color DefaultBackgroundColor = new(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
         #endregion
         #region Variables
         private List<GameManager> _gameManagers = new List<GameManager>();
@@ -41,6 +41,10 @@ namespace EpsilonEngine
         public ushort Width { get; private set; } = 1920;
         public ushort Height { get; private set; } = 1080;
         public float AspectRatio { get; private set; } = 1f;
+
+        public int MousePositionX { get; private set; } = 0;
+        public int MousePositionY { get; private set; } = 0;
+        public Point MousePosition => new Point(MousePositionX, MousePositionY);
 
         public float CurrentFPS { get; private set; } = 0f;
         public TimeSpan TimeSinceStart { get; private set; } = new TimeSpan(0);
@@ -603,6 +607,11 @@ namespace EpsilonEngine
         {
             DebugProfiler.UpdateStart();
 
+            Microsoft.Xna.Framework.Input.MouseState XNAMouseState = Microsoft.Xna.Framework.Input.Mouse.GetState();
+
+            MousePositionX = XNAMouseState.X;
+            MousePositionY = Height - XNAMouseState.Y;
+
             if (!_gameManagerCacheValid)
             {
                 _gameManagerCache = _gameManagers.ToArray();
@@ -638,15 +647,12 @@ namespace EpsilonEngine
                 _updatePumpCacheValid = true;
             }
 
-            int updatePumpLength = _updatePumpCache.Length;
-            for (int i = 0; i < updatePumpLength; i++)
+            foreach (PumpEvent updatePumpEvent in _updatePumpCache)
             {
-                _updatePumpCache[i].Invoke();
+                updatePumpEvent.Invoke();
             }
 
             DebugProfiler.UpdateEnd();
-
-            DebugProfiler.RenderStart();
 
             int sceneCacheLength = _sceneCache.Length;
             for (int i = 0; i < sceneCacheLength; i++)
@@ -660,11 +666,14 @@ namespace EpsilonEngine
                 _renderPumpCacheValid = true;
             }
 
-            int renderPumpLength = _renderPumpCache.Length;
-            for (int i = 0; i < renderPumpLength; i++)
+            DebugProfiler.RenderStart();
+
+            foreach (PumpEvent renderPumpEvent in _renderPumpCache)
             {
-                _renderPumpCache[i].Invoke();
+                renderPumpEvent.Invoke();
             }
+
+            DebugProfiler.RenderEnd();
 
             for (int i = 0; i < sceneCacheLength; i++)
             {
@@ -683,7 +692,6 @@ namespace EpsilonEngine
 
             SpriteBatch.End();
 
-            DebugProfiler.RenderEnd();
 
             DebugProfiler.FrameEnd();
 

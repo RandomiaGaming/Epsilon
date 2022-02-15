@@ -6,7 +6,7 @@ namespace EpsilonEngine
     {
         #region Variables
         private List<PhysicsObject> _physicsObjects = new List<PhysicsObject>();
-        private PhysicsObject[] _physicsObjectCache = new PhysicsObject[0];
+        internal PhysicsObject[] _physicsObjectCache = new PhysicsObject[0];
         private bool _physicsObjectCacheValid = true;
         #endregion
         #region Properties

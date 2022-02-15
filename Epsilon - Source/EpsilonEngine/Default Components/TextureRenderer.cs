@@ -3,8 +3,8 @@
     public sealed class TextureRenderer : Component
     {
         public Texture Texture { get; set; } = null;
-        public int OffsetX { get; set; } = 0;
-        public int OffsetY { get; set; } = 0;
+        public int OffsetX = 0;
+        public int OffsetY = 0;
         public Point Offset
         {
             get
@@ -17,22 +17,77 @@
                 OffsetY = value.Y;
             }
         }
-        public byte ColorR { get; set; } = byte.MaxValue;
-        public byte ColorG { get; set; } = byte.MaxValue;
-        public byte ColorB { get; set; } = byte.MaxValue;
-        public byte ColorA { get; set; } = byte.MaxValue;
+
+        private Microsoft.Xna.Framework.Color _XNAColorCache = Microsoft.Xna.Framework.Color.White;
+        private Microsoft.Xna.Framework.Vector2 _XNAPositionCache = Microsoft.Xna.Framework.Vector2.Zero;
+
+        private byte _colorR = byte.MaxValue;
+        private byte _colorG = byte.MaxValue;
+        private byte _colorB = byte.MaxValue;
+        private byte _colorA = byte.MaxValue;
+
+        public byte ColorR
+        {
+            get
+            {
+                return _colorR;
+            }
+            set
+            {
+                _colorR = value;
+                _XNAColorCache.R = _colorR;
+            }
+        }
+        public byte ColorG
+        {
+            get
+            {
+                return _colorG;
+            }
+            set
+            {
+                _colorG = value;
+                _XNAColorCache.G = _colorG;
+            }
+        }
+        public byte ColorB
+        {
+            get
+            {
+                return _colorB;
+            }
+            set
+            {
+                _colorB = value;
+                _XNAColorCache.B = _colorB;
+            }
+        }
+        public byte ColorA
+        {
+            get
+            {
+                return _colorA;
+            }
+            set
+            {
+                _colorA = value;
+                _XNAColorCache.A = _colorA;
+            }
+        }
+
         public Color Color
         {
             get
             {
-                return new Color(ColorR, ColorG, ColorB, ColorA);
+                return new Color(_colorR, _colorG, _colorB, _colorA);
             }
             set
             {
-                ColorR = value.R;
-                ColorG = value.G;
-                ColorB = value.B;
-                ColorA = value.A;
+                _colorR = value.R;
+                _colorG = value.G;
+                _colorB = value.B;
+                _colorA = value.A;
+                _XNAColorCache = new Microsoft.Xna.Framework.Color(_colorR, _colorG, _colorB, _colorA);
             }
         }
         public TextureRenderer(GameObject gameObject) : base(gameObject)
@@ -41,10 +96,19 @@
         }
         protected override void Render()
         {
-           if (Texture is not null)
+            if (Texture is not null)
             {
-                GameObject.DrawTextureLocalSpaceUnsafe(Texture, OffsetX, OffsetY, ColorR, ColorG, ColorB, ColorA);
+                int positionX = OffsetX- Scene.CameraPositionX  +GameObject.PositionX;
+                int positionY = Scene.Height - OffsetY  + Scene.CameraPositionY  - GameObject.PositionY - Texture.Height;
+               if(positionX < -Texture.Width || positionY + Texture.Height < 0 || positionX > Scene.Width || positionY > Scene.Height)
+                {
+                    return;
+                }
+                _XNAPositionCache.X = positionX;
+                _XNAPositionCache.Y = positionY;
+                Scene._spriteBatch.Draw(Texture.XNABase, _XNAPositionCache, _XNAColorCache);
             }
+           Scene._spriteBatch.Draw(Texture.XNABase, _XNAPositionCache, _XNAColorCache);
         }
         public override string ToString()
         {

@@ -107,6 +107,7 @@
     <Compile Include="EpsilonEngine\Physics\PhysicsObject.cs" />
     <Compile Include="EpsilonEngine\Physics\PhysicsScene.cs" />
     <Compile Include="Epsilon\Epsilon.cs" />
+    <Compile Include="Epsilon\Crate.cs" />
     <Compile Include="Epsilon\Ground.cs" />
     <Compile Include="Epsilon\Player.cs" />
     <Compile Include="Epsilon\StageData.cs" />
@@ -137,7 +138,7 @@
     <EmbeddedResource Include="Epsilon\Textures\Item Textures\Spiny.png" />
     <EmbeddedResource Include="Epsilon\Textures\Item Textures\Spring.png" />
     <EmbeddedResource Include="Epsilon\Textures\Item Textures\Switch.png" />
-    <EmbeddedResource Include="Epsilon\Textures\Item Textures\Test.png" />
+    <EmbeddedResource Include="Epsilon\Textures\Item Textures\Crate.png" />
     <EmbeddedResource Include="Epsilon\Textures\Item Textures\Tether.png" />
     <EmbeddedResource Include="Epsilon\Textures\Item Textures\Track.png" />
     <EmbeddedResource Include="Epsilon\Textures\UI Textures\All.png" />

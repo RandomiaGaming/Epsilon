@@ -7,6 +7,7 @@ namespace EpsilonEngine
         public PhysicsScene PhysicsScene { get; private set; } = null;
         public PhysicsLayer PhysicsLayer { get; private set; } = null;
         public PhysicsLayer CollisionPhysicsLayer { get; set; } = null;
+
         //Velocity is the objects move speed over time in pixels per frame.
         public float VelocityX { get; set; } = 0f;
         public float VelocityY { get; set; } = 0f;
@@ -226,6 +227,8 @@ namespace EpsilonEngine
             }
             PhysicsLayer = physicsLayer;
 
+            Game.RegisterForUpdate(PhysicsUpdate);
+
             PhysicsScene.AddPhysicsObject(this);
 
             PhysicsLayer.AddPhysicsObject(this);
@@ -236,51 +239,67 @@ namespace EpsilonEngine
         {
             return $"EpsilonEngine.PhysicsObject()";
         }
-        protected override void Update()
+        private void PhysicsUpdate()
         {
-            SubPixelX += VelocityX;
-            int targetMoveX = (int)SubPixelX;
-
-            if (targetMoveX != 0)
+            if (VelocityY != 0)
             {
-                SubPixelX -= targetMoveX;
+                SubPixelY += VelocityY;
+                int targetMoveY = (int)SubPixelY;
 
-                int distanceTravelledX = PhysicsMoveXAxisUnsafe(targetMoveX);
+                if (targetMoveY != 0)
+                {
+                    SubPixelY -= targetMoveY;
 
-                if (distanceTravelledX < targetMoveX)
-                {
-                    VelocityX *= BouncynessRight;
-                }
-                else if (distanceTravelledX > targetMoveX)
-                {
-                    VelocityX *= BouncynessLeft;
+                    if (targetMoveY < 0)
+                    {
+                        if (PhysicsMoveDownUnsafe(targetMoveY * -1) != targetMoveY * -1)
+                        {
+                            VelocityY *= BouncynessDown;
+                        }
+                    }
+                    else
+                    {
+                        if (PhysicsMoveUpUnsafe(targetMoveY) != targetMoveY)
+                        {
+                            VelocityY *= BouncynessUp;
+                        }
+                    }
                 }
             }
 
-            SubPixelY += VelocityY;
-            int targetMoveY = (int)SubPixelY;
-
-            if (targetMoveY != 0)
+            if (VelocityX != 0)
             {
-                SubPixelY -= targetMoveY;
+                SubPixelX += VelocityX;
+                int targetMoveX = (int)SubPixelX;
 
-                int distanceTravelledY = PhysicsMoveYAxisUnsafe(targetMoveY);
+                if (targetMoveX != 0)
+                {
+                    SubPixelX -= targetMoveX;
 
-                if (distanceTravelledY < targetMoveY)
-                {
-                    VelocityY *= BouncynessUp;
-                }
-                else if (distanceTravelledY > targetMoveY)
-                {
-                    VelocityY *= BouncynessDown;
+                    if (targetMoveX < 0)
+                    {
+                        if (PhysicsMoveLeftUnsafe(targetMoveX * -1) != targetMoveX * -1)
+                        {
+                            VelocityX *= BouncynessLeft;
+                        }
+                    }
+                    else
+                    {
+                        if (PhysicsMoveRightUnsafe(targetMoveX) != targetMoveX)
+                        {
+                            VelocityX *= BouncynessRight;
+                        }
+                    }
                 }
             }
         }
         #endregion
         #region Methods
+        private bool _moving = false;
+
         public Point PhysicsMove(Point moveDistance)
         {
-            int outputX = 0;
+            int outputX;
             if (moveDistance.X < 0)
             {
                 outputX = PhysicsMoveLeftUnsafe(moveDistance.X * -1);
@@ -290,7 +309,7 @@ namespace EpsilonEngine
                 outputX = PhysicsMoveRightUnsafe(moveDistance.X);
             }
 
-            int outputY = 0;
+            int outputY;
             if (moveDistance.Y < 0)
             {
                 outputY = PhysicsMoveLeftUnsafe(moveDistance.Y * -1);
@@ -396,247 +415,300 @@ namespace EpsilonEngine
 
         public int PhysicsMoveUpUnsafe(int moveDistance)
         {
+            if (_moving)
+            {
+                return 0;
+            }
+
+            _moving = true;
+
+            if (CollisionPhysicsLayer is null)
+            {
+                PositionY += moveDistance;
+                _moving = false;
+                return moveDistance;
+            }
+
+            Rectangle thisColliderShape = WorldColliderRect;
+
+            foreach (PhysicsObject otherCollider in CollisionPhysicsLayer._physicsObjectCache)
+            {
+                if (otherCollider != this)
+                {
+                    Rectangle otherColliderShape = otherCollider.WorldColliderRect;
+
+                    if (otherColliderShape.MinX > thisColliderShape.MaxX || otherColliderShape.MaxX < thisColliderShape.MinX)
+                    {
+                        //Ignore this physics object because it is too far to the left or right for a collision.
+                    }
+                    else if (otherColliderShape.MaxY < thisColliderShape.MinY)
+                    {
+                        //Ignore this physics object because it is too below us for a collision.
+                    }
+                    else if (otherColliderShape.MinY > thisColliderShape.MaxY)
+                    {
+                        //This physics object must be in front of us.
+                        int maxMove = otherColliderShape.MinY - thisColliderShape.MaxY - 1;
+
+                        if (maxMove < moveDistance && PushOthersUp && otherCollider.PushableUp)
+                        {
+                            int pushRequest = moveDistance - maxMove;
+                            int pushDistance = otherCollider.PhysicsMoveUpUnsafe(pushRequest);
+                            maxMove = maxMove + pushDistance;
+                        }
+
+                        if (maxMove > moveDistance)
+                        {
+                            //Ignore this collision because the object we hit is too far in front.
+                        }
+                        else
+                        {
+                            //Set the target move to the maximun and zero out the velocity due to a collision.
+                            moveDistance = maxMove;
+
+                            if (moveDistance == 0)
+                            {
+                                //No need to keep looping because we hit something so close that movement is impossible.
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //Set target move to 0, and zero out the velocity because there is an object overlapping us.
+                        moveDistance = 0;
+                        break;
+                    }
+                }
+            }
+
+            _moving = false;
+
             PositionY += moveDistance;
-            return moveDistance;
-        }
-        public int PhysicsMoveDownUnsafe(int moveDistance)
-        {
-            PositionY -= moveDistance;
             return moveDistance;
         }
         public int PhysicsMoveRightUnsafe(int moveDistance)
         {
+            if (_moving)
+            {
+                return 0;
+            }
+
+            _moving = true;
+
+            if (CollisionPhysicsLayer is null)
+            {
+                PositionX += moveDistance;
+                _moving = false;
+                return moveDistance;
+            }
+
+            Rectangle thisColliderShape = WorldColliderRect;
+
+            foreach (PhysicsObject otherCollider in CollisionPhysicsLayer._physicsObjectCache)
+            {
+                if (otherCollider != this)
+                {
+                    Rectangle otherColliderShape = otherCollider.WorldColliderRect;
+
+                    if (otherColliderShape.MinY > thisColliderShape.MaxY || otherColliderShape.MaxY < thisColliderShape.MinY)
+                    {
+                        //Ignore this physics object because it is too far to the left or right for a collision.
+                    }
+                    else if (otherColliderShape.MaxX < thisColliderShape.MinX)
+                    {
+                        //Ignore this physics object because it is too below us for a collision.
+                    }
+                    else if (otherColliderShape.MinX > thisColliderShape.MaxX)
+                    {
+                        //This physics object must be in front of us.
+                        int maxMove = otherColliderShape.MinX - thisColliderShape.MaxX - 1;
+
+                        if (maxMove < moveDistance && PushOthersRight && otherCollider.PushableRight)
+                        {
+                            int pushRequest = moveDistance - maxMove;
+                            int pushDistance = otherCollider.PhysicsMoveRightUnsafe(pushRequest);
+                            maxMove = maxMove + pushDistance;
+                        }
+
+                        if (maxMove > moveDistance)
+                        {
+                            //Ignore this collision because the object we hit is too far in front.
+                        }
+                        else
+                        {
+                            //Set the target move to the maximun and zero out the velocity due to a collision.
+                            moveDistance = maxMove;
+
+                            if (moveDistance == 0)
+                            {
+                                //No need to keep looping because we hit something so close that movement is impossible.
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //Set target move to 0, and zero out the velocity because there is an object overlapping us.
+                        moveDistance = 0;
+                        break;
+                    }
+                }
+            }
+
+            _moving = false;
+
             PositionX += moveDistance;
+            return moveDistance;
+        }
+        public int PhysicsMoveDownUnsafe(int moveDistance)
+        {
+            if (_moving)
+            {
+                return 0;
+            }
+
+            _moving = true;
+
+            if (CollisionPhysicsLayer is null)
+            {
+                PositionY -= moveDistance;
+                _moving = false;
+                return moveDistance;
+            }
+
+            Rectangle thisColliderShape = WorldColliderRect;
+
+            foreach (PhysicsObject otherCollider in CollisionPhysicsLayer._physicsObjectCache)
+            {
+                if (otherCollider != this)
+                {
+                    Rectangle otherColliderShape = otherCollider.WorldColliderRect;
+
+                    if (otherColliderShape.MinX > thisColliderShape.MaxX || otherColliderShape.MaxX < thisColliderShape.MinX)
+                    {
+                        //Ignore this physics object because it is too far to the left or right for a collision.
+                    }
+                    else if (otherColliderShape.MinY > thisColliderShape.MaxY)
+                    {
+                        //Ignore this physics object because it is too below us for a collision.
+                    }
+                    else if (otherColliderShape.MaxY < thisColliderShape.MinY)
+                    {
+                        //This physics object must be in front of us.
+                        int maxMove = thisColliderShape.MinY - otherColliderShape.MaxY - 1;
+
+                        if (maxMove < moveDistance && PushOthersDown && otherCollider.PushableDown)
+                        {
+                            int pushRequest = moveDistance - maxMove;
+                            int pushDistance = otherCollider.PhysicsMoveDownUnsafe(pushRequest);
+                            maxMove = maxMove + pushDistance;
+                        }
+
+                        if (maxMove > moveDistance)
+                        {
+                            //Ignore this collision because the object we hit is too far in front.
+                        }
+                        else
+                        {
+                            //Set the target move to the maximun and zero out the velocity due to a collision.
+                            moveDistance = maxMove;
+
+                            if (moveDistance == 0)
+                            {
+                                //No need to keep looping because we hit something so close that movement is impossible.
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //Set target move to 0, and zero out the velocity because there is an object overlapping us.
+                        moveDistance = 0;
+                        break;
+                    }
+                }
+            }
+
+            _moving = false;
+
+            PositionY -= moveDistance;
             return moveDistance;
         }
         public int PhysicsMoveLeftUnsafe(int moveDistance)
         {
+            if (_moving)
+            {
+                return 0;
+            }
+
+            _moving = true;
+
+            if (CollisionPhysicsLayer is null)
+            {
+                PositionX -= moveDistance;
+                _moving = false;
+                return moveDistance;
+            }
+
+            Rectangle thisColliderShape = WorldColliderRect;
+
+            foreach (PhysicsObject otherCollider in CollisionPhysicsLayer._physicsObjectCache)
+            {
+                if (otherCollider != this)
+                {
+                    Rectangle otherColliderShape = otherCollider.WorldColliderRect;
+
+                    if (otherColliderShape.MinY > thisColliderShape.MaxY || otherColliderShape.MaxY < thisColliderShape.MinY)
+                    {
+                        //Ignore this physics object because it is too far to the left or right for a collision.
+                    }
+                    else if (otherColliderShape.MinX > thisColliderShape.MaxX)
+                    {
+                        //Ignore this physics object because it is too below us for a collision.
+                    }
+                    else if (otherColliderShape.MaxX < thisColliderShape.MinX)
+                    {
+                        //This physics object must be in front of us.
+                        int maxMove = thisColliderShape.MinX - otherColliderShape.MaxX - 1;
+
+                        if (maxMove < moveDistance && PushOthersLeft && otherCollider.PushableLeft)
+                        {
+                            int pushRequest = moveDistance - maxMove;
+                            int pushDistance = otherCollider.PhysicsMoveLeftUnsafe(pushRequest);
+                            maxMove = maxMove + pushDistance;
+                        }
+
+                        if (maxMove > moveDistance)
+                        {
+                            //Ignore this collision because the object we hit is too far in front.
+                        }
+                        else
+                        {
+                            //Set the target move to the maximun and zero out the velocity due to a collision.
+                            moveDistance = maxMove;
+
+                            if (moveDistance == 0)
+                            {
+                                //No need to keep looping because we hit something so close that movement is impossible.
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //Set target move to 0, and zero out the velocity because there is an object overlapping us.
+                        moveDistance = 0;
+                        break;
+                    }
+                }
+            }
+
+            _moving = false;
+
             PositionX -= moveDistance;
             return moveDistance;
         }
         #endregion
-        /*
-
-            if (_collider is null)
-            {
-                //The object has no hitbox and can therefore move freely without fear of collisions and then return.
-                GameObject.PositionX += targetMoveX;
-                GameObject.PositionY += targetMoveY;
-                return;
-            }
-
-            Rectangle thisColliderShape = _collider.GetWorldShape();
-
-            if (targetMoveX > 0)
-            {
-                //We are moving right along the x-axis.
-                foreach (Collider otherCollider in _physicsLayer.ManagedColliders)
-                {
-                    if (otherCollider != _collider && otherCollider.SideCollision.Left)
-                    {
-                        Rectangle otherColliderShape = otherCollider.GetWorldShape();
-
-                        if (otherColliderShape.MinY > thisColliderShape.MaxY || otherColliderShape.MaxY < thisColliderShape.MinY)
-                        {
-                            //Ignore because object is too high or low for a collision.
-                        }
-                        else if (otherColliderShape.MaxX < thisColliderShape.MinX)
-                        {
-                            //Ignore because object is behind us.
-                        }
-                        else if (otherColliderShape.MaxX >= thisColliderShape.MinX && otherColliderShape.MinX <= thisColliderShape.MaxX)
-                        {
-                            //Set target move to 0, and zero out the velocity because there is an object overlapping us.
-                            targetMoveX = 0;
-                            VelocityX = 0;
-                            break;
-                        }
-                        else
-                        {
-                            //By process of elimination we know the object must be in front of us so measure how far infront.
-                            int maxMove = otherColliderShape.MinX - thisColliderShape.MaxX - 1;
-
-                            if (maxMove > targetMoveX)
-                            {
-                                //Ignore this collision because the object we hit is too far in front.
-                            }
-                            else
-                            {
-                                //Set the target move to the maximun and zero out the velocity due to a collision.
-                                targetMoveX = maxMove;
-                                VelocityX *= BouncynessUp;
-
-                                if (targetMoveX == 0)
-                                {
-                                    //No need to keep looping because we hit something so close that movement is impossible.
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-                //Move the GameObject.
-                GameObject.PositionX += targetMoveX;
-                //Remember to update the collider shape because the object moved.
-                thisColliderShape = _collider.GetWorldShape();
-            }
-            else if (targetMoveX < 0)
-            {
-                //By process of elimination We are moving left along the x-axis.
-                foreach (Collider otherCollider in _physicsLayer.ManagedColliders)
-                {
-                    if (otherCollider != _collider && otherCollider.SideCollision.Right)
-                    {
-                        Rectangle otherColliderShape = otherCollider.GetWorldShape();
-
-                        if (otherColliderShape.MinY > thisColliderShape.MaxY || otherColliderShape.MaxY < thisColliderShape.MinY)
-                        {
-                            //Ignore because object is too high or low for a collision.
-                        }
-                        else if (otherColliderShape.MinX > thisColliderShape.MaxX)
-                        {
-                            //Ignore because object is infront of us.
-                        }
-                        else if (otherColliderShape.MaxX >= thisColliderShape.MinX && otherColliderShape.MinX <= thisColliderShape.MaxX)
-                        {
-                            //Set target move to 0, and zero out the velocity because there is an object overlapping us.
-                            targetMoveX = 0;
-                            VelocityX = 0;
-                            break;
-                        }
-                        else
-                        {
-                            //By process of elimination we know the object must be in behind of us so measure how far behind.
-                            int maxMove = ((thisColliderShape.MinX - otherColliderShape.MaxX) * -1) + 1;
-
-                            if (maxMove < targetMoveX)
-                            {
-                                //Ignore this collision because the object we hit is too far in behind.
-                            }
-                            else
-                            {
-                                //Set the target move to the maximun and zero out the velocity due to a collision.
-                                targetMoveX = maxMove;
-                                VelocityX *= BouncynessUp;
-
-                                if (targetMoveX == 0)
-                                {
-                                    //No need to keep looping because we hit something so close that movement is impossible.
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-                //Move the GameObject. 
-                GameObject.PositionX += targetMoveX;
-                //Remember to update the collider shape because the object moved.
-                thisColliderShape = _collider.GetWorldShape();
-            }
-
-
-
-            if (targetMoveY > 0)
-            {
-                //We are moving right along the x-axis.
-                foreach (Collider otherCollider in _physicsLayer.ManagedColliders)
-                {
-                    if (otherCollider != _collider && otherCollider.SideCollision.Bottom)
-                    {
-                        Rectangle otherColliderShape = otherCollider.GetWorldShape();
-
-                        if (otherColliderShape.MinX > thisColliderShape.MaxX || otherColliderShape.MaxX < thisColliderShape.MinX)
-                        {
-                            //Ignore because object is too high or low for a collision.
-                        }
-                        else if (otherColliderShape.MaxY < thisColliderShape.MinY)
-                        {
-                            //Ignore because object is behind us.
-                        }
-                        else if (otherColliderShape.MaxY >= thisColliderShape.MinY && otherColliderShape.MinY <= thisColliderShape.MaxY)
-                        {
-                            //Set target move to 0, and zero out the velocity because there is an object overlapping us.
-                            targetMoveY = 0;
-                            VelocityY = 0;
-                            break;
-                        }
-                        else
-                        {
-                            //By process of elimination we know the object must be in front of us so measure how far infront.
-                            int maxMove = otherColliderShape.MinY - thisColliderShape.MaxY - 1;
-
-                            if (maxMove > targetMoveY)
-                            {
-                                //Ignore this collision because the object we hit is too far in front.
-                            }
-                            else
-                            {
-                                //Set the target move to the maximun and zero out the velocity due to a collision.
-                                targetMoveY = maxMove;
-                                VelocityY *= BouncynessDown;
-
-                                if (targetMoveY == 0)
-                                {
-                                    //No need to keep looping because we hit something so close that movement is impossible.
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-                //Move the GameObject. 
-                GameObject.PositionY += targetMoveY;
-            }
-            else if (targetMoveY < 0)
-            {
-                //By process of elimination We are moving left along the x-axis.
-                foreach (Collider otherCollider in _physicsLayer.ManagedColliders)
-                {
-                    if (otherCollider != _collider && otherCollider.SideCollision.Top)
-                    {
-                        Rectangle otherColliderShape = otherCollider.GetWorldShape();
-
-                        if (otherColliderShape.MinX > thisColliderShape.MaxX || otherColliderShape.MaxX < thisColliderShape.MinX)
-                        {
-                            //Ignore because object is too high or low for a collision.
-                        }
-                        else if (otherColliderShape.MinY > thisColliderShape.MaxY)
-                        {
-                            //Ignore because object is infront of us.
-                        }
-                        else if (otherColliderShape.MaxY >= thisColliderShape.MinY && otherColliderShape.MinY <= thisColliderShape.MaxY)
-                        {
-                            //Set target move to 0, and zero out the velocity because there is an object overlapping us.
-                            targetMoveY = 0;
-                            VelocityY = 0;
-                            break;
-                        }
-                        else
-                        {
-                            //By process of elimination we know the object must be in behind of us so measure how far behind.
-                            int maxMove = ((thisColliderShape.MinY - otherColliderShape.MaxY) * -1) + 1;
-
-                            if (maxMove < targetMoveY)
-                            {
-                                //Ignore this collision because the object we hit is too far in behind.
-                            }
-                            else
-                            {
-                                //Set the target move to the maximun and zero out the velocity due to a collision.
-                                targetMoveY = maxMove;
-                                VelocityY *= BouncynessDown;
-
-                                if (targetMoveY == 0)
-                                {
-                                    //No need to keep looping because we hit something so close that movement is impossible.
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-                //Move the GameObject. 
-                GameObject.PositionY += targetMoveY;
-            }*/
     }
 }

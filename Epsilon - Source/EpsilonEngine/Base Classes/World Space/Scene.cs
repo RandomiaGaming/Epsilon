@@ -14,7 +14,7 @@ namespace EpsilonEngine
         private SceneManager[] _sceneManagerCache = new SceneManager[0];
         private bool _sceneManagerCacheValid = true;
 
-        private Microsoft.Xna.Framework.Graphics.SpriteBatch _spriteBatch = null;
+        internal Microsoft.Xna.Framework.Graphics.SpriteBatch _spriteBatch = null;
         public Microsoft.Xna.Framework.Graphics.RenderTarget2D _renderTarget = null;
         #endregion
         #region Properties
@@ -22,8 +22,8 @@ namespace EpsilonEngine
 
         public Game Game { get; private set; } = null;
 
-        public int CameraPositionX { get; set; } = 0;
-        public int CameraPositionY { get; set; } = 0;
+        public int CameraPositionX = 0;
+        public int CameraPositionY = 0;
         public Point CameraPosition
         {
             get
@@ -36,6 +36,10 @@ namespace EpsilonEngine
                 CameraPositionY = value.Y;
             }
         }
+
+        public int WorldMousePositionX => (Game.MousePositionX * Width / Game.Width) + CameraPositionX;
+        public int WorldMousePositionY => (Game.MousePositionY * Height / Game.Height) + CameraPositionY; 
+        public Point WorldMousePosition => new Point(WorldMousePositionX, WorldMousePositionY);
 
         public ushort Width { get; private set; } = 1;
         public ushort Height { get; private set; } = 1;
@@ -131,7 +135,9 @@ namespace EpsilonEngine
         }
         public void DrawTextureScreenSpaceUnsafe(Texture texture, int x, int y, byte r, byte g, byte b, byte a)
         {
-            _spriteBatch.Draw(texture.XNABase, new Microsoft.Xna.Framework.Vector2(x, Height - y - texture.Height), new Microsoft.Xna.Framework.Color(r, g, b, a));
+            Microsoft.Xna.Framework.Vector2 drawPosition = new Microsoft.Xna.Framework.Vector2(x, Height - y - texture.Height);
+            Microsoft.Xna.Framework.Color drawColor = new Microsoft.Xna.Framework.Color(r, g, b, a);
+            _spriteBatch.Draw(texture.XNABase, drawPosition, drawColor);
         }
         public void Destroy()
         {

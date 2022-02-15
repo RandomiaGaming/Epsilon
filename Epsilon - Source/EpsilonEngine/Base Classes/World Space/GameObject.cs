@@ -16,8 +16,8 @@ namespace EpsilonEngine
         public Game Game { get; private set; } = null;
         public Scene Scene { get; private set; } = null;
 
-        public int PositionX { get; set; } = 0;
-        public int PositionY { get; set; } = 0;
+        public int PositionX = 0;
+        public int PositionY = 0;
         public Point Position
         {
             get

@@ -3,14 +3,60 @@ namespace Epsilon
 {
     public sealed class Player : PhysicsObject
     {
-        public Player(StagePlayer stagePlayer, PhysicsLayer physicsLayer, Texture texture) : base(stagePlayer, physicsLayer)
+        public Player(StagePlayer stagePlayer, PhysicsLayer physicsLayer, PhysicsLayer collsionPhysicsLayer, Texture texture) : base(stagePlayer, physicsLayer)
         {
             TextureRenderer textureRenderer = new TextureRenderer(this);
             textureRenderer.Texture = texture;
-            PositionX = RandomnessHelper.NextInt(16, Scene.Width - 32);
-            PositionY = RandomnessHelper.NextInt(16, Scene.Height - 32);
-            VelocityX = 0.01f;
-            VelocityY = 0.01f;
+            /*PositionX = RandomnessHelper.NextInt(16, StagePlayer.ViewPortWidth - 32);
+            PositionY = RandomnessHelper.NextInt(16, StagePlayer.ViewPortHeight - 32);
+            double rot = RandomnessHelper.NextDouble(0, System.Math.PI * 2);
+            VelocityX = (float)System.Math.Cos(rot) * 0.1f;
+            VelocityY = (float)System.Math.Sin(rot) * 0.1f;*/
+
+            LocalColliderMinX = 0;
+            LocalColliderMinY = 0;
+            LocalColliderMaxX = 15;
+            LocalColliderMaxY = 15;
+
+            PushableUp = false;
+            PushableDown = false;
+            PushableLeft = false;
+            PushableRight = false;
+
+            PushOthersUp = true;
+            PushOthersDown = true;
+            PushOthersLeft = true;
+            PushOthersRight = true;
+
+            /* BouncynessUp = -1.0f;
+             BouncynessDown = -1.0f;
+             BouncynessRight = -1.0f;
+             BouncynessLeft = -1.0f;*/
+
+            CollisionPhysicsLayer = collsionPhysicsLayer;
+        }
+        protected override void Update()
+        {
+            if (Microsoft.Xna.Framework.Input.Keyboard.GetState().IsKeyDown(Microsoft.Xna.Framework.Input.Keys.W))
+            {
+                Scene.CameraPositionY += 2;
+            }
+            else if (Microsoft.Xna.Framework.Input.Keyboard.GetState().IsKeyDown(Microsoft.Xna.Framework.Input.Keys.S))
+            {
+                Scene.CameraPositionY -= 2;
+            }
+
+            if (Microsoft.Xna.Framework.Input.Keyboard.GetState().IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D))
+            {
+                Scene.CameraPositionX += 2;
+            }
+            else if (Microsoft.Xna.Framework.Input.Keyboard.GetState().IsKeyDown(Microsoft.Xna.Framework.Input.Keys.A))
+            {
+                Scene.CameraPositionX -= 2;
+            }
+
+            PhysicsMoveXAxis(Scene.WorldMousePositionX - PositionX);
+            PhysicsMoveYAxis(Scene.WorldMousePositionY - PositionY);
         }
         public override string ToString()
         {
