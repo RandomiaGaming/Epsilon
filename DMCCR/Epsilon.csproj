@@ -1,0 +1,90 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>disable</Nullable>
+        <OutputType>Exe</OutputType>
+        <IsPackable>false</IsPackable>
+        <PackageId></PackageId>
+        <PackageVersion>1.0.0.0</PackageVersion>
+        <Authors>Finlay Christ</Authors>
+        <Company>RandomiaGaming</Company>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+        <FileVersion>1.0.0.0</FileVersion>
+        <NeutralLanguage>en-US</NeutralLanguage>
+        <StartupObject>DMCCR.Program</StartupObject>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+      <Prefer32bit>true</Prefer32bit>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+      <Prefer32bit>true</Prefer32bit>
+      <DebugSymbols>true</DebugSymbols>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\EpsilonEngine\EpsilonEngine.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.303" />
+      <PackageReference Include="SharpDX.Direct2D1" Version="4.2.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="MapData\Level.png" />
+      <EmbeddedResource Include="MapData\Level.png" />
+      <None Remove="MapData\LevelRender.png" />
+      <EmbeddedResource Include="MapData\LevelRender.png" />
+      <None Remove="Textures\0.png" />
+      <EmbeddedResource Include="Textures\0.png" />
+      <None Remove="Textures\1.png" />
+      <EmbeddedResource Include="Textures\1.png" />
+      <None Remove="Textures\2.png" />
+      <EmbeddedResource Include="Textures\2.png" />
+      <None Remove="Textures\3.png" />
+      <EmbeddedResource Include="Textures\3.png" />
+      <None Remove="Textures\4.png" />
+      <EmbeddedResource Include="Textures\4.png" />
+      <None Remove="Textures\5.png" />
+      <EmbeddedResource Include="Textures\5.png" />
+      <None Remove="Textures\6.png" />
+      <EmbeddedResource Include="Textures\6.png" />
+      <None Remove="Textures\7.png" />
+      <EmbeddedResource Include="Textures\7.png" />
+      <None Remove="Textures\8.png" />
+      <EmbeddedResource Include="Textures\8.png" />
+      <None Remove="Textures\9.png" />
+      <EmbeddedResource Include="Textures\9.png" />
+      <None Remove="Textures\Air.png" />
+      <EmbeddedResource Include="Textures\Air.png" />
+      <None Remove="Textures\Checkpoint Locked.png" />
+      <EmbeddedResource Include="Textures\Checkpoint Locked.png" />
+      <None Remove="Textures\Checkpoint Unlocked.png" />
+      <EmbeddedResource Include="Textures\Checkpoint Unlocked.png" />
+      <None Remove="Textures\Death Particle Texture.png" />
+      <EmbeddedResource Include="Textures\Death Particle Texture.png" />
+      <None Remove="Textures\Game Icon.png" />
+      <EmbeddedResource Include="Textures\Game Icon.png" />
+      <None Remove="Textures\GoalGate.png" />
+      <EmbeddedResource Include="Textures\GoalGate.png" />
+      <None Remove="Textures\Ground.png" />
+      <EmbeddedResource Include="Textures\Ground.png" />
+      <None Remove="Textures\Lava.png" />
+      <EmbeddedResource Include="Textures\Lava.png" />
+      <None Remove="Textures\LavaSpriteSheet.png" />
+      <EmbeddedResource Include="Textures\LavaSpriteSheet.png" />
+      <None Remove="Textures\NoJump.png" />
+      <EmbeddedResource Include="Textures\NoJump.png" />
+      <None Remove="Textures\PlayerLeft.png" />
+      <EmbeddedResource Include="Textures\PlayerLeft.png" />
+      <None Remove="Textures\PlayerRight.png" />
+      <EmbeddedResource Include="Textures\PlayerRight.png" />
+    </ItemGroup>
+
+</Project>

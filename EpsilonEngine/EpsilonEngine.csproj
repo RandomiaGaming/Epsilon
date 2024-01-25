@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>diable</ImplicitUsings>
+        <Nullable>disable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.303" />
+      <PackageReference Include="SharpDX.Desktop" Version="4.2.0" />
+      <PackageReference Include="SharpDX.Direct2D1" Version="4.2.0" />
+    </ItemGroup>
+
+</Project>
